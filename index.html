@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Calendário Memento Mori</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#222222">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Memento Mori">
+
+  <style>
+    :root {
+      --fundo: #f4f1ea;
+      --texto: #222;
+      --cinza: #666;
+      --borda: #cfc9bd;
+      --painel: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--fundo);
+      color: var(--texto);
+      -webkit-text-size-adjust: 100%;
+      min-height: 100vh;
+    }
+
+    /* ---------- Cabeçalho ---------- */
+    .topo { text-align: center; padding: 20px 16px 4px; }
+    .topo h1 { font-size: 1.35rem; margin: 0; }
+    .topo p { margin: 4px 0 0; color: var(--cinza); font-size: 0.9rem; }
+
+    /* ---------- Abas (só celular) ---------- */
+    .abas {
+      display: flex;
+      margin: 12px 16px 0;
+      background: #e7e2d7;
+      border-radius: 12px;
+      padding: 4px;
+    }
+    .abas button {
+      flex: 1;
+      min-height: 44px;
+      border: 0;
+      background: transparent;
+      border-radius: 9px;
+      font-size: 1rem;
+      color: var(--texto);
+      cursor: pointer;
+    }
+    .abas button[aria-selected="true"] {
+      background: #fff;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ---------- Estrutura ---------- */
+    .app { padding: 12px 16px 0; max-width: 1100px; margin: 0 auto; }
+    .app[data-aba="config"] .previa { display: none; }
+    .app[data-aba="previa"] .config { display: none; }
+
+    .painel {
+      background: var(--painel);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+      margin-bottom: 16px;
+    }
+
+    fieldset { border: 0; padding: 0; margin: 0 0 18px; min-width: 0; }
+    legend { font-weight: 700; font-size: 0.95rem; padding: 0; margin-bottom: 4px; }
+
+    label { display: block; font-size: 0.9rem; font-weight: 600; margin: 14px 0 6px; }
+    label.check {
+      display: flex; align-items: center; gap: 12px;
+      font-weight: 400; min-height: 44px; margin: 0; cursor: pointer;
+    }
+    .check input { width: 22px; height: 22px; accent-color: #222; flex-shrink: 0; }
+    .linha { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
+    .linha label { margin: 0; }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    select {
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 12px;
+      border: 1px solid var(--borda);
+      border-radius: 10px;
+      font-size: 16px; /* 16px evita zoom automático no iPhone */
+      background: #fff;
+      color: var(--texto);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    select {
+      background-image: linear-gradient(45deg, transparent 50%, #666 50%),
+                        linear-gradient(135deg, #666 50%, transparent 50%);
+      background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+      padding-right: 36px;
+    }
+    input[type="color"] {
+      width: 56px; height: 44px; padding: 3px;
+      border: 1px solid var(--borda); border-radius: 10px;
+      background: #fff; cursor: pointer;
+    }
+
+    :focus-visible { outline: 3px solid #7aa7ff; outline-offset: 2px; }
+
+    /* ---------- Prévia ---------- */
+    .previa-moldura {
+      background: #e7e2d7;
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .previa-moldura canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+    }
+    .resumo { text-align: center; color: var(--cinza); font-size: 0.9rem; margin: 12px 0 0; min-height: 1.2em; }
+
+    /* ---------- Ações ---------- */
+    .acoes {
+      position: sticky;
+      bottom: 0;
+      background: var(--fundo);
+      margin: 0 -16px;
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    }
+    .btn-principal {
+      width: 100%;
+      min-height: 52px;
+      background: #222;
+      color: #fff;
+      border: 0;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-principal:active { transform: scale(0.99); }
+    .btn-principal:disabled { opacity: 0.5; cursor: default; }
+    .msg { font-size: 0.9rem; min-height: 1.2em; margin: 8px 0 0; text-align: center; }
+    .msg.erro { color: #b00020; }
+    .msg.aviso { color: #8a5a00; }
+    .info { font-size: 0.8rem; color: #888; text-align: center; margin: 8px 0 0; }
+
+    .abas button:active, .btn-principal:active { opacity: 0.85; }
+
+    @media (hover: hover) {
+      .btn-principal:hover { background: #000; }
+      .abas button:hover:not([aria-selected="true"]) { background: rgba(255, 255, 255, 0.6); }
+    }
+
+    /* ---------- Tablet (768px+): tudo em coluna, sem abas ---------- */
+    @media (min-width: 768px) {
+      .topo { padding-top: 28px; }
+      .abas { display: none; }
+      .app { padding: 24px; display: grid; grid-template-columns: 1fr; gap: 16px; }
+      .app .config, .app .previa { display: block !important; margin: 0; }
+      .acoes { position: static; background: none; margin: 0; padding: 0; }
+      .painel { padding: 24px; }
+      .previa-moldura { max-width: 520px; margin: 0 auto; }
+    }
+
+    /* ---------- Desktop (1024px+): configurações à esquerda, prévia à direita ---------- */
+    @media (min-width: 1024px) {
+      .app {
+        grid-template-columns: 380px 1fr;
+        grid-template-areas:
+          "config previa"
+          "acoes  previa";
+        align-items: start;
+        gap: 24px;
+        padding: 32px;
+      }
+      .config { grid-area: config; margin: 0; }
+      .previa { grid-area: previa; position: sticky; top: 24px; margin: 0; }
+      .acoes  { grid-area: acoes; }
+      .previa-moldura { max-width: min(560px, calc(82vh * 210 / 297)); margin: 0 auto; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topo">
+    <h1 id="titulo"></h1>
+    <p id="subtitulo"></p>
+  </header>
+
+  <nav class="abas" role="tablist" aria-label="Seções">
+    <button role="tab" id="aba-config" data-aba="config" aria-selected="true" aria-controls="app"></button>
+    <button role="tab" id="aba-previa" data-aba="previa" aria-selected="false" aria-controls="app"></button>
+  </nav>
+
+  <main class="app" id="app" data-aba="config">
+
+    <section class="painel config" aria-label="Configurações">
+      <fieldset>
+        <legend id="sec-dados"></legend>
+        <label for="nome" id="lbl-nome"></label>
+        <input type="text" id="nome" maxlength="40" autocomplete="off">
+
+        <label for="nascimento" id="lbl-nascimento"></label>
+        <input type="date" id="nascimento">
+
+        <label for="expectativa" id="lbl-expectativa"></label>
+        <input type="number" id="expectativa" min="1" max="120" inputmode="numeric" value="90">
+      </fieldset>
+
+      <fieldset>
+        <legend id="sec-aparencia"></legend>
+        <div class="linha">
+          <label for="corVividas" id="lbl-corVividas"></label>
+          <input type="color" id="corVividas" value="#4a4a4a">
+        </div>
+        <div class="linha">
+          <label for="corAtual" id="lbl-corAtual"></label>
+          <input type="color" id="corAtual" value="#c0392b">
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend id="sec-opcoes"></legend>
+        <label class="check"><input type="checkbox" id="legenda" checked><span id="lbl-legenda"></span></label>
+        <label class="check"><input type="checkbox" id="rotulos" checked><span id="lbl-rotulos"></span></label>
+
+        <label for="frase" id="lbl-frase"></label>
+        <select id="frase"></select>
+
+        <div id="bloco-idioma">
+          <label for="idioma" id="lbl-idioma"></label>
+          <select id="idioma"></select>
+        </div>
+      </fieldset>
+    </section>
+
+    <section class="painel previa" aria-label="Prévia do PDF">
+      <div class="previa-moldura">
+        <canvas id="previa" aria-label="Prévia do calendário em PDF"></canvas>
+      </div>
+      <p class="resumo" id="resumo"></p>
+    </section>
+
+    <div class="acoes">
+      <button class="btn-principal" id="botao" type="button"></button>
+      <p class="msg" id="msg" role="alert"></p>
+      <p class="info" id="info"></p>
+    </div>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    // ============================================================
+    // TEXTOS POR IDIOMA
+    // Para adicionar um idioma, copie o bloco "pt", traduza e
+    // ele aparece sozinho na lista de idiomas.
+    // ============================================================
+    const TEXTOS = {
+      pt: {
+        nomeIdioma: "Português",
+        titulo: "Calendário Memento Mori",
+        subtitulo: "Veja seu calendário antes de baixar.",
+        abaConfig: "Configurar",
+        abaPrevia: "Visualizar",
+        secDados: "Dados",
+        secAparencia: "Aparência",
+        secOpcoes: "Opções",
+        nome: "Nome (opcional)",
+        nascimento: "Data de nascimento",
+        expectativa: "Expectativa de vida (anos)",
+        corVividas: "Semanas vividas",
+        corAtual: "Semana atual",
+        legenda: "Mostrar legenda",
+        rotulos: "Mostrar idades (0, 10, 20...)",
+        frase: "Frase do rodapé",
+        frases: [
+          "Lembre-se de que você vai morrer.",
+          "Memento mori",
+          "Cada semana conta."
+        ],
+        idioma: "Idioma",
+        botao: "Baixar PDF",
+        gerando: "Gerando PDF...",
+        previaVazia: "Informe a data de nascimento para ver a prévia.",
+        resumo: (vividas, total, pct) => `${vividas} de ${total} semanas vividas (${pct}%)`,
+        erroNascimento: "Informe uma data de nascimento válida (não pode ser no futuro).",
+        erroExpectativa: "A expectativa de vida deve estar entre 1 e 120 anos.",
+        avisoExpectativa: "A expectativa já foi ultrapassada: todas as semanas aparecem como vividas.",
+        erroGerar: "Não foi possível gerar o PDF. Tente de novo.",
+        info: "Nenhum dado é enviado a servidores: tudo acontece no seu navegador.",
+        pdfTitulo: "Memento Mori",
+        pdfSubtitulo: "Sua vida em semanas",
+        pdfDe: (nome) => `Calendário de ${nome}`,
+        pdfIdade: "Idade",
+        legVividas: "Semanas vividas",
+        legAtual: "Semana atual",
+        legRestantes: "Semanas restantes",
+        pdfArquivo: "memento-mori.pdf"
+      }
+    };
+
+    // ---------- Estado ----------
+    let idioma = "pt";
+    const CHAVE_CONFIG = "memento-mori-config";
+    const SEMANA_MS = 7 * 24 * 60 * 60 * 1000;
+    const SEMANAS_ANO = 52;
+    const $ = (id) => document.getElementById(id);
+
+    // ---------- Utilidades ----------
+    // "AAAA-MM-DD" -> data local (evita erro de fuso horário)
+    function lerData(texto) {
+      const [a, m, d] = texto.split("-").map(Number);
+      return new Date(a, m - 1, d);
+    }
+
+    function semanasVividas(nascimento, hoje) {
+      return Math.floor((hoje - nascimento) / SEMANA_MS);
+    }
+
+    function hexParaRgb(hex) {
+      const n = parseInt(hex.slice(1), 16);
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    }
+
+    // ---------- Opções (lidas da tela) ----------
+    function lerOpcoes() {
+      return {
+        idioma,
+        nome: $("nome").value.trim(),
+        nascimento: $("nascimento").value,
+        anos: Number($("expectativa").value),
+        corVividas: $("corVividas").value,
+        corAtual: $("corAtual").value,
+        legenda: $("legenda").checked,
+        rotulos: $("rotulos").checked,
+        frase: Number($("frase").value) || 0
+      };
+    }
+
+    function validar(op, t) {
+      if (!op.nascimento) return t.erroNascimento;
+      const nasc = lerData(op.nascimento);
+      if (isNaN(nasc) || nasc > new Date()) return t.erroNascimento;
+      if (!Number.isInteger(op.anos) || op.anos < 1 || op.anos > 120) return t.erroExpectativa;
+      return null;
+    }
+
+    // ---------- Layout ----------
+    // Gera uma lista de desenhos em milímetros (página A4).
+    // Usada tanto pela prévia (canvas) quanto pelo PDF: o que você vê é o que sai.
+    function layout(op, t) {
+      const W = 210, H = 297;
+      const COLUNAS = SEMANAS_ANO;
+      const LINHAS = op.anos;
+      const total = COLUNAS * LINHAS;
+      const vividas = Math.max(0, Math.min(semanasVividas(lerData(op.nascimento), new Date()), total));
+      const pct = ((vividas / total) * 100).toFixed(1);
+      const c = [];
+
+      // Fundo branco
+      c.push({ t: "rect", x: 0, y: 0, w: W, h: H, fill: "#ffffff" });
+
+      // Cabeçalho
+      c.push({ t: "texto", x: W / 2, y: 18, s: t.pdfTitulo, pt: 20, estilo: "bold", cor: "#000000", align: "center" });
+      c.push({ t: "texto", x: W / 2, y: 25, s: t.pdfSubtitulo, pt: 11, cor: "#666666", align: "center" });
+      let yResumo = 31;
+      if (op.nome) {
+        c.push({ t: "texto", x: W / 2, y: 32, s: t.pdfDe(op.nome), pt: 12, estilo: "bold", cor: "#222222", align: "center" });
+        yResumo = 39;
+      }
+      c.push({ t: "texto", x: W / 2, y: yResumo, s: t.resumo(vividas, total, pct), pt: 11, cor: "#666666", align: "center" });
+
+      // Grade
+      const gradeY = 46;
+      const gradeLarg = W - 30 - 15;
+      const gradeFim = op.legenda ? H - 30 : H - 22;
+      const gradeAlt = gradeFim - gradeY;
+      const passo = Math.min(gradeLarg / COLUNAS, gradeAlt / LINHAS);
+      const tam = passo * 0.78;
+      const larguraGrade = passo * COLUNAS;
+      const larguraBloco = 14 + larguraGrade;           // rótulos + grade
+      const xBloco = (W - larguraBloco) / 2;             // centraliza o bloco na página
+      const xRotulos = xBloco + 11;
+      const xGrade = xBloco + 14;
+
+      // Rótulos de idade
+      if (op.rotulos) {
+        c.push({ t: "texto", x: xRotulos, y: gradeY - 2, s: t.pdfIdade, pt: 7, cor: "#787878", align: "right" });
+        for (let linha = 0; linha < LINHAS; linha += 10) {
+          c.push({
+            t: "texto", x: xRotulos, y: gradeY + linha * passo + tam / 2 + 0.9,
+            s: String(linha), pt: 7, cor: "#787878", align: "right"
+          });
+        }
+      }
+
+      // Quadradinhos
+      for (let i = 0; i < total; i++) {
+        const linha = Math.floor(i / COLUNAS);
+        const coluna = i % COLUNAS;
+        const x = xGrade + coluna * passo;
+        const y = gradeY + linha * passo;
+
+        if (i < vividas) {
+          c.push({ t: "rect", x, y, w: tam, h: tam, fill: op.corVividas });
+        } else if (i === vividas) {
+          // Semana atual: um pouco maior, centralizada, para se destacar
+          const g = tam * 1.25;
+          const d = (g - tam) / 2;
+          c.push({ t: "rect", x: x - d, y: y - d, w: g, h: g, fill: op.corAtual });
+        } else {
+          c.push({ t: "rect", x, y, w: tam, h: tam, stroke: "#c8c8c8", lw: 0.1 });
+        }
+      }
+
+      // Legenda
+      if (op.legenda) {
+        const ly = H - 22;
+        const itens = [
+          { fill: op.corVividas, s: t.legVividas, x: 36 },
+          { fill: op.corAtual, s: t.legAtual, x: 80 },
+          { stroke: "#c8c8c8", s: t.legRestantes, x: 124 }
+        ];
+        itens.forEach((it) => {
+          c.push({ t: "rect", x: it.x, y: ly - 3, w: 3, h: 3, fill: it.fill, stroke: it.stroke, lw: 0.1 });
+          c.push({ t: "texto", x: it.x + 5, y: ly, s: it.s, pt: 9, cor: "#3c3c3c", align: "left" });
+        });
+      }
+
+      // Frase do rodapé
+      c.push({ t: "texto", x: W / 2, y: H - 12, s: t.frases[op.frase] || t.frases[0], pt: 10, estilo: "italic", cor: "#646464", align: "center" });
+
+      return c;
+    }
+
+    // ---------- Desenho na prévia (canvas) ----------
+    function desenharCanvas(ctx, cmds, px) {
+      cmds.forEach((c) => {
+        if (c.t === "rect") {
+          if (c.fill) {
+            ctx.fillStyle = c.fill;
+            ctx.fillRect(c.x * px, c.y * px, c.w * px, c.h * px);
+          }
+          if (c.stroke) {
+            ctx.strokeStyle = c.stroke;
+            ctx.lineWidth = c.lw * px;
+            ctx.strokeRect(c.x * px, c.y * px, c.w * px, c.h * px);
+          }
+        } else if (c.t === "texto") {
+          const estilo = (c.estilo === "italic" ? "italic " : "") + (c.estilo === "bold" ? "bold " : "");
+          ctx.font = `${estilo}${c.pt * 0.3528 * px}px Helvetica, Arial, sans-serif`;
+          ctx.fillStyle = c.cor;
+          ctx.textAlign = c.align || "left";
+          ctx.textBaseline = "alphabetic";
+          ctx.fillText(c.s, c.x * px, c.y * px);
+        }
+      });
+    }
+
+    // ---------- Desenho no PDF (jsPDF) ----------
+    function desenharPDF(doc, cmds) {
+      cmds.forEach((c) => {
+        if (c.t === "rect") {
+          if (c.fill) doc.setFillColor(...hexParaRgb(c.fill));
+          if (c.stroke) {
+            doc.setDrawColor(...hexParaRgb(c.stroke));
+            doc.setLineWidth(c.lw);
+          }
+          const estilo = c.fill && c.stroke ? "FD" : c.fill ? "F" : "S";
+          doc.rect(c.x, c.y, c.w, c.h, estilo);
+        } else if (c.t === "texto") {
+          doc.setFont("helvetica", c.estilo || "normal");
+          doc.setFontSize(c.pt);
+          doc.setTextColor(...hexParaRgb(c.cor));
+          doc.text(c.s, c.x, c.y, { align: c.align || "left" });
+        }
+      });
+    }
+
+    // ---------- Prévia na tela ----------
+    function atualizarPrevia() {
+      const t = TEXTOS[idioma];
+      const op = lerOpcoes();
+      const canvas = $("previa");
+      const ctx = canvas.getContext("2d");
+
+      // Ajusta a resolução ao tamanho real da tela (nítido em telas de alta densidade)
+      const dpr = window.devicePixelRatio || 1;
+      const largura = canvas.clientWidth || 300;
+      canvas.width = Math.round(largura * dpr);
+      canvas.height = Math.round(canvas.width * 297 / 210);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (!op.nascimento) {
+        $("resumo").textContent = t.previaVazia;
+        mostrarMensagem("", "");
+        return;
+      }
+      const erro = validar(op, t);
+      if (erro) {
+        $("resumo").textContent = "";
+        mostrarMensagem(erro, "erro");
+        return;
+      }
+
+      desenharCanvas(ctx, layout(op, t), canvas.width / 210);
+
+      const total = op.anos * SEMANAS_ANO;
+      const vividas = semanasVividas(lerData(op.nascimento), new Date());
+      const pct = ((Math.min(vividas, total) / total) * 100).toFixed(1);
+      $("resumo").textContent = t.resumo(Math.min(Math.max(vividas, 0), total), total, pct);
+
+      if (vividas >= total) mostrarMensagem(t.avisoExpectativa, "aviso");
+      else mostrarMensagem("", "");
+    }
+
+    function mostrarMensagem(texto, tipo) {
+      const el = $("msg");
+      el.textContent = texto;
+      el.className = "msg" + (tipo ? " " + tipo : "");
+    }
+
+    // ---------- PDF ----------
+    function baixarPDF() {
+      const t = TEXTOS[idioma];
+      const op = lerOpcoes();
+      const erro = validar(op, t);
+      if (erro) {
+        mostrarMensagem(erro, "erro");
+        return;
+      }
+
+      const botao = $("botao");
+      const textoOriginal = botao.textContent;
+      botao.disabled = true;
+      botao.textContent = t.gerando;
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+        desenharPDF(doc, layout(op, t));
+        doc.save(t.pdfArquivo);
+        const vividas = semanasVividas(lerData(op.nascimento), new Date());
+        if (vividas >= op.anos * SEMANAS_ANO) mostrarMensagem(t.avisoExpectativa, "aviso");
+      } catch (e) {
+        console.error(e);
+        mostrarMensagem(t.erroGerar, "erro");
+      } finally {
+        botao.disabled = false;
+        botao.textContent = textoOriginal;
+      }
+    }
+
+    // ---------- Configurações salvas no navegador ----------
+    function salvarConfig() {
+      try { localStorage.setItem(CHAVE_CONFIG, JSON.stringify(lerOpcoes())); } catch (e) { /* ignora */ }
+    }
+
+    function carregarConfig() {
+      try {
+        const salvo = JSON.parse(localStorage.getItem(CHAVE_CONFIG) || "null");
+        if (!salvo) return;
+        if (salvo.nome !== undefined) $("nome").value = salvo.nome;
+        if (salvo.nascimento) $("nascimento").value = salvo.nascimento;
+        if (salvo.anos) $("expectativa").value = salvo.anos;
+        if (salvo.corVividas) $("corVividas").value = salvo.corVividas;
+        if (salvo.corAtual) $("corAtual").value = salvo.corAtual;
+        if (salvo.legenda !== undefined) $("legenda").checked = salvo.legenda;
+        if (salvo.rotulos !== undefined) $("rotulos").checked = salvo.rotulos;
+        if (salvo.frase !== undefined) $("frase").value = salvo.frase;
+        if (salvo.idioma && TEXTOS[salvo.idioma]) {
+          idioma = salvo.idioma;
+          $("idioma").value = idioma;
+        }
+      } catch (e) { /* configuração inválida: usa os padrões */ }
+    }
+
+    // ---------- Interface ----------
+    function preencherSelects() {
+      const selIdioma = $("idioma");
+      selIdioma.innerHTML = "";
+      Object.keys(TEXTOS).forEach((codigo) => {
+        const opt = document.createElement("option");
+        opt.value = codigo;
+        opt.textContent = TEXTOS[codigo].nomeIdioma;
+        selIdioma.appendChild(opt);
+      });
+      selIdioma.value = idioma;
+      // Esconde a escolha de idioma enquanto houver só um
+      $("bloco-idioma").hidden = Object.keys(TEXTOS).length < 2;
+    }
+
+    function aplicarTextos() {
+      const t = TEXTOS[idioma];
+      document.documentElement.lang = idioma === "pt" ? "pt-BR" : idioma;
+      $("titulo").textContent = t.titulo;
+      $("subtitulo").textContent = t.subtitulo;
+      $("aba-config").textContent = t.abaConfig;
+      $("aba-previa").textContent = t.abaPrevia;
+      $("sec-dados").textContent = t.secDados;
+      $("sec-aparencia").textContent = t.secAparencia;
+      $("sec-opcoes").textContent = t.secOpcoes;
+      $("lbl-nome").textContent = t.nome;
+      $("lbl-nascimento").textContent = t.nascimento;
+      $("lbl-expectativa").textContent = t.expectativa;
+      $("lbl-corVividas").textContent = t.corVividas;
+      $("lbl-corAtual").textContent = t.corAtual;
+      $("lbl-legenda").textContent = t.legenda;
+      $("lbl-rotulos").textContent = t.rotulos;
+      $("lbl-frase").textContent = t.frase;
+      $("lbl-idioma").textContent = t.idioma;
+      $("botao").textContent = t.botao;
+      $("info").textContent = t.info;
+
+      // Lista de frases no idioma atual, mantendo a escolha
+      const selFrase = $("frase");
+      const escolhida = Number(selFrase.value) || 0;
+      selFrase.innerHTML = "";
+      t.frases.forEach((f, i) => {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = f;
+        selFrase.appendChild(opt);
+      });
+      selFrase.value = escolhida;
+    }
+
+    function trocarAba(aba) {
+      $("app").dataset.aba = aba;
+      document.querySelectorAll(".abas button").forEach((b) => {
+        b.setAttribute("aria-selected", String(b.dataset.aba === aba));
+      });
+      if (aba === "previa") atualizarPrevia(); // o canvas só tem tamanho quando aparece
+    }
+
+    // ---------- Eventos ----------
+    document.querySelectorAll(".abas button").forEach((b) => {
+      b.addEventListener("click", () => trocarAba(b.dataset.aba));
+    });
+
+    document.querySelectorAll(".config input, .config select").forEach((el) => {
+      const atualiza = () => { salvarConfig(); atualizarPrevia(); };
+      el.addEventListener("input", atualiza);
+      el.addEventListener("change", atualiza);
+    });
+
+    $("idioma").addEventListener("change", (e) => {
+      idioma = e.target.value;
+      aplicarTextos();
+      salvarConfig();
+      atualizarPrevia();
+    });
+
+    $("botao").addEventListener("click", baixarPDF);
+
+    let redimensionando;
+    window.addEventListener("resize", () => {
+      clearTimeout(redimensionando);
+      redimensionando = setTimeout(atualizarPrevia, 120);
+    });
+
+    // ---------- Inicialização ----------
+    preencherSelects();
+    aplicarTextos();   // monta a lista de frases
+    carregarConfig();  // restaura a configuração salva
+    aplicarTextos();   // aplica o idioma salvo e mantém a frase escolhida
+    trocarAba("config");
+    atualizarPrevia();
+  </script>
+</body>
+</html>
