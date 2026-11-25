@@ -34,7 +34,7 @@ $telas = @(
 
 # Abas a capturar: nome, codigo a executar ao abrir
 $abas = @(
-  @{ nome = "configurar"; codigo = 'document.getElementById("nascimento").value = "1990-05-15"; trocarAba("config");' },
+  @{ nome = "configurar"; codigo = 'document.getElementById("nascimento").value = "1990-05-15"; atualizarPrevia(); trocarAba("config");' },
   @{ nome = "visualizar"; codigo = 'document.getElementById("nascimento").value = "1990-05-15"; trocarAba("previa");' }
 )
 
