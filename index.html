@@ -2242,12 +2242,23 @@
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     const USA_COMPARTILHAR = EH_IOS && typeof navigator.canShare === "function";
 
+    // Conta no GoatCounter só que um PDF foi baixado (nada do que está nele). Se o contador
+    // estiver bloqueado ou sem internet, o download segue normalmente
+    function contarDownload() {
+      try {
+        if (window.goatcounter && window.goatcounter.count) {
+          window.goatcounter.count({ path: "baixou-pdf", title: "Baixou o PDF", event: true });
+        }
+      } catch (e) { /* ignora */ }
+    }
+
     async function entregarPDF(doc, t) {
       if (USA_COMPARTILHAR) {
         const arquivo = new File([doc.output("blob")], t.pdfArquivo, { type: "application/pdf" });
         if (navigator.canShare({ files: [arquivo] })) {
           try {
             await navigator.share({ files: [arquivo], title: t.pdfTitulo });
+            contarDownload();
             return;
           } catch (e) {
             if (e.name === "AbortError") return; // a pessoa fechou a janela de compartilhar
@@ -2255,6 +2266,7 @@
         }
       }
       doc.save(t.pdfArquivo);
+      contarDownload();
     }
 
     async function baixarPDF() {
