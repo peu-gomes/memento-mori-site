@@ -1,8 +1,7 @@
 {
-  "name": "Calendário Memento Mori",
+  "name": "Memento Mori",
   "short_name": "Memento Mori",
-  "description": "Sua vida em semanas, num calendário para imprimir em PDF.",
-  "lang": "pt-BR",
+  "description": "Your life in weeks, as a printable calendar. Sua vida em semanas, num calendário para imprimir.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
