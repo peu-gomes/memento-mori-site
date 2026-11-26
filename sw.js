@@ -1,7 +1,7 @@
 // Service worker: guarda o app para ele abrir mesmo sem internet (útil no app da Tela de Início).
 // Estratégia "rede primeiro": com internet, sempre usa a versão mais nova publicada e atualiza a cópia;
 // sem internet, usa a cópia guardada.
-const CACHE = "memento-mori-v2"; // mude o número quando trocar arquivos de lib/
+const CACHE = "memento-mori-v3"; // mude o número quando trocar arquivos de lib/
 const ARQUIVOS = [
   "./",
   "./index.html",
@@ -27,7 +27,7 @@ self.addEventListener("activate", (e) => {
 
 async function daRedeOuDaCopia(req) {
   try {
-    const resp = await fetch(req);
+    const resp = await fetch(req, { cache: "no-cache" }); // sem a cópia de 10 min do navegador
     if (resp.ok) {
       const cache = await caches.open(CACHE);
       await cache.put(req, resp.clone());
