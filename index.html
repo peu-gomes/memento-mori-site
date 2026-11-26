@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <!-- Segurança: a página só carrega arquivos deste site. A única conexão externa é o contador de visitas
        (GoatCounter: conta a página aberta, sem cookies e sem nada do que a pessoa digita). Sem formulários, sem plugins -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://peukz.goatcounter.com; media-src 'self' blob:; connect-src 'self' https://peukz.goatcounter.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
@@ -54,7 +54,8 @@
     }
 
     * { box-sizing: border-box; }
-    html { -webkit-tap-highlight-color: transparent; }
+    /* Como app: a página não amplia (pinça nem toque duplo); só a prévia do PDF tem zoom próprio */
+    html { -webkit-tap-highlight-color: transparent; touch-action: pan-x pan-y; }
     [hidden] { display: none !important; }
 
     body {
@@ -351,7 +352,11 @@
       border-radius: 12px;
       padding: 12px;
     }
+    .previa-moldura { overflow: hidden; touch-action: none; }
+    .previa-moldura.ampliada { cursor: grab; }
+    .previa-moldura.arrastando { cursor: grabbing; }
     .previa-moldura canvas {
+      transform-origin: 0 0;
       display: block;
       margin: 0 auto;
       background: #fff;
@@ -2155,7 +2160,10 @@
         h = dispH;
         w = h * papel.w / papel.h;
       }
-      const dpr = window.devicePixelRatio || 1;
+      // Com zoom, desenha em resolução maior para continuar nítido (limitado para não pesar)
+      const base = window.devicePixelRatio || 1;
+      const maxRes = Math.sqrt(LIMITE_PIXELS / Math.max(1, w * h * base * base));
+      const dpr = base * Math.max(1, Math.min(zoom.s, maxRes));
       canvas.style.width = Math.floor(w) + "px";
       canvas.style.height = Math.floor(h) + "px";
       canvas.width = Math.round(Math.floor(w) * dpr);
@@ -2969,8 +2977,119 @@
       document.querySelectorAll(".abas button").forEach((b) => {
         b.setAttribute("aria-selected", String(b.dataset.aba === aba));
       });
-      if (aba === "previa") atualizarPrevia(); // o canvas só tem tamanho quando aparece
+      if (aba === "previa") { zerarZoom(); atualizarPrevia(); } // o canvas só tem tamanho quando aparece
     }
+
+    // ---------- Zoom da prévia ----------
+    // Pinça (ou roda do mouse) amplia só o desenho do PDF; arrastar move quando ampliado;
+    // toque duplo amplia no ponto tocado ou volta ao tamanho normal
+    const LIMITE_PIXELS = 12e6;   // teto de pixels do canvas (celulares travam com canvas gigante)
+    const ZOOM_MAX = 6;
+    const zoom = { s: 1, x: 0, y: 0 };
+    let nitidez;                  // redesenha nítido quando o gesto termina
+
+    function aplicarZoom() {
+      const canvas = $("previa");
+      const w = canvas.offsetWidth, h = canvas.offsetHeight;
+      // O desenho ampliado sempre cobre o espaço original (não some para fora)
+      zoom.x = Math.min(0, Math.max(w - w * zoom.s, zoom.x));
+      zoom.y = Math.min(0, Math.max(h - h * zoom.s, zoom.y));
+      canvas.style.transform = zoom.s === 1 ? "" : `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.s})`;
+      canvas.parentElement.classList.toggle("ampliada", zoom.s > 1);
+    }
+
+    function zerarZoom() {
+      zoom.s = 1; zoom.x = 0; zoom.y = 0;
+      aplicarZoom();
+    }
+
+    // Amplia para "novo" mantendo parado o ponto (px, py) da tela
+    function ampliarEm(novo, px, py) {
+      const canvas = $("previa");
+      const r = canvas.getBoundingClientRect();
+      const ox = r.left - zoom.x, oy = r.top - zoom.y;       // posição do canvas sem zoom
+      const lx = (px - ox - zoom.x) / zoom.s, ly = (py - oy - zoom.y) / zoom.s;
+      zoom.s = Math.min(ZOOM_MAX, Math.max(1, novo));
+      if (zoom.s < 1.02) { zerarZoom(); return; }
+      zoom.x = px - ox - lx * zoom.s;
+      zoom.y = py - oy - ly * zoom.s;
+      aplicarZoom();
+    }
+
+    function agendarNitidez() {
+      clearTimeout(nitidez);
+      nitidez = setTimeout(atualizarPrevia, 250);
+    }
+
+    (function gestosDaPrevia() {
+      const moldura = $("previa").parentElement;
+      const dedos = new Map();
+      let pinca = null, ultimoToque = { t: 0, x: 0, y: 0 }, moveu = false;
+
+      const centro = () => {
+        const p = [...dedos.values()];
+        return { x: (p[0].x + p[1].x) / 2, y: (p[0].y + p[1].y) / 2, d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y) };
+      };
+
+      moldura.addEventListener("pointerdown", (e) => {
+        moldura.setPointerCapture(e.pointerId);
+        dedos.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        moveu = false;
+        if (dedos.size === 2) pinca = { ...centro(), s: zoom.s };
+        if (zoom.s > 1) moldura.classList.add("arrastando");
+      });
+
+      moldura.addEventListener("pointermove", (e) => {
+        const antes = dedos.get(e.pointerId);
+        if (!antes) return;
+        const agora = { x: e.clientX, y: e.clientY };
+        dedos.set(e.pointerId, agora);
+        if (Math.hypot(agora.x - antes.x, agora.y - antes.y) > 2) moveu = true;
+        if (dedos.size === 2 && pinca) {
+          const c = centro();
+          ampliarEm(pinca.s * (c.d / pinca.d), c.x, c.y);
+          // Arrastar com os dois dedos também move
+          zoom.x += c.x - pinca.x; zoom.y += c.y - pinca.y;
+          pinca.x = c.x; pinca.y = c.y;
+          aplicarZoom();
+        } else if (dedos.size === 1 && zoom.s > 1) {
+          zoom.x += agora.x - antes.x; zoom.y += agora.y - antes.y;
+          aplicarZoom();
+        }
+      });
+
+      const soltar = (e) => {
+        if (!dedos.has(e.pointerId)) return;
+        dedos.delete(e.pointerId);
+        if (dedos.size < 2) pinca = null;
+        if (dedos.size === 0) {
+          moldura.classList.remove("arrastando");
+          // Toque duplo: amplia no ponto ou volta ao normal
+          const agora = Date.now();
+          if (e.type === "pointerup" && !moveu) {
+            if (agora - ultimoToque.t < 320 && Math.hypot(e.clientX - ultimoToque.x, e.clientY - ultimoToque.y) < 30) {
+              if (zoom.s > 1) zerarZoom(); else ampliarEm(2.5, e.clientX, e.clientY);
+              ultimoToque.t = 0;
+            } else {
+              ultimoToque = { t: agora, x: e.clientX, y: e.clientY };
+            }
+          }
+          agendarNitidez();
+        }
+      };
+      moldura.addEventListener("pointerup", soltar);
+      moldura.addEventListener("pointercancel", soltar);
+
+      // Computador: roda do mouse (ou pinça no touchpad) amplia no ponto do cursor
+      moldura.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        ampliarEm(zoom.s * Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0015)), e.clientX, e.clientY);
+        agendarNitidez();
+      }, { passive: false });
+
+      // iPhone/iPad: o Safari ignora o bloqueio de zoom do viewport; os gestos nativos são barrados aqui
+      ["gesturestart", "gesturechange"].forEach((ev) => document.addEventListener(ev, (e) => e.preventDefault()));
+    })();
 
     // ---------- Eventos ----------
     document.querySelectorAll(".abas button").forEach((b) => {
@@ -3081,7 +3200,7 @@
     let redimensionando;
     window.addEventListener("resize", () => {
       clearTimeout(redimensionando);
-      redimensionando = setTimeout(atualizarPrevia, 120);
+      redimensionando = setTimeout(() => { zerarZoom(); atualizarPrevia(); }, 120);
     });
 
     // ---------- Inicialização ----------
