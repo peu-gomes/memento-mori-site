@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <!-- Segurança: a página só carrega arquivos deste site e não consegue enviar dados a nenhum outro lugar
-       (sem conexões externas, sem imagens de fora, sem formulários, sem plugins) -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <!-- Segurança: a página só carrega arquivos deste site. A única conexão externa é o contador de visitas
+       (GoatCounter: conta a página aberta, sem cookies e sem nada do que a pessoa digita). Sem formulários, sem plugins -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://peukz.goatcounter.com; media-src 'self' blob:; connect-src 'self' https://peukz.goatcounter.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
   <meta name="referrer" content="no-referrer">
   <title>Memento Mori</title>
   <meta name="description" content="Sua vida em semanas, num calendário para imprimir em PDF. Your life in weeks, as a printable calendar.">
@@ -710,6 +710,8 @@
   <!-- jsPDF 4.2.1 guardado no próprio site: funciona offline e não depende de servidor de terceiros
        (para atualizar: troque o arquivo em lib/ e confira com "npm audit" que não há falhas conhecidas) -->
   <script src="lib/jspdf.umd.min.js" defer></script>
+  <!-- Contador de visitas (GoatCounter), guardado no próprio site. Painel: https://peukz.goatcounter.com -->
+  <script data-goatcounter="https://peukz.goatcounter.com/count" async src="lib/goatcounter-count.js"></script>
   <script>
     // ============================================================
     // TEXTOS POR IDIOMA
@@ -811,7 +813,7 @@
         erroExpectativa: "A expectativa de vida deve estar entre 1 e 120 anos.",
         avisoExpectativa: "A expectativa já foi ultrapassada: todas as semanas aparecem como vividas.",
         erroGerar: "Não foi possível gerar o PDF. Tente de novo.",
-        info: "Nenhum dado é enviado a servidores: tudo acontece no seu navegador.",
+        info: "Seus dados não saem do seu navegador: tudo acontece nele.",
         pdfTitulo: "Memento Mori",
         pdfIdade: "Idade",
         pdfSemana: "Semana",
@@ -925,7 +927,7 @@
         erroExpectativa: "Life expectancy must be between 1 and 120 years.",
         avisoExpectativa: "Life expectancy has already been passed: all weeks are shown as lived.",
         erroGerar: "Couldn't create the PDF. Please try again.",
-        info: "No data is sent to any server: everything happens in your browser.",
+        info: "Your data never leaves your browser: everything happens right here.",
         pdfTitulo: "Memento Mori",
         pdfIdade: "Age",
         pdfSemana: "Week",
@@ -1039,7 +1041,7 @@
         erroExpectativa: "La esperanza de vida debe estar entre 1 y 120 años.",
         avisoExpectativa: "Ya se superó la esperanza de vida: todas las semanas aparecen como vividas.",
         erroGerar: "No se pudo generar el PDF. Inténtalo de nuevo.",
-        info: "No se envía ningún dato a servidores: todo ocurre en tu navegador.",
+        info: "Tus datos no salen de tu navegador: todo ocurre en él.",
         pdfTitulo: "Memento Mori",
         pdfIdade: "Edad",
         pdfSemana: "Semana",
@@ -1153,7 +1155,7 @@
         erroExpectativa: "L’espérance de vie doit être comprise entre 1 et 120 ans.",
         avisoExpectativa: "L’espérance de vie est déjà dépassée : toutes les semaines apparaissent comme vécues.",
         erroGerar: "Impossible de créer le PDF. Réessayez.",
-        info: "Aucune donnée n’est envoyée à un serveur : tout se passe dans votre navigateur.",
+        info: "Vos données ne quittent pas votre navigateur : tout se passe ici.",
         pdfTitulo: "Memento Mori",
         pdfIdade: "Âge",
         pdfSemana: "Semaine",
@@ -1267,7 +1269,7 @@
         erroExpectativa: "Die Lebenserwartung muss zwischen 1 und 120 Jahren liegen.",
         avisoExpectativa: "Die Lebenserwartung ist bereits überschritten: Alle Wochen erscheinen als gelebt.",
         erroGerar: "Das PDF konnte nicht erstellt werden. Bitte versuch es noch einmal.",
-        info: "Es werden keine Daten an Server gesendet: Alles passiert in deinem Browser.",
+        info: "Deine Daten verlassen deinen Browser nicht: Alles passiert hier.",
         pdfTitulo: "Memento Mori",
         pdfIdade: "Alter",
         pdfSemana: "Woche",
@@ -1381,7 +1383,7 @@
         erroExpectativa: "L’aspettativa di vita deve essere tra 1 e 120 anni.",
         avisoExpectativa: "L’aspettativa di vita è già stata superata: tutte le settimane appaiono come vissute.",
         erroGerar: "Impossibile creare il PDF. Riprova.",
-        info: "Nessun dato viene inviato a server: tutto avviene nel tuo browser.",
+        info: "I tuoi dati non lasciano il browser: tutto avviene qui.",
         pdfTitulo: "Memento Mori",
         pdfIdade: "Età",
         pdfSemana: "Settimana",
