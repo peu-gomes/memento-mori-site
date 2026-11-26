@@ -410,13 +410,37 @@
       .dlg-botoes .btn-principal { flex-basis: 100%; }
     }
 
+    /* Celular: tela fixa como um app. Topo e botão parados; só as configurações rolam por dentro,
+       sem "puxar para atualizar" nem quique; a prévia se ajusta à altura livre, sem rolagem */
     @media (max-width: 767px) {
-      body { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
-      .app { flex: 1; width: 100%; display: flex; flex-direction: column; }
-      .acoes { margin-top: auto; }
-      .painel { padding: 16px 14px; }
-      .previa { padding: 12px; }
-      .previa-moldura { padding: 10px; }
+      html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+      body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+      .fixo-celular { position: static; flex-shrink: 0; }
+      .app { flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; }
+      .painel { padding: 16px 14px; margin-bottom: 0; }
+      .config {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+      }
+      .previa { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 12px; }
+      .previa-moldura {
+        flex: 1;
+        min-height: 0;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .acoes { position: static; flex-shrink: 0; box-shadow: none; }
+      /* Controles não selecionam texto nem abrem menu ao segurar (comportamento de app) */
+      button, .abas, .seg, .interruptor, .cartao-escolha, legend, .opcao-nome {
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+      }
     }
 
     /* ---------- Tablet e desktop (768px+): tela fixa, sem rolagem da página ----------
