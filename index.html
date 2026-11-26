@@ -4,10 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Calendário Memento Mori</title>
+  <meta name="description" content="Sua vida em semanas, num calendário para imprimir em PDF.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <meta name="theme-color" content="#222222">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <meta name="theme-color" content="#f4f1ea">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Memento Mori">
 
   <style>
@@ -16,10 +20,16 @@
       --texto: #222;
       --cinza: #666;
       --borda: #cfc9bd;
+      --linha: #ebe6dc;
+      --suave: #ebe6dc;
       --painel: #fff;
+      --foco: #7aa7ff;
+      --erro: #b00020;
     }
 
     * { box-sizing: border-box; }
+    html { -webkit-tap-highlight-color: transparent; }
+    [hidden] { display: none !important; }
 
     body {
       margin: 0;
@@ -29,27 +39,27 @@
       -webkit-text-size-adjust: 100%;
       min-height: 100vh;
     }
+    button { font-family: inherit; }
+    /* Toque: sem atraso e sem zoom com toque duplo nos controles */
+    button, input, select, label { touch-action: manipulation; }
 
-    /* ---------- Cabeçalho ---------- */
-    .topo { text-align: left; padding: 16px 16px 4px; }
-    .topo h1 { font-size: 1.15rem; margin: 0; }
-    .topo p { margin: 4px 0 0; color: var(--cinza); font-size: 0.9rem; }
-
-    /* Celular: título e abas ficam fixos no topo enquanto a página rola */
+    /* ---------- Cabeçalho (celular) ---------- */
+    /* Título e abas ficam fixos no topo enquanto a página rola */
     .fixo-celular {
       position: sticky;
       top: 0;
       z-index: 10;
       background: var(--fundo);
-      padding-bottom: 8px;
-      padding-top: env(safe-area-inset-top);
+      padding: env(safe-area-inset-top) 0 8px;
     }
-    .titulo-painel { display: none; margin: 0 0 18px; font-size: 1.15rem; }
+    .topo { padding: 12px 16px 0; }
+    .topo h1 { font-size: 1.1rem; margin: 0; }
+    .titulo-painel { display: none; margin: 0 0 16px; font-size: 1.15rem; }
 
     /* ---------- Abas (só celular) ---------- */
     .abas {
       display: flex;
-      margin: 12px 16px 0;
+      margin: 10px 16px 0;
       background: #e7e2d7;
       border-radius: 12px;
       padding: 4px;
@@ -71,29 +81,22 @@
     }
 
     /* ---------- Estrutura ---------- */
-    .app { padding: 12px 16px 0; max-width: 1100px; margin: 0 auto; }
+    .app { padding: 4px 16px 0; max-width: 1100px; margin: 0 auto; }
     .app[data-aba="config"] .previa { display: none; }
     .app[data-aba="previa"] .config { display: none; }
 
     .painel {
       background: var(--painel);
       border-radius: 14px;
-      padding: 20px;
+      padding: 18px;
       box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
       margin-bottom: 16px;
     }
 
-    fieldset { border: 0; padding: 0; margin: 0 0 18px; min-width: 0; }
-    legend { font-weight: 700; font-size: 0.95rem; padding: 0; margin-bottom: 4px; }
+    fieldset { border: 0; padding: 0; margin: 0 0 24px; min-width: 0; }
+    legend { font-weight: 700; font-size: 1rem; padding: 0; margin-bottom: 4px; }
 
     label { display: block; font-size: 0.9rem; font-weight: 600; margin: 14px 0 6px; }
-    label.check {
-      display: flex; align-items: center; gap: 12px;
-      font-weight: 400; min-height: 44px; margin: 0; cursor: pointer;
-    }
-    .check input { width: 22px; height: 22px; accent-color: #222; flex-shrink: 0; }
-    .linha { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
-    .linha label { margin: 0; }
 
     input[type="text"],
     input[type="date"],
@@ -104,12 +107,17 @@
       padding: 10px 12px;
       border: 1px solid var(--borda);
       border-radius: 10px;
+      font-family: inherit;
       font-size: 16px; /* 16px evita zoom automático no iPhone */
       background: #fff;
       color: var(--texto);
       -webkit-appearance: none;
       appearance: none;
     }
+    /* iPhone: a data fica alinhada à esquerda, como os outros campos */
+    input[type="date"] { display: block; text-align: left; }
+    input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+    input:disabled, select:disabled { opacity: 0.45; }
     select {
       background-image: linear-gradient(45deg, transparent 50%, #666 50%),
                         linear-gradient(135deg, #666 50%, transparent 50%);
@@ -119,37 +127,140 @@
       padding-right: 36px;
     }
     input[type="color"] {
-      width: 56px; height: 44px; padding: 3px;
-      border: 1px solid var(--borda); border-radius: 10px;
+      flex-shrink: 0;
+      width: 48px; height: 36px; padding: 3px;
+      border: 1px solid var(--borda); border-radius: 9px;
       background: #fff; cursor: pointer;
     }
+    input[type="color"]:disabled { cursor: default; }
 
-    /* ---------- Textos do PDF ---------- */
+    :focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+
+    /* ---------- Interruptores (liga/desliga) ---------- */
+    .opcao {
+      display: flex; align-items: center; gap: 12px;
+      min-height: 52px;
+      border-top: 1px solid var(--linha);
+    }
+    legend + .opcao { border-top: 0; }
+    .opcao-nome { flex: 1; font-size: 0.95rem; }
+    .interruptor {
+      position: relative;
+      flex: 1; min-width: 0;
+      display: flex; align-items: center; gap: 12px;
+      min-height: 44px; margin: 0;
+      font-size: 0.95rem; font-weight: 400;
+      cursor: pointer;
+    }
+    .interruptor input {
+      position: absolute; left: 0; top: 50%; z-index: 1;
+      width: 44px; height: 26px; margin: -13px 0 0;
+      opacity: 0; cursor: pointer;
+    }
+    .trilho {
+      position: relative; flex-shrink: 0;
+      width: 44px; height: 26px; border-radius: 13px;
+      background: #cfc9bd;
+      transition: background 0.15s;
+    }
+    .trilho::after {
+      content: ""; position: absolute; top: 3px; left: 3px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      transition: transform 0.15s;
+    }
+    .interruptor input:checked + .trilho { background: #222; }
+    .interruptor input:checked + .trilho::after { transform: translateX(18px); }
+    .interruptor input:focus-visible + .trilho { outline: 3px solid var(--foco); outline-offset: 2px; }
+
+    /* ---------- Botões segmentados (escolha uma opção) ---------- */
+    .seg {
+      display: inline-flex; flex-shrink: 0; gap: 2px;
+      padding: 3px; border-radius: 10px;
+      background: var(--suave);
+    }
+    .seg label { position: relative; display: flex; margin: 0; font-weight: 400; cursor: pointer; }
+    .seg input {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      margin: 0; opacity: 0; cursor: pointer;
+    }
+    .seg label > span {
+      display: flex; align-items: center; justify-content: center;
+      min-width: 32px; height: 32px; padding: 0 6px;
+      border-radius: 7px; color: #5a554c; line-height: 1;
+    }
+    .seg input:checked + span {
+      background: #fff; color: #111; font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+    }
+    .seg input:focus-visible + span { outline: 3px solid var(--foco); outline-offset: 1px; }
+    .seg svg { display: block; width: 16px; height: 16px; }
+    .seg b { font-weight: inherit; }
+    .letra-p { font-size: 11px; }
+    .letra-m { font-size: 14px; }
+    .letra-g { font-size: 18px; }
+
+    /* ---------- Botões ---------- */
     .btn-sec {
       min-height: 44px; padding: 0 14px;
       border: 1px solid var(--borda); border-radius: 10px;
       background: #fff; color: var(--texto); font-size: 0.95rem; cursor: pointer;
     }
     .btn-link {
-      border: 0; background: none; color: #b00020; font-size: 0.85rem;
-      cursor: pointer; padding: 8px; min-height: 36px;
+      display: block; margin: 0 auto;
+      min-height: 40px; padding: 8px;
+      border: 0; background: none;
+      color: var(--cinza); font-size: 0.85rem; text-decoration: underline;
+      cursor: pointer;
     }
-    .item-texto { border: 1px solid var(--borda); border-radius: 10px; padding: 0 10px; margin-top: 8px; }
-    .item-topo { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .item-texto label.check { min-height: 42px; }
-    .item-campos {
-      display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-      gap: 6px; padding-bottom: 10px;
+    .btn-icone {
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; padding: 0;
+      border: 0; border-radius: 8px;
+      background: none; color: #555; cursor: pointer;
     }
-    .item-campos[hidden] { display: none; }
-    .item-campos > input[type="text"],
-    .item-campos > .btn-sec,
-    .item-campos > img { grid-column: 1 / -1; }
-    .item-campos select, .item-campos input[type="text"] { min-height: 42px; padding-top: 6px; padding-bottom: 6px; }
-    .mini-assinatura { max-height: 48px; max-width: 100%; justify-self: center; }
-    #add-texto { width: 100%; margin-top: 8px; }
+    .btn-icone svg { width: 18px; height: 18px; }
+    .btn-icone:disabled { opacity: 0.25; cursor: default; }
+    .btn-icone.perigo { color: var(--erro); }
 
-    /* Janela para desenhar a assinatura */
+    /* ---------- Textos do PDF: separados por área da página ---------- */
+    .zona-titulo {
+      display: flex; align-items: center; gap: 10px;
+      margin: 12px 0 8px;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em;
+      text-transform: uppercase; color: #8a8377;
+    }
+    .zona-titulo::after { content: ""; flex: 1; height: 1px; background: var(--linha); }
+    .lista-textos { display: flex; flex-direction: column; gap: 8px; }
+    .lista-textos:empty { display: none; }
+    .item-texto {
+      border: 1px solid var(--borda); border-radius: 12px;
+      padding: 4px 6px 10px 12px;
+      background: #fff;
+    }
+    .item-texto.desligado { padding-bottom: 4px; background: #faf8f4; }
+    .item-texto.desligado .item-nome { color: var(--cinza); font-weight: 400; }
+    .item-texto.realce { animation: realce 1.2s ease-out; }
+    @keyframes realce {
+      from { box-shadow: 0 0 0 3px #e9b949; }
+      to { box-shadow: 0 0 0 3px rgba(233, 185, 73, 0); }
+    }
+    .item-topo { display: flex; align-items: center; gap: 2px; }
+    .item-nome { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; font-size: 0.92rem; }
+    .item-campos { display: flex; flex-direction: column; gap: 8px; padding-right: 6px; }
+    .item-campos input[type="text"] { min-height: 44px; padding-top: 8px; padding-bottom: 8px; }
+    .item-controles { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; }
+    .assinatura-linha { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .assinatura-linha .btn-sec { flex-shrink: 0; }
+    .mini-assinatura { display: block; min-width: 0; max-width: 100%; max-height: 44px; object-fit: contain; }
+    .btn-add {
+      display: block; width: 100%; min-height: 44px; margin-top: 8px;
+      border: 1px dashed #bdb5a6; border-radius: 12px;
+      background: none; color: #555; font-size: 0.9rem; cursor: pointer;
+    }
+
+    /* ---------- Janela da assinatura ---------- */
     .dlg {
       border: 0; border-radius: 14px; padding: 18px;
       width: min(560px, calc(100vw - 24px));
@@ -165,14 +276,12 @@
     .dlg-fontes { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
     .dlg-fontes .btn-sec { flex: 1; }
     .dlg-ajuste { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 4px 12px; margin-top: 10px; }
-    .dlg-ajuste[hidden] { display: none; }
     .dlg-ajuste label { margin: 0; font-weight: 600; font-size: 0.9rem; }
-    .dlg-ajuste label.check { grid-column: 1 / -1; font-weight: 400; min-height: 40px; }
+    .dlg-ajuste .interruptor { grid-column: 1 / -1; font-weight: 400; }
     .dlg-ajuste input[type="range"] { width: 100%; accent-color: #222; }
     .dlg-dica { font-size: 0.85rem; color: var(--cinza); margin: 8px 0 12px; }
     .dlg-botoes { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
     .dlg-botoes .btn-principal { width: auto; min-height: 44px; padding: 0 20px; font-size: 0.95rem; }
-    .dlg [hidden] { display: none !important; }
 
     /* Webcam do computador para fotografar a assinatura */
     .camera-quadro { position: relative; border-radius: 10px; overflow: hidden; background: #111; }
@@ -184,8 +293,6 @@
       pointer-events: none;
     }
 
-    :focus-visible { outline: 3px solid #7aa7ff; outline-offset: 2px; }
-
     /* ---------- Prévia ---------- */
     .previa-moldura {
       background: #e7e2d7;
@@ -194,19 +301,23 @@
     }
     .previa-moldura canvas {
       display: block;
+      margin: 0 auto;
       background: #fff;
       border-radius: 4px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
     }
-    .resumo { text-align: center; color: var(--cinza); font-size: 0.9rem; margin: 12px 0 0; min-height: 1.2em; }
+    .resumo { text-align: center; color: var(--texto); font-size: 0.9rem; margin: 12px 0 0; min-height: 1.2em; }
+    .info { font-size: 0.8rem; color: #888; text-align: center; margin: 6px 0 0; }
 
     /* ---------- Ações ---------- */
     .acoes {
       position: sticky;
       bottom: 0;
+      z-index: 5;
       background: var(--fundo);
       margin: 0 -16px;
-      padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+      box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.06);
     }
     .btn-principal {
       width: 100%;
@@ -221,16 +332,38 @@
     }
     .btn-principal:active { transform: scale(0.99); }
     .btn-principal:disabled { opacity: 0.5; cursor: default; }
-    .msg { font-size: 0.9rem; min-height: 1.2em; margin: 8px 0 0; text-align: center; }
-    .msg.erro { color: #b00020; }
+    .msg { font-size: 0.9rem; margin: 8px 0 0; text-align: center; }
+    .msg:empty { display: none; }
+    .msg.erro { color: var(--erro); }
     .msg.aviso { color: #8a5a00; }
-    .info { font-size: 0.8rem; color: #888; text-align: center; margin: 8px 0 0; }
 
     .abas button:active, .btn-principal:active { opacity: 0.85; }
 
     @media (hover: hover) {
       .btn-principal:hover { background: #000; }
       .abas button:hover:not([aria-selected="true"]) { background: rgba(255, 255, 255, 0.6); }
+      .btn-sec:hover { background: #f8f6f1; border-color: #b9b2a4; }
+      .btn-icone:not(:disabled):hover { background: var(--suave); }
+      .btn-add:hover { background: #fff; color: #222; border-color: #999; }
+      .btn-link:hover { color: var(--texto); }
+      .seg label:hover input:not(:checked) + span { background: rgba(255, 255, 255, 0.6); }
+    }
+
+    /* ---------- Celular: menos margem e o botão sempre no pé da tela ---------- */
+    /* Janela da assinatura em tela estreita: botões ocupam a largura, o principal embaixo */
+    @media (max-width: 480px) {
+      .dlg { width: calc(100vw - 16px); padding: 16px 14px; }
+      .dlg-botoes > button { flex: 1 1 auto; }
+      .dlg-botoes .btn-principal { flex-basis: 100%; }
+    }
+
+    @media (max-width: 767px) {
+      body { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+      .app { flex: 1; width: 100%; display: flex; flex-direction: column; }
+      .acoes { margin-top: auto; }
+      .painel { padding: 16px 14px; }
+      .previa { padding: 12px; }
+      .previa-moldura { padding: 10px; }
     }
 
     /* ---------- Tablet e desktop (768px+): tela fixa, sem rolagem da página ----------
@@ -241,9 +374,7 @@
       body { display: flex; flex-direction: column; }
 
       .fixo-celular { display: none; }
-      .topo { display: none; } /* o título passa a ficar dentro do painel */
       .titulo-painel { display: block; }
-      .abas { display: none; }
 
       .app {
         flex: 1;
@@ -251,9 +382,9 @@
         width: 100%;
         max-width: 1100px;
         margin: 0 auto;
-        padding: 20px 20px 20px;
+        padding: 20px;
         display: grid;
-        grid-template-columns: 330px 1fr;
+        grid-template-columns: 340px minmax(0, 1fr);
         grid-template-rows: minmax(0, 1fr) auto;
         grid-template-areas:
           "config previa"
@@ -266,25 +397,22 @@
         grid-area: config;
         min-height: 0;
         margin: 0;
-        padding: 16px 18px;
+        padding: 16px 16px 8px;
         overflow-y: auto; /* só se a tela for muito baixa */
+        overscroll-behavior: contain;
       }
 
-      /* Cada campo: nome à esquerda, controle à direita (como as cores) */
-      .config fieldset {
+      /* Dados: nome à esquerda, campo à direita */
+      .secao-dados {
         display: grid;
         grid-template-columns: max-content minmax(0, 1fr);
         column-gap: 14px;
         row-gap: 10px;
         align-items: center;
-        margin-bottom: 18px;
       }
-      .config legend { grid-column: 1 / -1; margin-bottom: 4px; }
-      .config label { margin: 0; }
-      .config label.check,
-      .config .linha { grid-column: 1 / -1; margin: 0; }
-      .config #bloco-idioma { display: contents; }
-      .config .lista-textos, .config #add-texto { grid-column: 1 / -1; }
+      .secao-dados legend { grid-column: 1 / -1; }
+      .secao-dados label { margin: 0; }
+
       .previa {
         grid-area: previa;
         min-height: 0;
@@ -294,9 +422,6 @@
       .previa-moldura {
         flex: 1;
         min-height: 0;
-        max-width: none;
-        margin: 0;
-        padding: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -305,38 +430,37 @@
         grid-area: acoes;
         position: static;
         background: none;
+        box-shadow: none;
         margin: 0;
         padding: 0;
       }
       .btn-principal { min-height: 48px; }
 
-      /* Telas mais baixas: espaçamento menor para caber sem rolagem */
+      /* Telas mais baixas: espaçamento menor para caber mais */
       @media (max-height: 860px) {
         .painel { padding: 14px; }
-        .config { padding: 12px 14px; }
-        fieldset { margin-bottom: 10px; }
-        label { margin: 8px 0 4px; }
-        label.check { min-height: 36px; }
-        .linha { margin-top: 8px; }
+        .config { padding: 12px 14px 6px; }
+        fieldset { margin-bottom: 16px; }
+        .opcao { min-height: 46px; }
         input[type="text"], input[type="date"], input[type="number"], select { min-height: 42px; padding: 8px 12px; }
-        input[type="color"] { height: 38px; }
       }
     }
 
-    /* Tablet em pé: coluna estreita, então o nome do campo fica acima do controle */
+    /* Tablet em pé: configurações mais estreitas para a prévia ganhar espaço;
+       o nome do campo fica acima do controle */
     @media (min-width: 768px) and (max-width: 1023px) {
-      .config fieldset { display: block; }
-      .config label { margin: 10px 0 4px; }
-      .config label.check, .config .linha { margin: 0; }
-      .config .linha { margin-top: 8px; }
+      .app { grid-template-columns: 300px minmax(0, 1fr); padding: 16px; gap: 12px 16px; }
+      .config { padding: 14px 14px 6px; }
+      .previa { padding: 10px; }
+      .previa-moldura { padding: 8px; }
+      .secao-dados { display: block; }
+      .secao-dados label { margin: 10px 0 4px; }
     }
 
     /* ---------- Desktop (1024px+): colunas um pouco mais largas ---------- */
     @media (min-width: 1024px) {
       .app { grid-template-columns: 380px minmax(0, 1fr); max-width: 1400px; padding: 24px 32px; gap: 16px 24px; }
-      .app { width: 100%; }
-      .previa { padding: 20px; min-width: 0; }
-      .previa-moldura { min-width: 0; }
+      .previa { padding: 20px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -361,7 +485,8 @@
 
     <section class="painel config" aria-label="Configurações">
       <h2 class="titulo-painel" id="titulo-painel"></h2>
-      <fieldset>
+
+      <fieldset class="secao-dados">
         <legend id="sec-dados"></legend>
         <label for="nascimento" id="lbl-nascimento"></label>
         <input type="date" id="nascimento" name="mm-data-calendario" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
@@ -371,51 +496,62 @@
       </fieldset>
 
       <fieldset>
-        <legend id="sec-aparencia"></legend>
-        <div class="linha">
-          <label for="corVividas" id="lbl-corVividas"></label>
+        <legend id="sec-calendario"></legend>
+        <div class="opcao">
+          <label class="interruptor"><input type="checkbox" role="switch" id="preencher" checked><span class="trilho" aria-hidden="true"></span><span id="lbl-preencher"></span></label>
           <input type="color" id="corVividas" value="#4a4a4a">
         </div>
-        <div class="linha">
-          <label for="corAtual" id="lbl-corAtual"></label>
+        <div class="opcao">
+          <label class="interruptor"><input type="checkbox" role="switch" id="atual" checked><span class="trilho" aria-hidden="true"></span><span id="lbl-atual"></span></label>
           <input type="color" id="corAtual" value="#c0392b">
+        </div>
+        <div class="opcao">
+          <label class="interruptor"><input type="checkbox" role="switch" id="legenda" checked><span class="trilho" aria-hidden="true"></span><span id="lbl-legenda"></span></label>
+        </div>
+        <div class="opcao">
+          <label class="interruptor"><input type="checkbox" role="switch" id="rotulos" checked><span class="trilho" aria-hidden="true"></span><span id="lbl-rotulos"></span></label>
+        </div>
+        <div class="opcao">
+          <span class="opcao-nome" id="lbl-formato"></span>
+          <div class="seg" role="radiogroup" aria-labelledby="lbl-formato">
+            <label><input type="radio" name="formato" value="quadrado" id="formato-quadrado" checked><span><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="1" fill="currentColor"/></svg></span></label>
+            <label><input type="radio" name="formato" value="circulo" id="formato-circulo"><span><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg></span></label>
+          </div>
         </div>
       </fieldset>
 
       <fieldset>
         <legend id="sec-textos"></legend>
-        <div class="lista-textos" id="lista-textos"></div>
-        <button type="button" class="btn-sec" id="add-texto"></button>
+        <h3 class="zona-titulo" id="lbl-zona-topo"></h3>
+        <div class="lista-textos" id="lista-topo"></div>
+        <button type="button" class="btn-add" data-zona="topo"></button>
+        <h3 class="zona-titulo" id="lbl-zona-rodape"></h3>
+        <div class="lista-textos" id="lista-rodape"></div>
+        <button type="button" class="btn-add" data-zona="rodape"></button>
         <datalist id="sugestoes-frase"></datalist>
       </fieldset>
 
-      <fieldset>
-        <legend id="sec-opcoes"></legend>
-        <label class="check"><input type="checkbox" id="preencher" checked><span id="lbl-preencher"></span></label>
-        <label class="check"><input type="checkbox" id="atual" checked><span id="lbl-atual"></span></label>
-        <label class="check"><input type="checkbox" id="legenda" checked><span id="lbl-legenda"></span></label>
-        <label class="check"><input type="checkbox" id="rotulos" checked><span id="lbl-rotulos"></span></label>
-
-        <div id="bloco-idioma">
-          <label for="idioma" id="lbl-idioma"></label>
-          <select id="idioma"></select>
-        </div>
+      <fieldset id="bloco-idioma">
+        <label for="idioma" id="lbl-idioma"></label>
+        <select id="idioma"></select>
       </fieldset>
+
+      <button type="button" class="btn-link" id="restaurar"></button>
     </section>
 
     <section class="painel previa" aria-label="Prévia do PDF">
       <div class="previa-moldura">
-        <canvas id="previa" aria-label="Prévia do calendário em PDF"></canvas>
+        <canvas id="previa" role="img" aria-label="Prévia do calendário em PDF"></canvas>
       </div>
       <p class="resumo" id="resumo"></p>
+      <p class="info" id="info"></p>
     </section>
 
     <div class="acoes">
       <button class="btn-principal" id="botao" type="button"></button>
       <p class="msg" id="msg" role="alert"></p>
-      <p class="info" id="info"></p>
     </div>
-  </main>
+</main>
 
   <dialog class="dlg" id="dlg-assinatura" aria-labelledby="dlg-titulo">
     <p class="dlg-titulo" id="dlg-titulo"></p>
@@ -433,7 +569,7 @@
     <div class="dlg-ajuste" id="pad-ajuste" hidden>
       <label for="pad-sens" id="lbl-sens"></label>
       <input type="range" id="pad-sens" min="1" max="10" step="1" value="5">
-      <label class="check"><input type="checkbox" id="pad-preta"><span id="lbl-preta"></span></label>
+      <label class="interruptor"><input type="checkbox" role="switch" id="pad-preta"><span class="trilho" aria-hidden="true"></span><span id="lbl-preta"></span></label>
     </div>
     <p class="dlg-dica" id="dlg-dica"></p>
     <div class="dlg-botoes" id="pad-botoes">
@@ -447,7 +583,8 @@
     </div>
   </dialog>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- jsPDF 2.5.1 guardado no próprio site: funciona offline e não depende de servidor de terceiros -->
+  <script src="lib/jspdf.umd.min.js" defer></script>
   <script>
     // ============================================================
     // TEXTOS POR IDIOMA
@@ -457,34 +594,39 @@
     const TEXTOS = {
       pt: {
         nomeIdioma: "Português",
+        locale: "pt-BR",
         titulo: "Calendário Memento Mori",
         abaConfig: "Configurar",
         abaPrevia: "Visualizar",
-        secDados: "Dados",
-        secAparencia: "Aparência",
-        secOpcoes: "Opções",
+        secDados: "Seus dados",
+        secCalendario: "Calendário",
         nascimento: "Data de nascimento",
         expectativa: "Expectativa de vida (anos)",
-        corVividas: "Semanas vividas",
-        corAtual: "Semana atual",
-        preencher: "Preencher semanas vividas automaticamente",
+        corVividas: "Cor das semanas vividas",
+        corAtual: "Cor da semana atual",
+        preencher: "Preencher semanas vividas",
         destacarAtual: "Destacar a semana atual",
-        resumoVazio: (total) => `${total} semanas em branco`,
         legSemana: "Uma semana",
         legenda: "Mostrar legenda",
-        rotulos: "Mostrar idades (0, 10, 20...)",
+        rotulos: "Mostrar idades (0, 10, 20…)",
+        formato: "Formato das semanas",
+        formatos: { quadrado: "Quadrados", circulo: "Círculos" },
         secTextos: "Textos do PDF",
+        zonas: { topo: "Topo da página", rodape: "Rodapé" },
         tiposTexto: { titulo: "Título", nome: "Nome", frase: "Frase", assinatura: "Assinatura", livre: "Texto" },
         placeholders: { titulo: "Título", nome: "Seu nome", frase: "Escreva uma frase", livre: "Escreva um texto" },
-        posicao: "Posição",
-        posicoes: {
-          "topo-esq": "Topo, esquerda", "topo-centro": "Topo, centro", "topo-dir": "Topo, direita",
-          "rodape-esq": "Rodapé, esquerda", "rodape-centro": "Rodapé, centro", "rodape-dir": "Rodapé, direita"
-        },
+        alinhamento: "Alinhamento",
+        alinhamentos: { esq: "À esquerda", centro: "No centro", dir: "À direita" },
         tamanho: "Tamanho",
         tamanhos: { p: "Pequeno", m: "Médio", g: "Grande" },
+        subir: "Mover para cima",
+        descer: "Mover para baixo",
+        paraTopo: "Mover para o topo da página",
+        paraRodape: "Mover para o rodapé",
         addTexto: "+ Adicionar texto",
-        remover: "Remover",
+        remover: "Remover texto",
+        restaurar: "Restaurar configurações padrão",
+        confirmarRestaurar: "Voltar todas as configurações ao padrão? Seus textos e sua assinatura serão apagados.",
         desenharAssinatura: "Adicionar assinatura",
         refazerAssinatura: "Refazer assinatura",
         dlgTitulo: "Sua assinatura",
@@ -505,13 +647,17 @@
         frases: [
           "Lembre-se de que você vai morrer.",
           "Memento mori",
-          "Cada semana conta."
+          "Cada semana conta.",
+          "Carpe diem.",
+          "O tempo é o que temos."
         ],
         idioma: "Idioma",
         botao: "Baixar PDF",
+        botaoCompartilhar: "Salvar ou compartilhar PDF",
         gerando: "Gerando PDF...",
         previaVazia: "Informe a data de nascimento para ver a prévia.",
-        resumo: (vividas, total, pct) => `${vividas} de ${total} semanas vividas (${pct}%)`,
+        resumo: (vividas, restantes, pct) => `${vividas} semanas vividas · ${restantes} restantes (${pct})`,
+        resumoVazio: (total) => `${total} semanas em branco`,
         erroNascimento: "Informe uma data de nascimento válida (ano com 4 dígitos, a partir de 1900, e não pode ser no futuro).",
         erroExpectativa: "A expectativa de vida deve estar entre 1 e 120 anos.",
         avisoExpectativa: "A expectativa já foi ultrapassada: todas as semanas aparecem como vividas.",
@@ -535,7 +681,13 @@
     const $ = (id) => document.getElementById(id);
 
     // ---------- Textos do PDF (título, nome, frase, assinatura e textos livres) ----------
-    const POSICOES = ["topo-esq", "topo-centro", "topo-dir", "rodape-esq", "rodape-centro", "rodape-dir"];
+    // Posição = área da página (topo/rodape) + alinhamento (esq/centro/dir)
+    const ZONAS = ["topo", "rodape"];
+    const LADOS = ["esq", "centro", "dir"];
+    const POSICOES = ZONAS.flatMap((z) => LADOS.map((l) => `${z}-${l}`));
+    const zonaDe = (b) => b.pos.split("-")[0];
+    const ladoDe = (b) => b.pos.split("-")[1];
+    const FORMATOS = ["quadrado", "circulo"];
     const TAMANHOS = { p: 0.75, m: 1, g: 1.35 };
     const ESTILO_TEXTO = {
       titulo: { pt: 20, estilo: "bold", cor: "#000000" },
@@ -584,6 +736,7 @@
         atual: $("atual").checked,
         legenda: $("legenda").checked,
         rotulos: $("rotulos").checked,
+        formato: $("formato-circulo").checked ? "circulo" : "quadrado",
         textos
       };
     }
@@ -671,7 +824,12 @@
         }
       }
 
-      // Quadradinhos
+      // Cada semana: quadrado ou círculo, ocupando o mesmo espaço
+      const circulo = op.formato === "circulo";
+      const marca = (x, y, medida, estilo) => c.push(circulo
+        ? { t: "circ", x: x + medida / 2, y: y + medida / 2, r: medida / 2, ...estilo }
+        : { t: "rect", x, y, w: medida, h: medida, ...estilo });
+
       for (let i = 0; i < total; i++) {
         const linha = Math.floor(i / COLUNAS);
         const coluna = i % COLUNAS;
@@ -679,14 +837,14 @@
         const y = gradeY + linha * passo;
 
         if (op.preencher && i < vividas) {
-          c.push({ t: "rect", x, y, w: tam, h: tam, fill: op.corVividas });
+          marca(x, y, tam, { fill: op.corVividas });
         } else if (op.atual && i === vividas) {
           // Semana atual: um pouco maior, centralizada, para se destacar
           const g = tam * 1.25;
           const d = (g - tam) / 2;
-          c.push({ t: "rect", x: x - d, y: y - d, w: g, h: g, fill: op.corAtual });
+          marca(x - d, y - d, g, { fill: op.corAtual });
         } else {
-          c.push({ t: "rect", x, y, w: tam, h: tam, stroke: "#c8c8c8", lw: 0.1 });
+          marca(x, y, tam, { stroke: "#c8c8c8", lw: 0.1 });
         }
       }
 
@@ -701,7 +859,7 @@
         const larg = 44;
         itens.forEach((it, k) => { it.x = 105 - (itens.length * larg) / 2 + 6 + k * larg; });
         itens.forEach((it) => {
-          c.push({ t: "rect", x: it.x, y: ly - 3, w: 3, h: 3, fill: it.fill, stroke: it.stroke, lw: 0.1 });
+          marca(it.x, ly - 3, 3, it.fill ? { fill: it.fill } : { stroke: it.stroke, lw: 0.1 });
           c.push({ t: "texto", x: it.x + 5, y: ly, s: it.s, pt: 9, cor: "#3c3c3c", align: "left" });
         });
       }
@@ -783,6 +941,18 @@
             ctx.lineWidth = c.lw * px;
             ctx.strokeRect(c.x * px, c.y * px, c.w * px, c.h * px);
           }
+        } else if (c.t === "circ") {
+          ctx.beginPath();
+          ctx.arc(c.x * px, c.y * px, c.r * px, 0, Math.PI * 2);
+          if (c.fill) {
+            ctx.fillStyle = c.fill;
+            ctx.fill();
+          }
+          if (c.stroke) {
+            ctx.strokeStyle = c.stroke;
+            ctx.lineWidth = c.lw * px;
+            ctx.stroke();
+          }
         } else if (c.t === "texto") {
           const estilo = (c.estilo === "italic" ? "italic " : "") + (c.estilo === "bold" ? "bold " : "");
           ctx.font = `${estilo}${c.pt * 0.3528 * px}px Helvetica, Arial, sans-serif`;
@@ -800,14 +970,15 @@
     // ---------- Desenho no PDF (jsPDF) ----------
     function desenharPDF(doc, cmds) {
       cmds.forEach((c) => {
-        if (c.t === "rect") {
+        if (c.t === "rect" || c.t === "circ") {
           if (c.fill) doc.setFillColor(...hexParaRgb(c.fill));
           if (c.stroke) {
             doc.setDrawColor(...hexParaRgb(c.stroke));
             doc.setLineWidth(c.lw);
           }
           const estilo = c.fill && c.stroke ? "FD" : c.fill ? "F" : "S";
-          doc.rect(c.x, c.y, c.w, c.h, estilo);
+          if (c.t === "rect") doc.rect(c.x, c.y, c.w, c.h, estilo);
+          else doc.circle(c.x, c.y, c.r, estilo);
         } else if (c.t === "texto") {
           doc.setFont("helvetica", c.estilo || "normal");
           doc.setFontSize(c.pt);
@@ -832,8 +1003,13 @@
       // Ajusta a resolução ao tamanho real da tela (nítido em telas de alta densidade)
       // Tamanho da prévia: ocupa a largura disponível, sem passar da altura disponível (tela fixa)
       const moldura = canvas.parentElement;
-      const dispW = moldura.clientWidth - 24;
-      const dispH = moldura.clientHeight - 24;
+      // Mede o espaço livre sem o desenho anterior: no celular a moldura cresce com o conteúdo
+      // (só a largura limita); no tablet/desktop ela tem altura fixa (largura e altura limitam)
+      canvas.style.width = "0px";
+      canvas.style.height = "0px";
+      const estilo = getComputedStyle(moldura);
+      const dispW = moldura.clientWidth - parseFloat(estilo.paddingLeft) - parseFloat(estilo.paddingRight);
+      const dispH = moldura.clientHeight - parseFloat(estilo.paddingTop) - parseFloat(estilo.paddingBottom);
       let w = dispW > 0 ? dispW : 300;
       let h = w * 297 / 210;
       if (dispH > 0 && h > dispH) {
@@ -862,15 +1038,18 @@
 
       desenharCanvas(ctx, layout(op, t), canvas.width / 210);
 
+      // Números no formato do idioma (1.654 e 35,3% em português)
+      const num = (n, formato) => n.toLocaleString(t.locale, formato);
       const total = op.anos * SEMANAS_ANO;
       if (!op.preencher) {
-        $("resumo").textContent = t.resumoVazio(total);
+        $("resumo").textContent = t.resumoVazio(num(total));
         mostrarMensagem("", "");
         return;
       }
       const vividas = semanasVividas(lerData(op.nascimento), new Date());
-      const pct = ((Math.min(vividas, total) / total) * 100).toFixed(1);
-      $("resumo").textContent = t.resumo(Math.min(Math.max(vividas, 0), total), total, pct);
+      const v = Math.min(Math.max(vividas, 0), total);
+      const pct = num(v / total, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      $("resumo").textContent = t.resumo(num(v), num(total - v), pct);
 
       if (vividas >= total) mostrarMensagem(t.avisoExpectativa, "aviso");
       else mostrarMensagem("", "");
@@ -883,7 +1062,28 @@
     }
 
     // ---------- PDF ----------
-    function baixarPDF() {
+    // iPhone/iPad: a janela de compartilhar do sistema (Salvar em Arquivos, Imprimir, WhatsApp...)
+    // funciona melhor que o download, principalmente no app instalado na Tela de Início
+    const EH_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const USA_COMPARTILHAR = EH_IOS && typeof navigator.canShare === "function";
+
+    async function entregarPDF(doc, t) {
+      if (USA_COMPARTILHAR) {
+        const arquivo = new File([doc.output("blob")], t.pdfArquivo, { type: "application/pdf" });
+        if (navigator.canShare({ files: [arquivo] })) {
+          try {
+            await navigator.share({ files: [arquivo], title: t.pdfTitulo });
+            return;
+          } catch (e) {
+            if (e.name === "AbortError") return; // a pessoa fechou a janela de compartilhar
+          }
+        }
+      }
+      doc.save(t.pdfArquivo);
+    }
+
+    async function baixarPDF() {
       const t = TEXTOS[idioma];
       const op = lerOpcoes();
       const erro = validar(op, t);
@@ -898,9 +1098,9 @@
       botao.textContent = t.gerando;
       try {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+        const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
         desenharPDF(doc, layout(op, t));
-        doc.save(t.pdfArquivo);
+        await entregarPDF(doc, t);
         const vividas = op.preencher ? semanasVividas(lerData(op.nascimento), new Date()) : 0;
         if (vividas >= op.anos * SEMANAS_ANO) mostrarMensagem(t.avisoExpectativa, "aviso");
       } catch (e) {
@@ -924,7 +1124,14 @@
         if (salvo.idioma && TEXTOS[salvo.idioma]) idioma = salvo.idioma;
         const t = TEXTOS[idioma];
         if (Array.isArray(salvo.textos)) {
-          textos = salvo.textos.filter((b) => b && (ESTILO_TEXTO[b.tipo] || b.tipo === "assinatura"));
+          textos = salvo.textos
+            .filter((b) => b && (ESTILO_TEXTO[b.tipo] || b.tipo === "assinatura"))
+            .map((b) => ({
+              ...b,
+              valor: typeof b.valor === "string" ? b.valor : "",
+              pos: POSICOES.includes(b.pos) ? b.pos : "rodape-centro",
+              tam: TAMANHOS[b.tam] ? b.tam : "m"
+            }));
         } else {
           // Configuração de versões anteriores: aproveita o nome e a frase escolhida
           textos = textosPadrao(t);
@@ -939,6 +1146,7 @@
         if (salvo.atual !== undefined) $("atual").checked = salvo.atual;
         if (salvo.preencher !== undefined) $("preencher").checked = salvo.preencher;
         if (salvo.rotulos !== undefined) $("rotulos").checked = salvo.rotulos;
+        if (FORMATOS.includes(salvo.formato)) $("formato-" + salvo.formato).checked = true;
         $("idioma").value = idioma;
       } catch (e) { /* configuração inválida: usa os padrões */ }
     }
@@ -960,24 +1168,35 @@
 
     function aplicarTextos() {
       const t = TEXTOS[idioma];
-      document.documentElement.lang = idioma === "pt" ? "pt-BR" : idioma;
+      document.documentElement.lang = t.locale || idioma;
       $("titulo").textContent = t.pdfTitulo;
       $("titulo-painel").textContent = t.pdfTitulo;
       $("aba-config").textContent = t.abaConfig;
       $("aba-previa").textContent = t.abaPrevia;
       $("sec-dados").textContent = t.secDados;
-      $("sec-aparencia").textContent = t.secAparencia;
-      $("sec-opcoes").textContent = t.secOpcoes;
+      $("sec-calendario").textContent = t.secCalendario;
+      $("sec-textos").textContent = t.secTextos;
       $("lbl-nascimento").textContent = t.nascimento;
       $("lbl-expectativa").textContent = t.expectativa;
-      $("lbl-corVividas").textContent = t.corVividas;
-      $("lbl-corAtual").textContent = t.corAtual;
       $("lbl-preencher").textContent = t.preencher;
       $("lbl-atual").textContent = t.destacarAtual;
       $("lbl-legenda").textContent = t.legenda;
       $("lbl-rotulos").textContent = t.rotulos;
-      $("sec-textos").textContent = t.secTextos;
-      $("add-texto").textContent = t.addTexto;
+      $("lbl-formato").textContent = t.formato;
+      FORMATOS.forEach((f) => {
+        $("formato-" + f).setAttribute("aria-label", t.formatos[f]);
+        $("formato-" + f).parentElement.title = t.formatos[f];
+      });
+      [["corVividas", t.corVividas], ["corAtual", t.corAtual]].forEach(([id, nome]) => {
+        $(id).setAttribute("aria-label", nome);
+        $(id).title = nome;
+      });
+      ZONAS.forEach((z) => { $("lbl-zona-" + z).textContent = t.zonas[z]; });
+      document.querySelectorAll(".btn-add").forEach((bt) => {
+        bt.textContent = t.addTexto;
+        bt.setAttribute("aria-label", `${t.addTexto.replace(/^\+\s*/, "")}: ${t.zonas[bt.dataset.zona]}`);
+      });
+      $("restaurar").textContent = t.restaurar;
       $("dlg-titulo").textContent = t.dlgTitulo;
       $("dlg-dica").textContent = t.dlgDica;
       $("pad-limpar").textContent = t.limpar;
@@ -990,7 +1209,7 @@
       $("lbl-sens").textContent = t.sensibilidade;
       $("lbl-preta").textContent = t.tintaPreta;
       $("lbl-idioma").textContent = t.idioma;
-      $("botao").textContent = t.botao;
+      $("botao").textContent = USA_COMPARTILHAR ? t.botaoCompartilhar : t.botao;
       $("info").textContent = t.info;
 
       // Sugestões para o campo da frase
@@ -1003,83 +1222,188 @@
       renderTextos();
     }
 
-    // Monta a lista de textos do PDF (cada item: ligar, conteúdo, posição e tamanho)
-    function renderTextos() {
-      const t = TEXTOS[idioma];
-      const lista = $("lista-textos");
-      lista.innerHTML = "";
-      textos.forEach((b, i) => {
-        const item = document.createElement("div");
-        item.className = "item-texto";
+    // ---------- Lista de textos do PDF ----------
+    // Ícones (SVG fixos, definidos aqui mesmo)
+    const ICONES = {
+      esq: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M2 6.5h8M2 9.5h12M2 12.5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+      centro: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M4 6.5h8M2 9.5h12M4 12.5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+      dir: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M6 6.5h8M2 9.5h12M6 12.5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+      subir: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 10l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      descer: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      remover: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4.5h11M6.5 4.5V3h3v1.5M4 4.5l.7 9h6.6l.7-9M6.7 7v4.5M9.3 7v4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    };
 
-        const topo = document.createElement("div");
-        topo.className = "item-topo";
-        const lab = document.createElement("label");
-        lab.className = "check";
-        const chk = document.createElement("input");
-        chk.type = "checkbox";
-        chk.checked = b.ativo;
-        const nomeTipo = document.createElement("span");
-        nomeTipo.textContent = t.tiposTexto[b.tipo] || t.tiposTexto.livre;
-        lab.append(chk, nomeTipo);
-        topo.append(lab);
-        if (b.tipo === "livre") {
-          const rm = document.createElement("button");
-          rm.type = "button";
-          rm.className = "btn-link";
-          rm.textContent = t.remover;
-          rm.addEventListener("click", () => { textos.splice(i, 1); renderTextos(); mudouTextos(); });
-          topo.append(rm);
-        }
+    // Identificador de cada texto enquanto a página está aberta (não é salvo)
+    const idsTexto = new WeakMap();
+    let proximoId = 1;
+    function idDe(b) {
+      if (!idsTexto.has(b)) idsTexto.set(b, proximoId++);
+      return idsTexto.get(b);
+    }
 
-        const campos = document.createElement("div");
-        campos.className = "item-campos";
-        campos.hidden = !b.ativo;
-        chk.addEventListener("change", () => { b.ativo = chk.checked; campos.hidden = !b.ativo; mudouTextos(); });
+    function criar(tag, classe, props) {
+      const el = document.createElement(tag);
+      if (classe) el.className = classe;
+      if (props) Object.assign(el, props);
+      return el;
+    }
 
-        if (b.tipo === "assinatura") {
-          const bt = document.createElement("button");
-          bt.type = "button";
-          bt.className = "btn-sec";
-          bt.textContent = b.valor ? t.refazerAssinatura : t.desenharAssinatura;
-          bt.addEventListener("click", () => abrirPad(b));
-          campos.append(bt);
-          if (b.valor) {
-            const im = document.createElement("img");
-            im.className = "mini-assinatura";
-            im.src = b.valor;
-            im.alt = t.tiposTexto.assinatura;
-            campos.append(im);
-          }
-        } else {
-          const inp = document.createElement("input");
-          inp.type = "text";
-          inp.maxLength = 80;
-          inp.value = b.valor;
-          inp.placeholder = t.placeholders[b.tipo] || "";
-          inp.autocomplete = "off";
-          inp.setAttribute("aria-label", nomeTipo.textContent);
-          if (b.tipo === "frase") inp.setAttribute("list", "sugestoes-frase");
-          inp.addEventListener("input", () => { b.valor = inp.value; mudouTextos(); });
-          campos.append(inp);
-        }
+    function botaoIcone(icone, rotulo, desativado, aoClicar, foco, classeExtra) {
+      const bt = criar("button", "btn-icone" + (classeExtra ? " " + classeExtra : ""), { type: "button", title: rotulo, disabled: desativado });
+      bt.setAttribute("aria-label", rotulo);
+      bt.innerHTML = ICONES[icone];
+      if (foco) bt.dataset.foco = foco;
+      bt.addEventListener("click", aoClicar);
+      return bt;
+    }
 
-        const selPos = document.createElement("select");
-        selPos.setAttribute("aria-label", t.posicao);
-        POSICOES.forEach((p) => selPos.add(new Option(t.posicoes[p], p)));
-        selPos.value = b.pos;
-        selPos.addEventListener("change", () => { b.pos = selPos.value; mudouTextos(); });
-
-        const selTam = document.createElement("select");
-        selTam.setAttribute("aria-label", t.tamanho);
-        Object.keys(TAMANHOS).forEach((k) => selTam.add(new Option(t.tamanhos[k], k)));
-        selTam.value = b.tam;
-        selTam.addEventListener("change", () => { b.tam = selTam.value; mudouTextos(); });
-
-        campos.append(selPos, selTam);
-        item.append(topo, campos);
-        lista.append(item);
+    // Botões segmentados: escolha única entre poucas opções (alinhamento, tamanho)
+    function segmentado(nome, rotulo, opcoes, valor, aoMudar, foco) {
+      const grupo = criar("div", "seg");
+      grupo.setAttribute("role", "radiogroup");
+      grupo.setAttribute("aria-label", rotulo);
+      opcoes.forEach((o) => {
+        const lab = criar("label", "", { title: o.titulo });
+        const inp = criar("input", "", { type: "radio", name: nome, value: o.valor, checked: o.valor === valor });
+        inp.setAttribute("aria-label", o.titulo);
+        inp.dataset.foco = `${foco}-${o.valor}`;
+        inp.addEventListener("change", () => { if (inp.checked) aoMudar(o.valor); });
+        const visual = criar("span");
+        visual.innerHTML = o.html; // ícones e letras fixos, definidos neste arquivo
+        lab.append(inp, visual);
+        grupo.append(lab);
       });
+      return grupo;
+    }
+
+    // A lista segue a ordem da página: primeiro os textos do topo, depois os do rodapé.
+    // Dentro de cada área, a ordem da lista é a ordem em que eles aparecem empilhados no PDF.
+    function ordenarPorZona() {
+      textos = ZONAS.flatMap((z) => textos.filter((b) => zonaDe(b) === z));
+    }
+
+    // Monta os cartões de texto. "realcar": texto que acabou de mudar de lugar (pisca e fica à vista)
+    function renderTextos(realcar) {
+      const t = TEXTOS[idioma];
+      const ativo = document.activeElement;
+      const foco = ativo && ativo.dataset ? ativo.dataset.foco : "";
+      ordenarPorZona();
+      ZONAS.forEach((z) => { $("lista-" + z).innerHTML = ""; });
+      textos.forEach((b, i) => $("lista-" + zonaDe(b)).append(cartaoTexto(b, i, t)));
+
+      // Devolve o foco ao mesmo controle (útil no teclado); se a seta ficou desativada, vai para a outra
+      if (foco) {
+        let el = document.querySelector(`[data-foco="${foco}"]`);
+        if (el && el.disabled) {
+          const outra = foco.endsWith("-subir") ? foco.replace(/-subir$/, "-descer") : foco.replace(/-descer$/, "-subir");
+          el = document.querySelector(`[data-foco="${outra}"]`);
+        }
+        if (el && !el.disabled) el.focus({ preventScroll: true });
+      }
+      if (realcar) {
+        const cartao = document.querySelector(`.item-texto[data-id="${idDe(realcar)}"]`);
+        if (cartao) {
+          cartao.classList.add("realce");
+          cartao.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        }
+      }
+    }
+
+    function cartaoTexto(b, i, t) {
+      const id = idDe(b);
+      const zona = zonaDe(b);
+      const nome = t.tiposTexto[b.tipo] || t.tiposTexto.livre;
+      const item = criar("div", "item-texto" + (b.ativo ? "" : " desligado"));
+      item.dataset.id = id;
+
+      // Cabeçalho: liga/desliga com o nome, setas de ordem e (texto livre) remover
+      const topo = criar("div", "item-topo");
+      const lab = criar("label", "interruptor");
+      const chk = criar("input", "", { type: "checkbox", checked: b.ativo });
+      chk.setAttribute("role", "switch");
+      chk.dataset.foco = id + "-ativo";
+      const trilho = criar("span", "trilho");
+      trilho.setAttribute("aria-hidden", "true");
+      lab.append(chk, trilho, criar("span", "item-nome", { textContent: nome }));
+      topo.append(lab);
+
+      // Setas: trocam a ordem dentro da área; na divisa entre topo e rodapé, passam o texto para a outra área
+      const mesmaAntes = i > 0 && zonaDe(textos[i - 1]) === zona;
+      const mesmaDepois = i < textos.length - 1 && zonaDe(textos[i + 1]) === zona;
+      const rotuloSubir = mesmaAntes ? t.subir : t.paraTopo;
+      const rotuloDescer = mesmaDepois ? t.descer : t.paraRodape;
+      topo.append(
+        botaoIcone("subir", rotuloSubir, !mesmaAntes && zona === "topo", () => mover(b, -1), id + "-subir"),
+        botaoIcone("descer", rotuloDescer, !mesmaDepois && zona === "rodape", () => mover(b, 1), id + "-descer")
+      );
+      if (b.tipo === "livre") topo.append(botaoIcone("remover", t.remover, false, () => remover(b), null, "perigo"));
+
+      const campos = criar("div", "item-campos");
+      campos.hidden = !b.ativo;
+      chk.addEventListener("change", () => {
+        b.ativo = chk.checked;
+        campos.hidden = !b.ativo;
+        item.classList.toggle("desligado", !b.ativo);
+        mudouTextos();
+      });
+
+      if (b.tipo === "assinatura") {
+        const linha = criar("div", "assinatura-linha");
+        const bt = criar("button", "btn-sec", { type: "button", textContent: b.valor ? t.refazerAssinatura : t.desenharAssinatura });
+        bt.dataset.foco = id + "-assinar";
+        bt.addEventListener("click", () => abrirPad(b));
+        linha.append(bt);
+        if (b.valor) linha.append(criar("img", "mini-assinatura", { src: b.valor, alt: nome }));
+        campos.append(linha);
+      } else {
+        const inp = criar("input", "", {
+          type: "text", maxLength: 80, value: b.valor,
+          placeholder: t.placeholders[b.tipo] || "", autocomplete: "off"
+        });
+        inp.setAttribute("aria-label", nome);
+        inp.dataset.foco = id + "-texto";
+        if (b.tipo === "frase") inp.setAttribute("list", "sugestoes-frase");
+        inp.addEventListener("input", () => { b.valor = inp.value; mudouTextos(); });
+        campos.append(inp);
+      }
+
+      const controles = criar("div", "item-controles");
+      controles.append(
+        segmentado(`alinhamento-${id}`, t.alinhamento,
+          LADOS.map((l) => ({ valor: l, html: ICONES[l], titulo: t.alinhamentos[l] })),
+          ladoDe(b), (l) => { b.pos = `${zonaDe(b)}-${l}`; mudouTextos(); }, `${id}-alinhamento`),
+        segmentado(`tamanho-${id}`, t.tamanho,
+          Object.keys(TAMANHOS).map((k) => ({ valor: k, html: `<b class="letra-${k}">A</b>`, titulo: t.tamanhos[k] })),
+          b.tam, (k) => { b.tam = k; mudouTextos(); }, `${id}-tamanho`)
+      );
+      campos.append(controles);
+      item.append(topo, campos);
+      return item;
+    }
+
+    function mover(b, direcao) {
+      const i = textos.indexOf(b);
+      const vizinho = textos[i + direcao];
+      if (vizinho && zonaDe(vizinho) === zonaDe(b)) {
+        textos[i] = vizinho;
+        textos[i + direcao] = b;
+      } else if (direcao < 0 && zonaDe(b) === "rodape") {
+        b.pos = `topo-${ladoDe(b)}`;    // último do topo
+      } else if (direcao > 0 && zonaDe(b) === "topo") {
+        b.pos = `rodape-${ladoDe(b)}`;  // primeiro do rodapé
+      } else {
+        return;
+      }
+      renderTextos(b);
+      mudouTextos();
+    }
+
+    function remover(b) {
+      const zona = zonaDe(b);
+      textos = textos.filter((x) => x !== b);
+      renderTextos();
+      mudouTextos();
+      document.querySelector(`.btn-add[data-zona="${zona}"]`).focus();
     }
 
     function mudouTextos() { salvarConfig(); atualizarPrevia(); }
@@ -1415,15 +1739,6 @@
       return { src: saida.toDataURL("image/png"), proporcao: cw / ch };
     }
 
-    // No celular o texto de privacidade fica embaixo do botão;
-    // no tablet e desktop vai para a coluna da prévia, para a tela caber sem rolagem.
-    function posicionarInfo() {
-      const info = $("info");
-      const largo = window.matchMedia("(min-width: 768px)").matches;
-      const destino = largo ? document.querySelector(".previa") : document.querySelector(".acoes");
-      if (info.parentElement !== destino) destino.appendChild(info);
-    }
-
     function trocarAba(aba) {
       $("app").dataset.aba = aba;
       document.querySelectorAll(".abas button").forEach((b) => {
@@ -1452,18 +1767,28 @@
 
     $("botao").addEventListener("click", baixarPDF);
 
-    $("add-texto").addEventListener("click", () => {
-      textos.push({ tipo: "livre", ativo: true, valor: "", pos: "rodape-esq", tam: "m" });
-      renderTextos();
-      mudouTextos();
-      const campos = $("lista-textos").querySelectorAll('input[type="text"]');
-      campos[campos.length - 1].focus();
+    // Novo texto entra no fim da área escolhida, já com o campo pronto para digitar
+    document.querySelectorAll(".btn-add").forEach((bt) => {
+      bt.addEventListener("click", () => {
+        const b = { tipo: "livre", ativo: true, valor: "", pos: `${bt.dataset.zona}-centro`, tam: "m" };
+        textos.push(b);
+        renderTextos(b);
+        mudouTextos();
+        const campo = document.querySelector(`[data-foco="${idDe(b)}-texto"]`);
+        if (campo) campo.focus();
+      });
+    });
+
+    $("restaurar").addEventListener("click", () => {
+      if (!confirm(TEXTOS[idioma].confirmarRestaurar)) return;
+      try { localStorage.removeItem(CHAVE_CONFIG); } catch (e) { /* ignora */ }
+      location.reload();
     });
 
     let redimensionando;
     window.addEventListener("resize", () => {
       clearTimeout(redimensionando);
-      redimensionando = setTimeout(() => { posicionarInfo(); atualizarPrevia(); }, 120);
+      redimensionando = setTimeout(atualizarPrevia, 120);
     });
 
     // ---------- Inicialização ----------
@@ -1478,9 +1803,15 @@
     aplicarTextos();   // monta a lista de frases
     carregarConfig();  // restaura a configuração salva
     aplicarTextos();   // aplica o idioma salvo e mantém a frase escolhida
-    posicionarInfo();
     trocarAba("config");
     atualizarPrevia();
+
+    // App instalado (Tela de Início): funciona sem internet depois da primeira visita
+    if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js").catch(() => { /* sem modo offline */ });
+      });
+    }
   </script>
 </body>
 </html>

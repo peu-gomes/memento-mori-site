@@ -40,8 +40,10 @@ $abas = @(
 
 $total = 0
 foreach ($aba in $abas) {
-  # Cria uma copia da pagina que ja preenche dados e abre a aba desejada
-  $copia = $html.Replace('trocarAba("config");', $aba.codigo)
+  # Cria uma copia da pagina que ja preenche dados e abre a aba desejada.
+  # O <base> faz a copia achar os arquivos do projeto (jsPDF, icones, manifest).
+  $baseUrl = "file:///" + ($projeto -replace '\\', '/') + "/"
+  $copia = $html.Replace('trocarAba("config");', $aba.codigo).Replace('<head>', "<head><base href='$baseUrl'>")
   $arquivoPagina = Join-Path $temp ("pagina-" + $aba.nome + ".html")
   Set-Content -Path $arquivoPagina -Value $copia -Encoding UTF8
   $urlPagina = "file:///" + ($arquivoPagina -replace '\\', '/')
@@ -53,8 +55,19 @@ foreach ($aba in $abas) {
     $urlMoldura = "file:///" + ($moldura -replace '\\', '/')
     $arquivoImg = Join-Path $saida ("{0}_{1}_{2}x{3}.png" -f $tela.nome, $aba.nome, $tela.w, $tela.h)
 
-    & $navegador --headless=new --disable-gpu --no-sandbox --virtual-time-budget=6000 `
-      "--window-size=$($tela.w + 20),$($tela.h + 20)" "--screenshot=$arquivoImg" $urlMoldura 2>$null | Out-Null
+    # Perfil novo a cada captura: funciona mesmo com o Edge aberto
+    # (com o perfil normal, o Edge repassa para a janela aberta e a captura falha calada)
+    $perfil = Join-Path $temp ("perfil-" + [guid]::NewGuid().ToString("N"))
+    $argumentos = @(
+      "--headless=new", "--disable-gpu", "--no-sandbox", "--virtual-time-budget=6000",
+      "--user-data-dir=`"$perfil`"",
+      "--window-size=$($tela.w + 20),$($tela.h + 20)",
+      "--screenshot=`"$arquivoImg`"",
+      $urlMoldura
+    )
+    # -Wait espera o Edge terminar de verdade (ele devolve o controle antes de salvar a imagem)
+    Start-Process -FilePath $navegador -ArgumentList $argumentos -Wait -WindowStyle Hidden
+    Remove-Item $perfil -Recurse -Force -ErrorAction SilentlyContinue
 
     if (Test-Path $arquivoImg) { $total++ }
   }
