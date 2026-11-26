@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- Segurança: a página só carrega arquivos deste site e não consegue enviar dados a nenhum outro lugar
+       (sem conexões externas, sem imagens de fora, sem formulários, sem plugins) -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
   <title>Memento Mori</title>
   <meta name="description" content="Sua vida em semanas, num calendário para imprimir em PDF. Your life in weeks, as a printable calendar.">
 
@@ -555,15 +559,15 @@
       <fieldset>
         <legend id="sec-calendario"></legend>
         <div class="opcao">
-          <label class="interruptor"><input type="checkbox" role="switch" id="preencher" checked><span class="trilho" aria-hidden="true"></span><span id="lbl-preencher"></span></label>
+          <label class="interruptor"><input type="checkbox" role="switch" id="preencher"><span class="trilho" aria-hidden="true"></span><span id="lbl-preencher"></span></label>
           <input type="color" id="corVividas" value="#4a4a4a">
         </div>
         <div class="opcao">
-          <label class="interruptor"><input type="checkbox" role="switch" id="atual" checked><span class="trilho" aria-hidden="true"></span><span id="lbl-atual"></span></label>
+          <label class="interruptor"><input type="checkbox" role="switch" id="atual"><span class="trilho" aria-hidden="true"></span><span id="lbl-atual"></span></label>
           <input type="color" id="corAtual" value="#c0392b">
         </div>
         <div class="opcao">
-          <label class="interruptor"><input type="checkbox" role="switch" id="legenda" checked><span class="trilho" aria-hidden="true"></span><span id="lbl-legenda"></span></label>
+          <label class="interruptor"><input type="checkbox" role="switch" id="legenda"><span class="trilho" aria-hidden="true"></span><span id="lbl-legenda"></span></label>
         </div>
         <div class="opcao">
           <span class="opcao-nome" id="lbl-formato"></span>
@@ -586,15 +590,15 @@
         <p class="dica-secao" id="dica-divisoes"></p>
         <p class="rotulo-cartoes" id="lbl-linhasPor"></p>
         <div class="cartoes-escolha" role="radiogroup" aria-labelledby="lbl-linhasPor">
-          <label class="cartao-escolha"><input type="radio" name="linhasPor" value="vida" id="linhasPor-vida" checked><span class="cartao-corpo"><strong></strong><small></small></span></label>
-          <label class="cartao-escolha"><input type="radio" name="linhasPor" value="civil" id="linhasPor-civil"><span class="cartao-corpo"><strong></strong><small></small></span></label>
+          <label class="cartao-escolha"><input type="radio" name="linhasPor" value="vida" id="linhasPor-vida"><span class="cartao-corpo"><strong></strong><small></small></span></label>
+          <label class="cartao-escolha"><input type="radio" name="linhasPor" value="civil" id="linhasPor-civil" checked><span class="cartao-corpo"><strong></strong><small></small></span></label>
         </div>
         <div class="opcao">
           <span class="opcao-nome" id="lbl-divAnos"></span>
           <div class="seg seg-texto" role="radiogroup" aria-labelledby="lbl-divAnos">
             <label><input type="radio" name="divAnos" value="0" id="divAnos-0"><span></span></label>
-            <label><input type="radio" name="divAnos" value="5" id="divAnos-5"><span></span></label>
-            <label><input type="radio" name="divAnos" value="10" id="divAnos-10" checked><span></span></label>
+            <label><input type="radio" name="divAnos" value="5" id="divAnos-5" checked><span></span></label>
+            <label><input type="radio" name="divAnos" value="10" id="divAnos-10"><span></span></label>
           </div>
         </div>
         <div class="opcao" id="linha-divSemanas">
@@ -614,8 +618,8 @@
         <div class="opcao">
           <span class="opcao-nome" id="lbl-contorno"></span>
           <div class="seg seg-texto" role="radiogroup" aria-labelledby="lbl-contorno">
-            <label><input type="radio" name="contorno" value="claro" id="contorno-claro" checked><span></span></label>
-            <label><input type="radio" name="contorno" value="escuro" id="contorno-escuro"><span></span></label>
+            <label><input type="radio" name="contorno" value="claro" id="contorno-claro"><span></span></label>
+            <label><input type="radio" name="contorno" value="escuro" id="contorno-escuro" checked><span></span></label>
           </div>
         </div>
       </fieldset>
@@ -679,7 +683,8 @@
     </div>
   </dialog>
 
-  <!-- jsPDF 2.5.1 guardado no próprio site: funciona offline e não depende de servidor de terceiros -->
+  <!-- jsPDF 4.2.1 guardado no próprio site: funciona offline e não depende de servidor de terceiros
+       (para atualizar: troque o arquivo em lib/ e confira com "npm audit" que não há falhas conhecidas) -->
   <script src="lib/jspdf.umd.min.js" defer></script>
   <script>
     // ============================================================
@@ -1498,7 +1503,7 @@
     function textosPadrao(t) {
       return [
         { tipo: "titulo", ativo: true, valor: t.pdfTitulo, pos: "topo-centro", tam: "m" },
-        { tipo: "nome", ativo: true, valor: "", pos: "topo-centro", tam: "m" },
+        { tipo: "nome", ativo: false, valor: "", pos: "topo-centro", tam: "m" },
         { tipo: "frase", ativo: true, valor: t.frases[0], pos: "rodape-centro", tam: "m" },
         { tipo: "assinatura", ativo: false, valor: "", proporcao: 3, pos: "rodape-dir", tam: "m" }
       ];
@@ -2154,7 +2159,19 @@
               valor: typeof b.valor === "string" ? b.valor : "",
               pos: POSICOES.includes(b.pos) ? b.pos : "rodape-centro",
               tam: TAMANHOS[b.tam] ? b.tam : "m"
-            }));
+            }))
+            // Assinatura só vale se for uma imagem PNG de verdade (dado adulterado é descartado)
+            .map((b) => {
+              if (b.tipo !== "assinatura") return b;
+              const valida = /^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(b.valor);
+              const proporcao = Number(b.proporcao);
+              return {
+                ...b,
+                valor: valida ? b.valor : "",
+                ativo: valida ? b.ativo : false,
+                proporcao: proporcao >= 0.2 && proporcao <= 20 ? proporcao : 3
+              };
+            });
         } else {
           // Configuração de versões anteriores: aproveita o nome e a frase escolhida
           textos = textosPadrao(t);
