@@ -360,6 +360,16 @@
     }
     .resumo { text-align: center; color: var(--texto); font-size: 0.9rem; line-height: 1.5; margin: 12px 0 0; min-height: 1.2em; white-space: pre-line; }
     .info { font-size: 0.8rem; color: #888; text-align: center; margin: 6px 0 0; }
+    /* Apoio: café e sugestões, discretos embaixo da prévia */
+    .apoio { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 18px; margin: 4px 0 0; }
+    .apoio .btn-link { display: inline-flex; align-items: center; margin: 0; min-height: 36px; padding: 6px 4px; text-decoration: none; color: #6b665d; font-size: 0.85rem; }
+    .apoio .btn-link:hover, .apoio .btn-link:focus-visible { text-decoration: underline; }
+    .cafe-opcao { border: 1px solid var(--borda); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
+    .cafe-opcao strong { display: block; font-size: 0.95rem; margin-bottom: 2px; }
+    .cafe-opcao small { display: block; color: var(--cinza); font-size: 0.82rem; margin-bottom: 10px; }
+    .cafe-chave { display: flex; gap: 8px; align-items: center; }
+    .cafe-chave code { flex: 1; min-width: 0; overflow-wrap: anywhere; background: #f4f1ea; border-radius: 8px; padding: 10px; font-size: 0.9rem; }
+    a.btn-principal { display: flex; align-items: center; justify-content: center; text-decoration: none; min-height: 46px; font-size: 0.95rem; }
 
     /* ---------- Ações ---------- */
     .acoes {
@@ -669,6 +679,10 @@
       </div>
       <p class="resumo" id="resumo"></p>
       <p class="info" id="info"></p>
+      <p class="apoio" id="apoio" hidden>
+        <button type="button" class="btn-link" id="btn-cafe" hidden></button>
+        <a class="btn-link" id="link-sugestoes" target="_blank" rel="noopener noreferrer" hidden></a>
+      </p>
     </section>
 
     <div class="acoes">
@@ -676,6 +690,22 @@
       <p class="msg" id="msg" role="alert"></p>
     </div>
 </main>
+
+  <dialog class="dlg" id="dlg-cafe" aria-labelledby="cafe-titulo">
+    <p class="dlg-titulo" id="cafe-titulo"></p>
+    <p class="dlg-dica" id="cafe-dica"></p>
+    <div class="cafe-opcao" id="cafe-pix" hidden>
+      <strong id="cafe-pix-titulo"></strong>
+      <small id="cafe-pix-dica"></small>
+      <div class="cafe-chave"><code id="cafe-chave"></code><button type="button" class="btn-sec" id="cafe-copiar"></button></div>
+    </div>
+    <div class="cafe-opcao" id="cafe-kofi" hidden>
+      <strong id="cafe-kofi-titulo"></strong>
+      <small id="cafe-kofi-dica"></small>
+      <a class="btn-principal" id="cafe-kofi-link" target="_blank" rel="noopener noreferrer"></a>
+    </div>
+    <div class="dlg-botoes"><button type="button" class="btn-sec" id="cafe-fechar"></button></div>
+  </dialog>
 
   <dialog class="dlg" id="dlg-assinatura" aria-labelledby="dlg-titulo">
     <p class="dlg-titulo" id="dlg-titulo"></p>
@@ -718,6 +748,14 @@
     // Para adicionar um idioma, copie o bloco "pt", traduza e
     // ele aparece sozinho na lista de idiomas.
     // ============================================================
+    // ---------- Apoio: café e sugestões ----------
+    // Preencha para mostrar no site; o que ficar vazio não aparece
+    const APOIO = {
+      pix: "",        // chave Pix
+      kofi: "",       // link da página no Ko-fi (https://ko-fi.com/...)
+      sugestoes: ""   // link do Formulário Google
+    };
+
     const TEXTOS = {
       pt: {
         nomeIdioma: "Português",
@@ -814,6 +852,18 @@
         avisoExpectativa: "A expectativa já foi ultrapassada: todas as semanas aparecem como vividas.",
         erroGerar: "Não foi possível gerar o PDF. Tente de novo.",
         info: "Seus dados não saem do seu navegador: tudo acontece nele.",
+        cafe: "☕ Pague meu café",
+        sugestoes: "💡 Sugestões",
+        cafeTitulo: "Pague meu café",
+        cafeDica: "Se o calendário foi útil, um café ajuda a manter o site no ar e gratuito. Obrigado!",
+        pixTitulo: "Pix (Brasil)",
+        pixDica: "Copie a chave e cole no app do seu banco.",
+        copiar: "Copiar",
+        copiado: "Copiado!",
+        kofiTitulo: "Ko-fi",
+        kofiDica: "Cartão ou PayPal, de qualquer país.",
+        kofiAbrir: "Abrir o Ko-fi",
+        fechar: "Fechar",
         pdfTitulo: "Memento Mori",
         pdfIdade: "Idade",
         pdfSemana: "Semana",
@@ -928,6 +978,18 @@
         avisoExpectativa: "Life expectancy has already been passed: all weeks are shown as lived.",
         erroGerar: "Couldn't create the PDF. Please try again.",
         info: "Your data never leaves your browser: everything happens right here.",
+        cafe: "☕ Buy me a coffee",
+        sugestoes: "💡 Suggestions",
+        cafeTitulo: "Buy me a coffee",
+        cafeDica: "If the calendar was useful, a coffee helps keep the site online and free. Thank you!",
+        pixTitulo: "Pix (Brazil)",
+        pixDica: "Copy the key and paste it into your bank app.",
+        copiar: "Copy",
+        copiado: "Copied!",
+        kofiTitulo: "Ko-fi",
+        kofiDica: "Card or PayPal, from any country.",
+        kofiAbrir: "Open Ko-fi",
+        fechar: "Close",
         pdfTitulo: "Memento Mori",
         pdfIdade: "Age",
         pdfSemana: "Week",
@@ -1042,6 +1104,18 @@
         avisoExpectativa: "Ya se superó la esperanza de vida: todas las semanas aparecen como vividas.",
         erroGerar: "No se pudo generar el PDF. Inténtalo de nuevo.",
         info: "Tus datos no salen de tu navegador: todo ocurre en él.",
+        cafe: "☕ Invítame un café",
+        sugestoes: "💡 Sugerencias",
+        cafeTitulo: "Invítame un café",
+        cafeDica: "Si el calendario te fue útil, un café ayuda a mantener el sitio en línea y gratuito. ¡Gracias!",
+        pixTitulo: "Pix (Brasil)",
+        pixDica: "Copia la clave y pégala en la app de tu banco.",
+        copiar: "Copiar",
+        copiado: "¡Copiado!",
+        kofiTitulo: "Ko-fi",
+        kofiDica: "Tarjeta o PayPal, desde cualquier país.",
+        kofiAbrir: "Abrir Ko-fi",
+        fechar: "Cerrar",
         pdfTitulo: "Memento Mori",
         pdfIdade: "Edad",
         pdfSemana: "Semana",
@@ -1156,6 +1230,18 @@
         avisoExpectativa: "L’espérance de vie est déjà dépassée : toutes les semaines apparaissent comme vécues.",
         erroGerar: "Impossible de créer le PDF. Réessayez.",
         info: "Vos données ne quittent pas votre navigateur : tout se passe ici.",
+        cafe: "☕ Offrez-moi un café",
+        sugestoes: "💡 Suggestions",
+        cafeTitulo: "Offrez-moi un café",
+        cafeDica: "Si le calendrier vous a été utile, un café aide à garder le site en ligne et gratuit. Merci !",
+        pixTitulo: "Pix (Brésil)",
+        pixDica: "Copiez la clé et collez-la dans l’app de votre banque.",
+        copiar: "Copier",
+        copiado: "Copié !",
+        kofiTitulo: "Ko-fi",
+        kofiDica: "Carte ou PayPal, depuis n’importe quel pays.",
+        kofiAbrir: "Ouvrir Ko-fi",
+        fechar: "Fermer",
         pdfTitulo: "Memento Mori",
         pdfIdade: "Âge",
         pdfSemana: "Semaine",
@@ -1270,6 +1356,18 @@
         avisoExpectativa: "Die Lebenserwartung ist bereits überschritten: Alle Wochen erscheinen als gelebt.",
         erroGerar: "Das PDF konnte nicht erstellt werden. Bitte versuch es noch einmal.",
         info: "Deine Daten verlassen deinen Browser nicht: Alles passiert hier.",
+        cafe: "☕ Spendier mir einen Kaffee",
+        sugestoes: "💡 Vorschläge",
+        cafeTitulo: "Spendier mir einen Kaffee",
+        cafeDica: "Wenn dir der Kalender geholfen hat, hilft ein Kaffee, die Seite online und kostenlos zu halten. Danke!",
+        pixTitulo: "Pix (Brasilien)",
+        pixDica: "Kopiere den Schlüssel und füge ihn in deine Banking-App ein.",
+        copiar: "Kopieren",
+        copiado: "Kopiert!",
+        kofiTitulo: "Ko-fi",
+        kofiDica: "Karte oder PayPal, aus jedem Land.",
+        kofiAbrir: "Ko-fi öffnen",
+        fechar: "Schließen",
         pdfTitulo: "Memento Mori",
         pdfIdade: "Alter",
         pdfSemana: "Woche",
@@ -1384,6 +1482,18 @@
         avisoExpectativa: "L’aspettativa di vita è già stata superata: tutte le settimane appaiono come vissute.",
         erroGerar: "Impossibile creare il PDF. Riprova.",
         info: "I tuoi dati non lasciano il browser: tutto avviene qui.",
+        cafe: "☕ Offrimi un caffè",
+        sugestoes: "💡 Suggerimenti",
+        cafeTitulo: "Offrimi un caffè",
+        cafeDica: "Se il calendario ti è stato utile, un caffè aiuta a mantenere il sito online e gratuito. Grazie!",
+        pixTitulo: "Pix (Brasile)",
+        pixDica: "Copia la chiave e incollala nell’app della tua banca.",
+        copiar: "Copia",
+        copiado: "Copiato!",
+        kofiTitulo: "Ko-fi",
+        kofiDica: "Carta o PayPal, da qualsiasi paese.",
+        kofiAbrir: "Apri Ko-fi",
+        fechar: "Chiudi",
         pdfTitulo: "Memento Mori",
         pdfIdade: "Età",
         pdfSemana: "Settimana",
@@ -2301,6 +2411,7 @@
         bt.setAttribute("aria-label", `${t.addTexto.replace(/^\+\s*/, "")}: ${t.zonas[bt.dataset.zona]}`);
       });
       $("restaurar").textContent = t.restaurar;
+      aplicarTextosApoio(t);
       $("dlg-titulo").textContent = t.dlgTitulo;
       $("dlg-dica").textContent = t.dlgDica;
       $("pad-limpar").textContent = t.limpar;
@@ -2908,6 +3019,52 @@
         const campo = document.querySelector(`[data-foco="${idDe(b)}-texto"]`);
         if (campo) campo.focus();
       });
+    });
+
+    // ---------- Apoio (café e sugestões) ----------
+    function aplicarTextosApoio(t) {
+      const temCafe = Boolean(APOIO.pix || APOIO.kofi);
+      $("btn-cafe").hidden = !temCafe;
+      $("link-sugestoes").hidden = !APOIO.sugestoes;
+      $("apoio").hidden = !temCafe && !APOIO.sugestoes;
+      $("btn-cafe").textContent = t.cafe;
+      $("link-sugestoes").textContent = t.sugestoes;
+      if (APOIO.sugestoes) $("link-sugestoes").href = APOIO.sugestoes;
+      $("cafe-titulo").textContent = t.cafeTitulo;
+      $("cafe-dica").textContent = t.cafeDica;
+      $("cafe-pix").hidden = !APOIO.pix;
+      $("cafe-pix-titulo").textContent = t.pixTitulo;
+      $("cafe-pix-dica").textContent = t.pixDica;
+      $("cafe-chave").textContent = APOIO.pix;
+      $("cafe-copiar").textContent = t.copiar;
+      $("cafe-kofi").hidden = !APOIO.kofi;
+      $("cafe-kofi-titulo").textContent = t.kofiTitulo;
+      $("cafe-kofi-dica").textContent = t.kofiDica;
+      $("cafe-kofi-link").textContent = t.kofiAbrir;
+      if (APOIO.kofi) $("cafe-kofi-link").href = APOIO.kofi;
+      $("cafe-fechar").textContent = t.fechar;
+      // Fora do Brasil o Ko-fi vem primeiro (Pix só funciona com conta brasileira)
+      const dlg = $("dlg-cafe");
+      if (idioma === "pt") dlg.insertBefore($("cafe-pix"), $("cafe-kofi"));
+      else dlg.insertBefore($("cafe-kofi"), $("cafe-pix"));
+    }
+
+    $("btn-cafe").addEventListener("click", () => $("dlg-cafe").showModal());
+    $("cafe-fechar").addEventListener("click", () => $("dlg-cafe").close());
+    $("cafe-copiar").addEventListener("click", async () => {
+      const t = TEXTOS[idioma];
+      const bt = $("cafe-copiar");
+      try {
+        await navigator.clipboard.writeText(APOIO.pix);
+      } catch (e) {
+        // Sem acesso à área de transferência: seleciona a chave para a pessoa copiar
+        const r = document.createRange();
+        r.selectNodeContents($("cafe-chave"));
+        const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+        return;
+      }
+      bt.textContent = t.copiado;
+      setTimeout(() => { bt.textContent = TEXTOS[idioma].copiar; }, 2000);
     });
 
     // Volta tudo ao padrão, menos a data de nascimento (o resto é preferência; a data é um dado da pessoa)
