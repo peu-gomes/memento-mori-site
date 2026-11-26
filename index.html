@@ -124,6 +124,66 @@
       background: #fff; cursor: pointer;
     }
 
+    /* ---------- Textos do PDF ---------- */
+    .btn-sec {
+      min-height: 44px; padding: 0 14px;
+      border: 1px solid var(--borda); border-radius: 10px;
+      background: #fff; color: var(--texto); font-size: 0.95rem; cursor: pointer;
+    }
+    .btn-link {
+      border: 0; background: none; color: #b00020; font-size: 0.85rem;
+      cursor: pointer; padding: 8px; min-height: 36px;
+    }
+    .item-texto { border: 1px solid var(--borda); border-radius: 10px; padding: 0 10px; margin-top: 8px; }
+    .item-topo { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .item-texto label.check { min-height: 42px; }
+    .item-campos {
+      display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+      gap: 6px; padding-bottom: 10px;
+    }
+    .item-campos[hidden] { display: none; }
+    .item-campos > input[type="text"],
+    .item-campos > .btn-sec,
+    .item-campos > img { grid-column: 1 / -1; }
+    .item-campos select, .item-campos input[type="text"] { min-height: 42px; padding-top: 6px; padding-bottom: 6px; }
+    .mini-assinatura { max-height: 48px; max-width: 100%; justify-self: center; }
+    #add-texto { width: 100%; margin-top: 8px; }
+
+    /* Janela para desenhar a assinatura */
+    .dlg {
+      border: 0; border-radius: 14px; padding: 18px;
+      width: min(560px, calc(100vw - 24px));
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+    }
+    .dlg::backdrop { background: rgba(0, 0, 0, 0.45); }
+    .dlg-titulo { margin: 0 0 10px; font-weight: 700; }
+    #pad {
+      display: block; width: 100%; height: 200px;
+      border: 1px dashed var(--borda); border-radius: 10px;
+      background: #fff; touch-action: none; cursor: crosshair;
+    }
+    .dlg-fontes { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    .dlg-fontes .btn-sec { flex: 1; }
+    .dlg-ajuste { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 4px 12px; margin-top: 10px; }
+    .dlg-ajuste[hidden] { display: none; }
+    .dlg-ajuste label { margin: 0; font-weight: 600; font-size: 0.9rem; }
+    .dlg-ajuste label.check { grid-column: 1 / -1; font-weight: 400; min-height: 40px; }
+    .dlg-ajuste input[type="range"] { width: 100%; accent-color: #222; }
+    .dlg-dica { font-size: 0.85rem; color: var(--cinza); margin: 8px 0 12px; }
+    .dlg-botoes { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+    .dlg-botoes .btn-principal { width: auto; min-height: 44px; padding: 0 20px; font-size: 0.95rem; }
+    .dlg [hidden] { display: none !important; }
+
+    /* Webcam do computador para fotografar a assinatura */
+    .camera-quadro { position: relative; border-radius: 10px; overflow: hidden; background: #111; }
+    #camera-video { display: block; width: 100%; height: auto; }
+    .camera-guia {
+      position: absolute; left: 8%; right: 8%; top: 22%; bottom: 22%;
+      border: 2px dashed rgba(255, 255, 255, 0.95); border-radius: 8px;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+      pointer-events: none;
+    }
+
     :focus-visible { outline: 3px solid #7aa7ff; outline-offset: 2px; }
 
     /* ---------- Prévia ---------- */
@@ -224,6 +284,7 @@
       .config label.check,
       .config .linha { grid-column: 1 / -1; margin: 0; }
       .config #bloco-idioma { display: contents; }
+      .config .lista-textos, .config #add-texto { grid-column: 1 / -1; }
       .previa {
         grid-area: previa;
         min-height: 0;
@@ -302,9 +363,6 @@
       <h2 class="titulo-painel" id="titulo-painel"></h2>
       <fieldset>
         <legend id="sec-dados"></legend>
-        <label for="nome" id="lbl-nome"></label>
-        <input type="text" id="nome" name="mm-rotulo-calendario" maxlength="40" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
-
         <label for="nascimento" id="lbl-nascimento"></label>
         <input type="date" id="nascimento" name="mm-data-calendario" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
 
@@ -325,14 +383,18 @@
       </fieldset>
 
       <fieldset>
+        <legend id="sec-textos"></legend>
+        <div class="lista-textos" id="lista-textos"></div>
+        <button type="button" class="btn-sec" id="add-texto"></button>
+        <datalist id="sugestoes-frase"></datalist>
+      </fieldset>
+
+      <fieldset>
         <legend id="sec-opcoes"></legend>
         <label class="check"><input type="checkbox" id="preencher" checked><span id="lbl-preencher"></span></label>
         <label class="check"><input type="checkbox" id="atual" checked><span id="lbl-atual"></span></label>
         <label class="check"><input type="checkbox" id="legenda" checked><span id="lbl-legenda"></span></label>
         <label class="check"><input type="checkbox" id="rotulos" checked><span id="lbl-rotulos"></span></label>
-
-        <label for="frase" id="lbl-frase"></label>
-        <select id="frase"></select>
 
         <div id="bloco-idioma">
           <label for="idioma" id="lbl-idioma"></label>
@@ -355,6 +417,36 @@
     </div>
   </main>
 
+  <dialog class="dlg" id="dlg-assinatura" aria-labelledby="dlg-titulo">
+    <p class="dlg-titulo" id="dlg-titulo"></p>
+    <div class="dlg-fontes">
+      <button type="button" class="btn-sec" id="pad-importar"></button>
+      <button type="button" class="btn-sec" id="pad-foto"></button>
+      <input type="file" id="arq-importar" accept="image/*" hidden>
+      <input type="file" id="arq-foto" accept="image/*" capture="environment" hidden>
+    </div>
+    <canvas id="pad"></canvas>
+    <div class="camera-quadro" id="camera" hidden>
+      <video id="camera-video" autoplay playsinline muted></video>
+      <div class="camera-guia" id="camera-guia"></div>
+    </div>
+    <div class="dlg-ajuste" id="pad-ajuste" hidden>
+      <label for="pad-sens" id="lbl-sens"></label>
+      <input type="range" id="pad-sens" min="1" max="10" step="1" value="5">
+      <label class="check"><input type="checkbox" id="pad-preta"><span id="lbl-preta"></span></label>
+    </div>
+    <p class="dlg-dica" id="dlg-dica"></p>
+    <div class="dlg-botoes" id="pad-botoes">
+      <button type="button" class="btn-sec" id="pad-limpar"></button>
+      <button type="button" class="btn-sec" id="pad-cancelar"></button>
+      <button type="button" class="btn-principal" id="pad-salvar"></button>
+    </div>
+    <div class="dlg-botoes" id="camera-botoes" hidden>
+      <button type="button" class="btn-sec" id="camera-voltar"></button>
+      <button type="button" class="btn-principal" id="camera-capturar"></button>
+    </div>
+  </dialog>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     // ============================================================
@@ -371,7 +463,6 @@
         secDados: "Dados",
         secAparencia: "Aparência",
         secOpcoes: "Opções",
-        nome: "Nome (opcional)",
         nascimento: "Data de nascimento",
         expectativa: "Expectativa de vida (anos)",
         corVividas: "Semanas vividas",
@@ -382,7 +473,35 @@
         legSemana: "Uma semana",
         legenda: "Mostrar legenda",
         rotulos: "Mostrar idades (0, 10, 20...)",
-        frase: "Frase do rodapé",
+        secTextos: "Textos do PDF",
+        tiposTexto: { titulo: "Título", nome: "Nome", frase: "Frase", assinatura: "Assinatura", livre: "Texto" },
+        placeholders: { titulo: "Título", nome: "Seu nome", frase: "Escreva uma frase", livre: "Escreva um texto" },
+        posicao: "Posição",
+        posicoes: {
+          "topo-esq": "Topo, esquerda", "topo-centro": "Topo, centro", "topo-dir": "Topo, direita",
+          "rodape-esq": "Rodapé, esquerda", "rodape-centro": "Rodapé, centro", "rodape-dir": "Rodapé, direita"
+        },
+        tamanho: "Tamanho",
+        tamanhos: { p: "Pequeno", m: "Médio", g: "Grande" },
+        addTexto: "+ Adicionar texto",
+        remover: "Remover",
+        desenharAssinatura: "Adicionar assinatura",
+        refazerAssinatura: "Refazer assinatura",
+        dlgTitulo: "Sua assinatura",
+        dlgDica: "Assine com o dedo ou o mouse no espaço acima. Se preferir, assine num papel branco e use “Tirar foto” ou “Importar imagem”.",
+        cameraDica: "Aproxime o papel com a assinatura até ele preencher o retângulo, com boa luz, e clique em “Capturar”.",
+        capturar: "Capturar",
+        voltar: "Voltar",
+        erroCamera: "Não foi possível usar a câmera. Confira se ela está conectada e se o navegador tem permissão, ou use “Importar imagem”.",
+        dlgDicaImportada: "O fundo foi removido. Ajuste até sobrar só a escrita; você ainda pode desenhar por cima.",
+        importar: "Importar imagem",
+        foto: "Tirar foto",
+        sensibilidade: "Remover fundo",
+        tintaPreta: "Deixar a tinta preta",
+        erroImagem: "Não foi possível abrir essa imagem.",
+        limpar: "Limpar",
+        cancelar: "Cancelar",
+        salvar: "Usar assinatura",
         frases: [
           "Lembre-se de que você vai morrer.",
           "Memento mori",
@@ -399,8 +518,6 @@
         erroGerar: "Não foi possível gerar o PDF. Tente de novo.",
         info: "Nenhum dado é enviado a servidores: tudo acontece no seu navegador.",
         pdfTitulo: "Memento Mori",
-        pdfSubtitulo: "Sua vida em semanas",
-        pdfDe: (nome) => `Calendário de ${nome}`,
         pdfIdade: "Idade",
         legVividas: "Semanas vividas",
         legAtual: "Semana atual",
@@ -416,6 +533,28 @@
     const SEMANAS_ANO = 52;
     const ANO_MIN = 1900;
     const $ = (id) => document.getElementById(id);
+
+    // ---------- Textos do PDF (título, nome, frase, assinatura e textos livres) ----------
+    const POSICOES = ["topo-esq", "topo-centro", "topo-dir", "rodape-esq", "rodape-centro", "rodape-dir"];
+    const TAMANHOS = { p: 0.75, m: 1, g: 1.35 };
+    const ESTILO_TEXTO = {
+      titulo: { pt: 20, estilo: "bold", cor: "#000000" },
+      nome: { pt: 12, estilo: "bold", cor: "#222222" },
+      frase: { pt: 10, estilo: "italic", cor: "#646464" },
+      livre: { pt: 11, estilo: "normal", cor: "#3c3c3c" }
+    };
+    const ASSINATURA_ALT = 12;   // altura da assinatura em mm (tamanho médio)
+    const ASSINATURA_LARG = 80;  // largura máxima em mm
+
+    function textosPadrao(t) {
+      return [
+        { tipo: "titulo", ativo: true, valor: t.pdfTitulo, pos: "topo-centro", tam: "m" },
+        { tipo: "nome", ativo: true, valor: "", pos: "topo-centro", tam: "m" },
+        { tipo: "frase", ativo: true, valor: t.frases[0], pos: "rodape-centro", tam: "m" },
+        { tipo: "assinatura", ativo: false, valor: "", proporcao: 3, pos: "rodape-dir", tam: "m" }
+      ];
+    }
+    let textos = textosPadrao(TEXTOS.pt);
 
     // ---------- Utilidades ----------
     // "AAAA-MM-DD" -> data local (evita erro de fuso horário)
@@ -437,7 +576,6 @@
     function lerOpcoes() {
       return {
         idioma,
-        nome: $("nome").value.trim(),
         nascimento: $("nascimento").value,
         anos: Number($("expectativa").value),
         corVividas: $("corVividas").value,
@@ -446,7 +584,7 @@
         atual: $("atual").checked,
         legenda: $("legenda").checked,
         rotulos: $("rotulos").checked,
-        frase: Number($("frase").value) || 0
+        textos
       };
     }
 
@@ -475,32 +613,51 @@
       const total = COLUNAS * LINHAS;
       // Sem preenchimento automático: -1 => nenhum quadrado preenchido e sem semana atual
       const vividas = (op.preencher || op.atual) ? Math.max(0, Math.min(semanasVividas(lerData(op.nascimento), new Date()), total)) : -1;
-      const pct = ((Math.max(vividas, 0) / total) * 100).toFixed(1);
       const c = [];
 
       // Fundo branco
       c.push({ t: "rect", x: 0, y: 0, w: W, h: H, fill: "#ffffff" });
 
-      // Cabeçalho
-      c.push({ t: "texto", x: W / 2, y: 18, s: t.pdfTitulo, pt: 20, estilo: "bold", cor: "#000000", align: "center" });
-      c.push({ t: "texto", x: W / 2, y: 25, s: t.pdfSubtitulo, pt: 11, cor: "#666666", align: "center" });
-      let yResumo = 31;
-      if (op.nome) {
-        c.push({ t: "texto", x: W / 2, y: 32, s: t.pdfDe(op.nome), pt: 12, estilo: "bold", cor: "#222222", align: "center" });
-        yResumo = 39;
-      }
-      c.push({ t: "texto", x: W / 2, y: yResumo, s: op.preencher ? t.resumo(vividas, total, pct) : t.resumoVazio(total), pt: 11, cor: "#666666", align: "center" });
+      // Textos do topo e do rodapé, organizados em linhas: cada posição empilha os seus,
+      // e um texto que encostaria em outro da mesma linha desce para a seguinte
+      const GAP = 1.5, MARGEM_TOPO = 12, MARGEM_BASE = 10, FOLGA = 4;
+      const blocos = blocosVisiveis(op.textos);
+      const lado = (b) => b.pos.split("-")[1];
+      const montarLinhas = (lista, xEsq, xDir) => {
+        const linhas = [];
+        const ultima = {};
+        lista.forEach((b) => {
+          const l = lado(b);
+          const x = l === "esq" ? xEsq : l === "dir" ? xDir - b.largura : W / 2 - b.largura / 2;
+          const ini = x - FOLGA / 2, fim = x + b.largura + FOLGA / 2;
+          let k = (ultima[l] === undefined ? -1 : ultima[l]) + 1;
+          while (k < linhas.length && linhas[k].itens.some((o) => ini < o.fim && o.ini < fim)) k++;
+          if (k === linhas.length) linhas.push({ itens: [], altura: 0 });
+          linhas[k].itens.push({ b, x, ini, fim });
+          linhas[k].altura = Math.max(linhas[k].altura, b.altura);
+          ultima[l] = k;
+        });
+        return linhas;
+      };
+      const alturaLinhas = (linhas) => linhas.reduce((soma, ln, i) => soma + ln.altura + (i ? GAP : 0), 0);
+      const doTopo = blocos.filter((b) => b.pos.startsWith("topo"));
+      const doRodape = blocos.filter((b) => b.pos.startsWith("rodape"));
 
-      // Grade
-      const gradeY = 46;
-      const gradeLarg = W - 30 - 15;
-      const gradeFim = op.legenda ? H - 30 : H - 22;
-      const gradeAlt = gradeFim - gradeY;
-      const passo = Math.min(gradeLarg / COLUNAS, gradeAlt / LINHAS);
+      // Grade: ocupa o espaço que os textos deixam. Como os textos dos lados se alinham às bordas
+      // da grade, e a largura da grade depende da altura livre, algumas passadas estabilizam o cálculo.
+      let xGrade = 22.5, larguraGrade = W - 45, linhasTopo, linhasRodape, gradeY, rodapeIni, legendaY, passo;
+      for (let k = 0; k < 4; k++) {
+        linhasTopo = montarLinhas(doTopo, xGrade, xGrade + larguraGrade);
+        linhasRodape = montarLinhas(doRodape, xGrade, xGrade + larguraGrade);
+        rodapeIni = H - MARGEM_BASE - alturaLinhas(linhasRodape);
+        legendaY = rodapeIni - (doRodape.length ? 5 : 2);
+        gradeY = Math.max(MARGEM_TOPO + alturaLinhas(linhasTopo) + (op.rotulos ? 7 : 5), 15);
+        const gradeFim = op.legenda ? legendaY - 8 : rodapeIni - 5;
+        passo = Math.min((W - 45) / COLUNAS, (gradeFim - gradeY) / LINHAS);
+        larguraGrade = passo * COLUNAS;
+        xGrade = (W - larguraGrade) / 2; // centralizada; os rótulos de idade ficam do lado de fora
+      }
       const tam = passo * 0.78;
-      const larguraGrade = passo * COLUNAS;
-      // A grade é centralizada na página; os rótulos de idade ficam do lado de fora, à esquerda
-      const xGrade = (W - larguraGrade) / 2;
       const xRotulos = xGrade - 3;
 
       // Rótulos de idade
@@ -535,7 +692,7 @@
 
       // Legenda
       if (op.legenda) {
-        const ly = H - 22;
+        const ly = legendaY;
         const itens = [];
         if (op.preencher) itens.push({ fill: op.corVividas, s: t.legVividas });
         if (op.atual) itens.push({ fill: op.corAtual, s: t.legAtual });
@@ -549,10 +706,68 @@
         });
       }
 
-      // Frase do rodapé
-      c.push({ t: "texto", x: W / 2, y: H - 12, s: t.frases[op.frase] || t.frases[0], pt: 10, estilo: "italic", cor: "#646464", align: "center" });
+      // Textos: os de cada linha ficam alinhados pela base
+      const desenharLinhas = (linhas, yInicial) => {
+        let y = yInicial;
+        linhas.forEach((ln) => {
+          const base = y + ln.altura;
+          ln.itens.forEach(({ b, x }) => {
+            const yItem = base - b.altura;
+            if (b.tipo === "assinatura") {
+              c.push({ t: "img", src: b.valor, x, y: yItem, w: b.w, h: b.h });
+            } else {
+              const l = lado(b);
+              const xt = l === "esq" ? x : l === "dir" ? x + b.largura : x + b.largura / 2;
+              const align = l === "esq" ? "left" : l === "dir" ? "right" : "center";
+              c.push({ t: "texto", x: xt, y: yItem + b.mm * 0.8, s: b.valor.trim(), pt: b.pt, estilo: b.estilo, cor: b.cor, align });
+            }
+          });
+          y = base + GAP;
+        });
+      };
+      desenharLinhas(linhasTopo, MARGEM_TOPO);
+      desenharLinhas(linhasRodape, rodapeIni);
 
       return c;
+    }
+
+    // Só entra no PDF o que está ligado e tem conteúdo; calcula a altura de cada bloco em mm
+    function blocosVisiveis(lista) {
+      return (lista || [])
+        .filter((b) => b.ativo && POSICOES.includes(b.pos) && typeof b.valor === "string" && b.valor.trim())
+        .map((b) => {
+          const f = TAMANHOS[b.tam] || 1;
+          if (b.tipo === "assinatura") {
+            const prop = b.proporcao > 0 ? b.proporcao : 3;
+            const w = Math.min(ASSINATURA_ALT * f * prop, ASSINATURA_LARG * f);
+            const h = w / prop;
+            return { ...b, w, h, altura: h, largura: w };
+          }
+          const e = ESTILO_TEXTO[b.tipo] || ESTILO_TEXTO.livre;
+          const pt = e.pt * f;
+          const mm = pt * 0.3528;
+          return { ...b, pt, mm, estilo: e.estilo, cor: e.cor, altura: mm * 1.25, largura: medirTexto(b.valor.trim(), pt, e.estilo) };
+        });
+    }
+
+    // Largura de um texto em mm (Helvetica, a mesma fonte do PDF)
+    let ctxMedida;
+    function medirTexto(texto, pt, estilo) {
+      ctxMedida = ctxMedida || document.createElement("canvas").getContext("2d");
+      ctxMedida.font = `${estilo === "italic" ? "italic " : ""}${estilo === "bold" ? "bold " : ""}${pt}px Helvetica, Arial, sans-serif`;
+      return ctxMedida.measureText(texto).width * 0.3528;
+    }
+
+    // Imagens (assinatura) carregadas uma vez para a prévia
+    const imagens = {};
+    function imagem(src) {
+      if (!imagens[src]) {
+        const im = new Image();
+        im.onload = () => atualizarPrevia();
+        im.src = src;
+        imagens[src] = im;
+      }
+      return imagens[src];
     }
 
     // ---------- Desenho na prévia (canvas) ----------
@@ -575,6 +790,9 @@
           ctx.textAlign = c.align || "left";
           ctx.textBaseline = "alphabetic";
           ctx.fillText(c.s, c.x * px, c.y * px);
+        } else if (c.t === "img") {
+          const im = imagem(c.src);
+          if (im.complete && im.naturalWidth) ctx.drawImage(im, c.x * px, c.y * px, c.w * px, c.h * px);
         }
       });
     }
@@ -595,6 +813,8 @@
           doc.setFontSize(c.pt);
           doc.setTextColor(...hexParaRgb(c.cor));
           doc.text(c.s, c.x, c.y, { align: c.align || "left" });
+        } else if (c.t === "img") {
+          doc.addImage(c.src, "PNG", c.x, c.y, c.w, c.h);
         }
       });
     }
@@ -701,7 +921,16 @@
       try {
         const salvo = JSON.parse(localStorage.getItem(CHAVE_CONFIG) || "null");
         if (!salvo) return;
-        if (salvo.nome !== undefined) $("nome").value = salvo.nome;
+        if (salvo.idioma && TEXTOS[salvo.idioma]) idioma = salvo.idioma;
+        const t = TEXTOS[idioma];
+        if (Array.isArray(salvo.textos)) {
+          textos = salvo.textos.filter((b) => b && (ESTILO_TEXTO[b.tipo] || b.tipo === "assinatura"));
+        } else {
+          // Configuração de versões anteriores: aproveita o nome e a frase escolhida
+          textos = textosPadrao(t);
+          if (typeof salvo.nome === "string") textos[1].valor = salvo.nome;
+          if (Number.isInteger(salvo.frase) && t.frases[salvo.frase]) textos[2].valor = t.frases[salvo.frase];
+        }
         if (salvo.nascimento) $("nascimento").value = salvo.nascimento;
         if (salvo.anos) $("expectativa").value = salvo.anos;
         if (salvo.corVividas) $("corVividas").value = salvo.corVividas;
@@ -710,11 +939,7 @@
         if (salvo.atual !== undefined) $("atual").checked = salvo.atual;
         if (salvo.preencher !== undefined) $("preencher").checked = salvo.preencher;
         if (salvo.rotulos !== undefined) $("rotulos").checked = salvo.rotulos;
-        if (salvo.frase !== undefined) $("frase").value = salvo.frase;
-        if (salvo.idioma && TEXTOS[salvo.idioma]) {
-          idioma = salvo.idioma;
-          $("idioma").value = idioma;
-        }
+        $("idioma").value = idioma;
       } catch (e) { /* configuração inválida: usa os padrões */ }
     }
 
@@ -743,7 +968,6 @@
       $("sec-dados").textContent = t.secDados;
       $("sec-aparencia").textContent = t.secAparencia;
       $("sec-opcoes").textContent = t.secOpcoes;
-      $("lbl-nome").textContent = t.nome;
       $("lbl-nascimento").textContent = t.nascimento;
       $("lbl-expectativa").textContent = t.expectativa;
       $("lbl-corVividas").textContent = t.corVividas;
@@ -752,22 +976,443 @@
       $("lbl-atual").textContent = t.destacarAtual;
       $("lbl-legenda").textContent = t.legenda;
       $("lbl-rotulos").textContent = t.rotulos;
-      $("lbl-frase").textContent = t.frase;
+      $("sec-textos").textContent = t.secTextos;
+      $("add-texto").textContent = t.addTexto;
+      $("dlg-titulo").textContent = t.dlgTitulo;
+      $("dlg-dica").textContent = t.dlgDica;
+      $("pad-limpar").textContent = t.limpar;
+      $("pad-cancelar").textContent = t.cancelar;
+      $("pad-salvar").textContent = t.salvar;
+      $("pad-importar").textContent = t.importar;
+      $("pad-foto").textContent = t.foto;
+      $("camera-voltar").textContent = t.voltar;
+      $("camera-capturar").textContent = t.capturar;
+      $("lbl-sens").textContent = t.sensibilidade;
+      $("lbl-preta").textContent = t.tintaPreta;
       $("lbl-idioma").textContent = t.idioma;
       $("botao").textContent = t.botao;
       $("info").textContent = t.info;
 
-      // Lista de frases no idioma atual, mantendo a escolha
-      const selFrase = $("frase");
-      const escolhida = Number(selFrase.value) || 0;
-      selFrase.innerHTML = "";
-      t.frases.forEach((f, i) => {
+      // Sugestões para o campo da frase
+      $("sugestoes-frase").innerHTML = "";
+      t.frases.forEach((f) => {
         const opt = document.createElement("option");
-        opt.value = i;
-        opt.textContent = f;
-        selFrase.appendChild(opt);
+        opt.value = f;
+        $("sugestoes-frase").appendChild(opt);
       });
-      selFrase.value = escolhida;
+      renderTextos();
+    }
+
+    // Monta a lista de textos do PDF (cada item: ligar, conteúdo, posição e tamanho)
+    function renderTextos() {
+      const t = TEXTOS[idioma];
+      const lista = $("lista-textos");
+      lista.innerHTML = "";
+      textos.forEach((b, i) => {
+        const item = document.createElement("div");
+        item.className = "item-texto";
+
+        const topo = document.createElement("div");
+        topo.className = "item-topo";
+        const lab = document.createElement("label");
+        lab.className = "check";
+        const chk = document.createElement("input");
+        chk.type = "checkbox";
+        chk.checked = b.ativo;
+        const nomeTipo = document.createElement("span");
+        nomeTipo.textContent = t.tiposTexto[b.tipo] || t.tiposTexto.livre;
+        lab.append(chk, nomeTipo);
+        topo.append(lab);
+        if (b.tipo === "livre") {
+          const rm = document.createElement("button");
+          rm.type = "button";
+          rm.className = "btn-link";
+          rm.textContent = t.remover;
+          rm.addEventListener("click", () => { textos.splice(i, 1); renderTextos(); mudouTextos(); });
+          topo.append(rm);
+        }
+
+        const campos = document.createElement("div");
+        campos.className = "item-campos";
+        campos.hidden = !b.ativo;
+        chk.addEventListener("change", () => { b.ativo = chk.checked; campos.hidden = !b.ativo; mudouTextos(); });
+
+        if (b.tipo === "assinatura") {
+          const bt = document.createElement("button");
+          bt.type = "button";
+          bt.className = "btn-sec";
+          bt.textContent = b.valor ? t.refazerAssinatura : t.desenharAssinatura;
+          bt.addEventListener("click", () => abrirPad(b));
+          campos.append(bt);
+          if (b.valor) {
+            const im = document.createElement("img");
+            im.className = "mini-assinatura";
+            im.src = b.valor;
+            im.alt = t.tiposTexto.assinatura;
+            campos.append(im);
+          }
+        } else {
+          const inp = document.createElement("input");
+          inp.type = "text";
+          inp.maxLength = 80;
+          inp.value = b.valor;
+          inp.placeholder = t.placeholders[b.tipo] || "";
+          inp.autocomplete = "off";
+          inp.setAttribute("aria-label", nomeTipo.textContent);
+          if (b.tipo === "frase") inp.setAttribute("list", "sugestoes-frase");
+          inp.addEventListener("input", () => { b.valor = inp.value; mudouTextos(); });
+          campos.append(inp);
+        }
+
+        const selPos = document.createElement("select");
+        selPos.setAttribute("aria-label", t.posicao);
+        POSICOES.forEach((p) => selPos.add(new Option(t.posicoes[p], p)));
+        selPos.value = b.pos;
+        selPos.addEventListener("change", () => { b.pos = selPos.value; mudouTextos(); });
+
+        const selTam = document.createElement("select");
+        selTam.setAttribute("aria-label", t.tamanho);
+        Object.keys(TAMANHOS).forEach((k) => selTam.add(new Option(t.tamanhos[k], k)));
+        selTam.value = b.tam;
+        selTam.addEventListener("change", () => { b.tam = selTam.value; mudouTextos(); });
+
+        campos.append(selPos, selTam);
+        item.append(topo, campos);
+        lista.append(item);
+      });
+    }
+
+    function mudouTextos() { salvarConfig(); atualizarPrevia(); }
+
+    // ---------- Assinatura desenhada ----------
+    let assinaturaAlvo = null;
+    let tracou = false;
+
+    function abrirPad(bloco) {
+      assinaturaAlvo = bloco;
+      $("dlg-assinatura").showModal();
+      const pad = $("pad");
+      const dpr = window.devicePixelRatio || 1;
+      pad.width = Math.round(pad.clientWidth * dpr);
+      pad.height = Math.round(pad.clientHeight * dpr);
+      const ctx = pad.getContext("2d");
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = 2.6 * dpr;
+      ctx.strokeStyle = "#1a1a1a";
+      ctx.fillStyle = "#1a1a1a";
+      tracou = false;
+      fotoOriginal = null;
+      $("pad-ajuste").hidden = true;
+      $("dlg-dica").textContent = TEXTOS[idioma].dlgDica;
+    }
+
+    (function prepararPad() {
+      const pad = $("pad");
+      const ctx = pad.getContext("2d");
+      let desenhando = false, ultimo = null;
+      const ponto = (e) => {
+        const r = pad.getBoundingClientRect();
+        return { x: (e.clientX - r.left) * pad.width / r.width, y: (e.clientY - r.top) * pad.height / r.height };
+      };
+      pad.addEventListener("pointerdown", (e) => {
+        desenhando = true;
+        pad.setPointerCapture(e.pointerId);
+        ultimo = ponto(e);
+        ctx.beginPath();
+        ctx.arc(ultimo.x, ultimo.y, ctx.lineWidth / 2, 0, Math.PI * 2);
+        ctx.fill();
+        tracou = true;
+      });
+      pad.addEventListener("pointermove", (e) => {
+        if (!desenhando) return;
+        const p = ponto(e);
+        ctx.beginPath();
+        ctx.moveTo(ultimo.x, ultimo.y);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+        ultimo = p;
+      });
+      const parar = () => { desenhando = false; };
+      pad.addEventListener("pointerup", parar);
+      pad.addEventListener("pointercancel", parar);
+
+      $("pad-limpar").addEventListener("click", () => {
+        ctx.clearRect(0, 0, pad.width, pad.height);
+        tracou = false;
+        fotoOriginal = null;
+        $("pad-ajuste").hidden = true;
+        $("dlg-dica").textContent = TEXTOS[idioma].dlgDica;
+      });
+
+      // Importar imagem ou tirar foto.
+      // Celular/tablet: "Tirar foto" abre a câmera do aparelho (input com capture).
+      // Computador: esse input só abriria a escolha de arquivo, então a webcam abre aqui mesmo.
+      $("pad-importar").addEventListener("click", () => $("arq-importar").click());
+      $("pad-foto").addEventListener("click", () => {
+        const toque = window.matchMedia("(pointer: coarse)").matches;
+        const temWebcam = navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
+        if (toque || !temWebcam) $("arq-foto").click();
+        else abrirCamera();
+      });
+      ["arq-importar", "arq-foto"].forEach((id) => {
+        $(id).addEventListener("change", (e) => {
+          const arq = e.target.files && e.target.files[0];
+          e.target.value = "";
+          if (!arq) return;
+          const url = URL.createObjectURL(arq);
+          const im = new Image();
+          im.onload = () => {
+            URL.revokeObjectURL(url);
+            usarImagem(im);
+          };
+          im.onerror = () => {
+            URL.revokeObjectURL(url);
+            $("dlg-dica").textContent = TEXTOS[idioma].erroImagem;
+          };
+          im.src = url;
+        });
+      });
+      $("pad-sens").addEventListener("input", mostrarFotoNoPad);
+      $("pad-preta").addEventListener("change", mostrarFotoNoPad);
+
+      function usarImagem(img) {
+        fotoOriginal = img;
+        $("pad-ajuste").hidden = false;
+        $("dlg-dica").textContent = TEXTOS[idioma].dlgDicaImportada;
+        mostrarFotoNoPad();
+      }
+
+      // ---------- Webcam (computador) ----------
+      let fluxoCamera = null;
+      let pedidoCamera = 0; // invalida pedidos antigos se a pessoa voltar ou fechar antes da câmera abrir
+
+      function modoCamera(ligado) {
+        $("camera").hidden = !ligado;
+        $("camera-botoes").hidden = !ligado;
+        pad.hidden = ligado;
+        $("pad-botoes").hidden = ligado;
+        document.querySelector(".dlg-fontes").hidden = ligado;
+        $("pad-ajuste").hidden = ligado || !fotoOriginal;
+      }
+
+      function pararCamera() {
+        pedidoCamera++;
+        if (fluxoCamera) fluxoCamera.getTracks().forEach((faixa) => faixa.stop());
+        fluxoCamera = null;
+        $("camera-video").srcObject = null;
+      }
+
+      async function abrirCamera() {
+        const meu = ++pedidoCamera;
+        const video = $("camera-video");
+        $("camera-capturar").disabled = true;
+        modoCamera(true);
+        $("dlg-dica").textContent = TEXTOS[idioma].cameraDica;
+        try {
+          const fluxo = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 1920 }, height: { ideal: 1080 } },
+            audio: false
+          });
+          if (meu !== pedidoCamera) { fluxo.getTracks().forEach((faixa) => faixa.stop()); return; }
+          fluxoCamera = fluxo;
+          video.srcObject = fluxo;
+          await video.play();
+          if (meu === pedidoCamera) $("camera-capturar").disabled = false;
+        } catch (e) {
+          if (meu !== pedidoCamera) return;
+          pararCamera();
+          modoCamera(false);
+          $("dlg-dica").textContent = TEXTOS[idioma].erroCamera;
+        }
+      }
+
+      $("camera-capturar").addEventListener("click", () => {
+        const video = $("camera-video");
+        const vw = video.videoWidth, vh = video.videoHeight;
+        if (!vw || !vh) return;
+        // Usa só a área do retângulo-guia (deixa de fora mãos e o fundo da sala)
+        const rv = video.getBoundingClientRect(), rg = $("camera-guia").getBoundingClientRect();
+        const sx = Math.max(0, (rg.left - rv.left) / rv.width * vw);
+        const sy = Math.max(0, (rg.top - rv.top) / rv.height * vh);
+        const sw = Math.min(vw - sx, rg.width / rv.width * vw);
+        const sh = Math.min(vh - sy, rg.height / rv.height * vh);
+        const foto = document.createElement("canvas");
+        foto.width = Math.max(1, Math.round(sw));
+        foto.height = Math.max(1, Math.round(sh));
+        foto.getContext("2d").drawImage(video, sx, sy, sw, sh, 0, 0, foto.width, foto.height);
+        pararCamera();
+        modoCamera(false);
+        usarImagem(foto);
+      });
+
+      $("camera-voltar").addEventListener("click", () => {
+        pararCamera();
+        modoCamera(false);
+        $("dlg-dica").textContent = fotoOriginal ? TEXTOS[idioma].dlgDicaImportada : TEXTOS[idioma].dlgDica;
+      });
+
+      // Fechar a janela (inclusive com Esc) sempre desliga a webcam
+      $("dlg-assinatura").addEventListener("close", () => { pararCamera(); modoCamera(false); });
+
+      // Desenha a assinatura importada (já sem fundo) centralizada no espaço de assinar
+      function mostrarFotoNoPad() {
+        if (!fotoOriginal) return;
+        const limpa = removerFundo(fotoOriginal, Number($("pad-sens").value), $("pad-preta").checked);
+        ctx.clearRect(0, 0, pad.width, pad.height);
+        const m = 12 * (window.devicePixelRatio || 1);
+        const esc = Math.min((pad.width - 2 * m) / limpa.width, (pad.height - 2 * m) / limpa.height);
+        const w = limpa.width * esc, h = limpa.height * esc;
+        ctx.drawImage(limpa, (pad.width - w) / 2, (pad.height - h) / 2, w, h);
+        tracou = true;
+      }
+      $("pad-cancelar").addEventListener("click", () => $("dlg-assinatura").close());
+      $("pad-salvar").addEventListener("click", () => {
+        const recorte = tracou ? recortarAssinatura(pad) : null;
+        if (assinaturaAlvo) {
+          assinaturaAlvo.valor = recorte ? recorte.src : "";
+          assinaturaAlvo.proporcao = recorte ? recorte.proporcao : 3;
+          if (recorte) assinaturaAlvo.ativo = true;
+        }
+        $("dlg-assinatura").close();
+        renderTextos();
+        mudouTextos();
+      });
+    })();
+
+    // Remove o fundo de uma foto ou imagem de assinatura, mantendo a escrita real.
+    // 1) Estima o fundo de cada região (o papel, mesmo com sombra ou luz desigual);
+    // 2) o que for mais escuro que o fundo vira tinta, com transparência proporcional (bordas suaves);
+    // 3) apaga pontinhos soltos (poeira, textura do papel).
+    let fotoOriginal = null;
+    function removerFundo(img, sensibilidade, tintaPreta) {
+      const MAX = 1200;
+      const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height; // <img> ou <canvas> (webcam)
+      const esc = Math.min(1, MAX / Math.max(iw, ih));
+      const w = Math.max(1, Math.round(iw * esc));
+      const h = Math.max(1, Math.round(ih * esc));
+      const cv = document.createElement("canvas");
+      cv.width = w; cv.height = h;
+      const cx = cv.getContext("2d", { willReadFrequently: true });
+      cx.fillStyle = "#fff"; // imagens com transparência: fundo branco antes de analisar
+      cx.fillRect(0, 0, w, h);
+      cx.drawImage(img, 0, 0, w, h);
+      const im = cx.getImageData(0, 0, w, h);
+      const d = im.data;
+      const n = w * h;
+
+      // Luminosidade de cada pixel
+      const lum = new Float32Array(n);
+      for (let i = 0; i < n; i++) lum[i] = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
+
+      // Fundo: o pixel mais claro de cada bloco (o papel), suavizado entre blocos vizinhos
+      const B = Math.max(8, Math.round(Math.max(w, h) / 40));
+      const bw = Math.ceil(w / B), bh = Math.ceil(h / B);
+      const blocoMax = new Float32Array(bw * bh);
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const k = Math.floor(y / B) * bw + Math.floor(x / B);
+          if (lum[y * w + x] > blocoMax[k]) blocoMax[k] = lum[y * w + x];
+        }
+      }
+      const fundoBloco = new Float32Array(bw * bh);
+      for (let by = 0; by < bh; by++) {
+        for (let bx = 0; bx < bw; bx++) {
+          let soma = 0, cont = 0;
+          for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+              const yy = by + dy, xx = bx + dx;
+              if (yy >= 0 && yy < bh && xx >= 0 && xx < bw) { soma += blocoMax[yy * bw + xx]; cont++; }
+            }
+          }
+          fundoBloco[by * bw + bx] = soma / cont;
+        }
+      }
+      const fundoEm = (x, y) => {
+        // interpolação bilinear entre os centros dos blocos
+        const fx = Math.min(Math.max(x / B - 0.5, 0), bw - 1), fy = Math.min(Math.max(y / B - 0.5, 0), bh - 1);
+        const x0 = Math.floor(fx), y0 = Math.floor(fy);
+        const x1 = Math.min(x0 + 1, bw - 1), y1 = Math.min(y0 + 1, bh - 1);
+        const ax = fx - x0, ay = fy - y0;
+        const a = fundoBloco[y0 * bw + x0] * (1 - ax) + fundoBloco[y0 * bw + x1] * ax;
+        const b = fundoBloco[y1 * bw + x0] * (1 - ax) + fundoBloco[y1 * bw + x1] * ax;
+        return a * (1 - ay) + b * ay;
+      };
+
+      // Tinta: quanto mais escuro que o papel, mais opaco
+      const t0 = Math.max(0.02, 0.30 - sensibilidade * 0.035);
+      const t1 = t0 + 0.2;
+      const alfa = new Uint8ClampedArray(n);
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const i = y * w + x;
+          const f = Math.max(fundoEm(x, y), 1);
+          const escuro = (f - lum[i]) / f;
+          const a = Math.min(1, Math.max(0, (escuro - t0) / (t1 - t0)));
+          alfa[i] = Math.round(a * 255);
+        }
+      }
+
+      // Apaga manchas pequenas e soltas
+      const minimo = Math.max(12, Math.round(n * 0.00004));
+      const visto = new Uint8Array(n);
+      const fila = new Int32Array(n);
+      for (let s0 = 0; s0 < n; s0++) {
+        if (!alfa[s0] || visto[s0]) continue;
+        let ini = 0, fim = 0;
+        fila[fim++] = s0; visto[s0] = 1;
+        while (ini < fim) {
+          const i = fila[ini++];
+          const x = i % w, y = (i - x) / w;
+          if (x > 0 && alfa[i - 1] && !visto[i - 1]) { visto[i - 1] = 1; fila[fim++] = i - 1; }
+          if (x < w - 1 && alfa[i + 1] && !visto[i + 1]) { visto[i + 1] = 1; fila[fim++] = i + 1; }
+          if (y > 0 && alfa[i - w] && !visto[i - w]) { visto[i - w] = 1; fila[fim++] = i - w; }
+          if (y < h - 1 && alfa[i + w] && !visto[i + w]) { visto[i + w] = 1; fila[fim++] = i + w; }
+        }
+        if (fim < minimo) for (let k = 0; k < fim; k++) alfa[fila[k]] = 0;
+      }
+
+      // Cor: a da caneta (corrigindo o tom do papel e reforçando um pouco), ou preta
+      for (let i = 0; i < n; i++) {
+        const p = i * 4;
+        if (tintaPreta) {
+          d[p] = d[p + 1] = d[p + 2] = 26;
+        } else {
+          const f = Math.max(fundoEm(i % w, Math.floor(i / w)), 1);
+          for (let c = 0; c < 3; c++) d[p + c] = Math.min(255, Math.max(0, (d[p + c] * 255 / f) * 0.8));
+        }
+        d[p + 3] = alfa[i];
+      }
+      cx.putImageData(im, 0, 0);
+      return cv;
+    }
+
+    // Corta as sobras em branco e reduz a imagem (fica leve para salvar no navegador)
+    function recortarAssinatura(pad) {
+      const { width: w, height: h } = pad;
+      const dados = pad.getContext("2d").getImageData(0, 0, w, h).data;
+      let x0 = w, y0 = h, x1 = -1, y1 = -1;
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          if (dados[(y * w + x) * 4 + 3] > 10) {
+            if (x < x0) x0 = x;
+            if (x > x1) x1 = x;
+            if (y < y0) y0 = y;
+            if (y > y1) y1 = y;
+          }
+        }
+      }
+      if (x1 < 0) return null;
+      const m = 4;
+      x0 = Math.max(0, x0 - m); y0 = Math.max(0, y0 - m);
+      x1 = Math.min(w - 1, x1 + m); y1 = Math.min(h - 1, y1 + m);
+      const cw = x1 - x0 + 1, ch = y1 - y0 + 1;
+      const escala = Math.min(1, 240 / ch);
+      const saida = document.createElement("canvas");
+      saida.width = Math.round(cw * escala);
+      saida.height = Math.round(ch * escala);
+      saida.getContext("2d").drawImage(pad, x0, y0, cw, ch, 0, 0, saida.width, saida.height);
+      return { src: saida.toDataURL("image/png"), proporcao: cw / ch };
     }
 
     // No celular o texto de privacidade fica embaixo do botão;
@@ -806,6 +1451,14 @@
     });
 
     $("botao").addEventListener("click", baixarPDF);
+
+    $("add-texto").addEventListener("click", () => {
+      textos.push({ tipo: "livre", ativo: true, valor: "", pos: "rodape-esq", tam: "m" });
+      renderTextos();
+      mudouTextos();
+      const campos = $("lista-textos").querySelectorAll('input[type="text"]');
+      campos[campos.length - 1].focus();
+    });
 
     let redimensionando;
     window.addEventListener("resize", () => {
