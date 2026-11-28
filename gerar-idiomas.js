@@ -24,6 +24,10 @@ for (const [id, [lang, titulo, descricao]] of Object.entries(PAGINAS)) {
   h = trocar(h, /<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${titulo}">`);
   h = trocar(h, /<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${descricao}">`);
   h = trocar(h, /<meta property="og:url" content="[^"]*">/, `<meta property="og:url" content="${SITE}${id}/">`);
+  const ld = { "@context": "https://schema.org", "@type": "WebApplication", name: titulo, description: descricao, url: `${SITE}${id}/`, inLanguage: lang,
+    applicationCategory: "LifestyleApplication", operatingSystem: "Any", browserRequirements: "Requires JavaScript", isAccessibleForFree: true,
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, image: `${SITE}og-image.png` };
+  h = trocar(h, /<script type="application\/ld\+json">[^<]*<\/script>/, `<script type="application/ld+json">${JSON.stringify(ld)}</script>`);
   for (const arq of ["manifest.json", "icon.svg", "icon-180.png", "lib/jspdf.umd.min.js", "lib/goatcounter-count.js"]) {
     h = trocar(h, new RegExp(`(href|src)="${arq}"`), `${arq.endsWith(".js") ? "src" : "href"}="../${arq}"`);
   }
@@ -33,6 +37,6 @@ for (const [id, [lang, titulo, descricao]] of Object.entries(PAGINAS)) {
 }
 const urls = ["", ...Object.keys(PAGINAS).map((id) => id + "/")];
 fs.writeFileSync("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-  urls.map((u) => `  <url><loc>${SITE}${u}</loc></url>\n`).join("") + "</urlset>\n");
+  urls.map((u) => `  <url><loc>${SITE}${u}</loc><lastmod>${new Date().toISOString().slice(0, 10)}</lastmod></url>\n`).join("") + "</urlset>\n");
 fs.writeFileSync("robots.txt", `User-agent: *\nAllow: /\nSitemap: ${SITE}sitemap.xml\n`);
 console.log("ok");
