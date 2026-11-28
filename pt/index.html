@@ -351,6 +351,17 @@
     .dlg-botoes { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
     .dlg-botoes .btn-principal { width: auto; min-height: 44px; padding: 0 20px; font-size: 0.95rem; }
 
+    /* Primeiro acesso: passo a passo */
+    .dlg-guia { width: min(420px, calc(100vw - 24px)); padding: 22px 20px 12px; }
+    .guia-passo { margin: 0 0 6px; font-size: 0.8rem; color: var(--cinza); }
+    .guia-titulo { margin: 0 0 16px; font-size: 1.3rem; line-height: 1.3; }
+    .dlg-guia input[type="date"], .dlg-guia input[type="number"] { width: 100%; min-height: 50px; }
+    .dlg-guia .interruptor { margin-bottom: 14px; }
+    .dlg-guia .msg { margin: 0 0 10px; }
+    .guia-rodape { display: flex; justify-content: space-between; margin-top: 6px; }
+    .guia-rodape .btn-link { margin: 0 0 0 auto; width: auto; min-height: 40px; }
+    .guia-rodape #guia-voltar { margin: 0; }
+
     /* Como funciona e perguntas frequentes */
     .dlg-ajuda { max-height: min(640px, calc(var(--altura-app, 100vh) - 32px)); overflow-y: auto; line-height: 1.5; }
     h2.dlg-titulo { font-size: 1.05rem; }
@@ -739,6 +750,18 @@
     </div>
 </main>
 
+  <dialog class="dlg dlg-guia" id="dlg-guia" aria-labelledby="guia-titulo">
+    <p class="guia-passo" id="guia-passo"></p>
+    <h2 class="guia-titulo" id="guia-titulo"></h2>
+    <input type="date" id="guia-data" aria-labelledby="guia-titulo" autocomplete="off">
+    <input type="number" id="guia-anos" min="1" max="120" inputmode="numeric" aria-labelledby="guia-titulo" autocomplete="off" hidden>
+    <p class="dlg-dica" id="guia-dica"></p>
+    <label class="interruptor" id="guia-linha-pintar" hidden><input type="checkbox" role="switch" id="guia-pintar" checked><span class="trilho" aria-hidden="true"></span><span id="guia-lbl-pintar"></span></label>
+    <p class="msg erro" id="guia-erro" role="alert"></p>
+    <button type="button" class="btn-principal" id="guia-avancar"></button>
+    <div class="guia-rodape"><button type="button" class="btn-link" id="guia-voltar"></button><button type="button" class="btn-link" id="guia-pular"></button></div>
+  </dialog>
+
   <dialog class="dlg dlg-ajuda" id="dlg-ajuda" aria-labelledby="ajuda-titulo">
     <h2 class="dlg-titulo" id="ajuda-titulo"></h2>
     <ol id="ajuda-passos"></ol>
@@ -819,6 +842,16 @@
       fr: ["Comment ça marche", ["Indiquez votre date de naissance.", "Ajustez le calendrier et les textes à votre goût.", "Téléchargez le PDF, imprimez-le et coloriez une case chaque semaine."], [["Que signifie memento mori ?", "C’est une expression latine qui veut dire « souviens-toi que tu vas mourir ». Une invitation à bien employer son temps."], ["Pourquoi des semaines ?", "Toute une vie en semaines tient sur une seule page, et chaque semaine est un pas que l’on peut ressentir."], ["Mes données sont-elles envoyées quelque part ?", "Non. Le PDF est créé sur votre appareil et ce que vous saisissez y reste. Le site compte seulement les visites, sans cookies."], ["Sur quel papier imprimer ?", "A4 ou Lettre, chez vous ou chez un imprimeur. Pour garder les proportions, imprimez en taille réelle (100 %)."], ["Est-ce que cela marche hors ligne ?", "Après la première visite, le site s’ouvre en général même sans connexion."], ["Est-ce gratuit ?", "Oui, et sans inscription."]]],
       de: ["So funktioniert’s", ["Gib dein Geburtsdatum ein.", "Passe Kalender und Texte nach Wunsch an.", "Lade das PDF herunter, drucke es aus und male jede Woche ein Kästchen aus."], [["Was bedeutet Memento mori?", "Ein lateinischer Ausdruck für „Bedenke, dass du sterben wirst“. Eine Einladung, die eigene Zeit gut zu nutzen."], ["Warum Wochen?", "Ein ganzes Leben in Wochen passt auf eine einzige Seite, und jede Woche ist ein spürbarer Schritt."], ["Werden meine Daten irgendwohin gesendet?", "Nein. Das PDF entsteht auf deinem Gerät, und deine Eingaben bleiben dort. Die Seite zählt nur Besuche, ohne Cookies."], ["Auf welchem Papier kann ich drucken?", "A4 oder Letter, zu Hause oder in der Druckerei. Damit die Proportionen stimmen, in Originalgröße (100 %) drucken."], ["Geht das auch offline?", "Nach dem ersten Besuch öffnet sich die Seite in der Regel auch ohne Verbindung."], ["Ist es kostenlos?", "Ja, und ohne Anmeldung."]]],
       it: ["Come funziona", ["Inserisci la tua data di nascita.", "Regola il calendario e i testi come preferisci.", "Scarica il PDF, stampalo e colora una casella ogni settimana."], [["Che cosa significa memento mori?", "È un’espressione latina che vuol dire «ricordati che devi morire». Un invito a usare bene il proprio tempo."], ["Perché le settimane?", "Un’intera vita in settimane sta in un solo foglio, e ogni settimana è un passo che si può sentire."], ["I miei dati vengono inviati da qualche parte?", "No. Il PDF viene creato sul tuo dispositivo e ciò che scrivi resta lì. Il sito conta solo le visite, senza cookie."], ["Su che carta posso stampare?", "A4 o Letter, a casa o in copisteria. Per mantenere le proporzioni, stampa a grandezza reale (100%)."], ["Funziona senza internet?", "Dopo la prima visita, il sito di solito si apre anche senza connessione."], ["È gratis?", "Sì, e senza registrazione."]]]
+    };
+
+    // ---------- Primeiro acesso: passo a passo ----------
+    const GUIA = {
+      pt: ["Passo {n} de 2", "Quando você nasceu?", "A data fica só no seu aparelho.", "Até que idade vai o seu calendário?", "Cada ano são 52 semanas. Dá para mudar depois.", "Pintar as semanas que já vivi", "Pular", "Voltar", "Continuar", "Ver meu calendário"],
+      en: ["Step {n} of 2", "When were you born?", "The date stays on your device.", "Up to what age should your calendar go?", "Each year is 52 weeks. You can change it later.", "Fill in the weeks I have already lived", "Skip", "Back", "Continue", "See my calendar"],
+      es: ["Paso {n} de 2", "¿Cuándo naciste?", "La fecha se queda en tu dispositivo.", "¿Hasta qué edad llega tu calendario?", "Cada año son 52 semanas. Puedes cambiarlo después.", "Pintar las semanas que ya he vivido", "Omitir", "Atrás", "Continuar", "Ver mi calendario"],
+      fr: ["Étape {n} sur 2", "Quand êtes-vous né(e) ?", "La date reste sur votre appareil.", "Jusqu’à quel âge va votre calendrier ?", "Chaque année compte 52 semaines. Modifiable ensuite.", "Colorier les semaines déjà vécues", "Passer", "Retour", "Continuer", "Voir mon calendrier"],
+      de: ["Schritt {n} von 2", "Wann wurdest du geboren?", "Das Datum bleibt auf deinem Gerät.", "Bis zu welchem Alter soll dein Kalender gehen?", "Jedes Jahr hat 52 Wochen. Später änderbar.", "Bereits gelebte Wochen ausfüllen", "Überspringen", "Zurück", "Weiter", "Meinen Kalender ansehen"],
+      it: ["Passo {n} di 2", "Quando sei nato/a?", "La data resta sul tuo dispositivo.", "Fino a che età arriva il tuo calendario?", "Ogni anno ha 52 settimane. Puoi cambiarlo dopo.", "Colora le settimane già vissute", "Salta", "Indietro", "Continua", "Vedi il mio calendario"]
     };
 
     const TEXTOS = {
@@ -3385,7 +3418,62 @@
       redimensionando = setTimeout(() => { ajustarAltura(); zerarZoom(); atualizarPrevia(); }, 120);
     });
 
+    // ---------- Primeiro acesso: passo a passo ----------
+    // Só aparece para quem ainda não tem configuração salva neste navegador
+    let passoGuia = 1;
+    function mostrarPasso(n) {
+      passoGuia = n;
+      const [passo, t1, d1, t2, d2, pintar, pular, voltar, continuar, ver] = GUIA[idioma] || GUIA.en;
+      $("guia-passo").textContent = passo.replace("{n}", n);
+      $("guia-titulo").textContent = n === 1 ? t1 : t2;
+      $("guia-dica").textContent = n === 1 ? d1 : d2;
+      $("guia-data").hidden = n !== 1;
+      $("guia-anos").hidden = $("guia-linha-pintar").hidden = n !== 2;
+      $("guia-lbl-pintar").textContent = pintar;
+      $("guia-pular").textContent = pular;
+      $("guia-voltar").textContent = voltar;
+      $("guia-voltar").hidden = n === 1;
+      $("guia-avancar").textContent = n === 1 ? continuar : ver;
+      $("guia-erro").textContent = "";
+      (n === 1 ? $("guia-data") : $("guia-avancar")).focus();
+    }
+    function abrirGuia() {
+      $("guia-data").min = $("nascimento").min;
+      $("guia-data").max = $("nascimento").max;
+      $("guia-anos").value = $("expectativa").value;
+      $("dlg-guia").showModal();
+      mostrarPasso(1);
+    }
+    $("guia-avancar").addEventListener("click", () => {
+      const t = TEXTOS[idioma];
+      const op = { ...lerOpcoes(), preencher: true, nascimento: $("guia-data").value };
+      if (passoGuia === 1) {
+        const erro = validar({ ...op, anos: 90 }, t);
+        if (erro) $("guia-erro").textContent = erro;
+        else mostrarPasso(2);
+        return;
+      }
+      op.anos = Number($("guia-anos").value);
+      const erro = validar(op, t);
+      if (erro) { $("guia-erro").textContent = erro; return; }
+      $("nascimento").value = op.nascimento;
+      $("expectativa").value = op.anos;
+      $("preencher").checked = $("atual").checked = $("guia-pintar").checked;
+      $("dlg-guia").close();
+      salvarConfig();
+      trocarAba("previa");
+      atualizarPrevia();
+    });
+    $("guia-voltar").addEventListener("click", () => mostrarPasso(1));
+    $("guia-pular").addEventListener("click", () => $("dlg-guia").close());
+    $("dlg-guia").addEventListener("close", salvarConfig); // pulou ou concluiu: não aparece de novo
+    ["guia-data", "guia-anos"].forEach((id) => $(id).addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); $("guia-avancar").click(); }
+    }));
+
     // ---------- Inicialização ----------
+    let primeiroAcesso = false;
+    try { primeiroAcesso = !localStorage.getItem(CHAVE_CONFIG); } catch (e) { /* sem armazenamento: não insiste */ }
     // Calendário nativo do sistema, limitado a 1900 até hoje (o seletor já bloqueia o resto)
     (function limitarData() {
       const h = new Date();
@@ -3407,6 +3495,7 @@
     } catch (e) { /* ignora */ }
     trocarAba(abaInicial);
     atualizarPrevia();
+    if (primeiroAcesso) abrirGuia();
 
     // App instalado (Tela de Início): funciona sem internet depois da primeira visita
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
