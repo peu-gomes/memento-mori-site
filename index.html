@@ -1854,18 +1854,17 @@
         ? t.mesesCurtos.map((m, i) => ({ coluna: i * POSICOES_MES, n: POSICOES_MES, textos: [m, m[0]] }))
         : [];
 
-      // Laterais: o ano à esquerda e, à direita, a idade que se completa naquele ano
+      // Laterais: o ano à esquerda e, à direita, a idade que se completa naquele ano.
+      // Cada lado marca os seus próprios números redondos (anos 2005, 2010...; idades 0, 5, 10...)
       const esquerda = [], direita = [];
       if (op.rotulos) {
         const cada = op.divAnos === "5" ? 5 : 10;
         for (let l = 0; l < linhas; l++) {
           const ano = ano0 + l;
-          const redondo = ano % cada === 0;
+          const idade = ano - nasc.getFullYear();
           const primeiraLinha = l === 0 && cada - (ano % cada) >= 3; // o ano de nascimento, se não colar no próximo
-          if (redondo || primeiraLinha) {
-            esquerda.push({ linha: l, s: String(ano) });
-            direita.push({ linha: l, s: String(Math.max(0, ano - nasc.getFullYear())) });
-          }
+          if (ano % cada === 0 || primeiraLinha) esquerda.push({ linha: l, s: String(ano) });
+          if (idade >= 0 && idade % cada === 0) direita.push({ linha: l, s: String(idade) });
         }
       }
       return {
