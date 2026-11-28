@@ -7,16 +7,17 @@
        (GoatCounter: conta a página aberta, sem cookies e sem nada do que a pessoa digita). Sem formulários, sem plugins -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://peukz.goatcounter.com; media-src 'self' blob:; connect-src 'self' https://peukz.goatcounter.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
   <meta name="referrer" content="no-referrer">
-  <title>Memento Mori</title>
+  <title>Memento Mori Calendar: Your Life in Weeks (Free PDF)</title>
   <meta name="description" content="Sua vida em semanas, num calendário para imprimir em PDF. Your life in weeks, as a printable calendar.">
 
-  <!-- O mesmo site em cada idioma (para buscadores); sem ?lang, o idioma vem do navegador -->
-  <link rel="alternate" hreflang="pt" href="https://mementomoriweeks.com/?lang=pt">
-  <link rel="alternate" hreflang="en" href="https://mementomoriweeks.com/?lang=en">
-  <link rel="alternate" hreflang="es" href="https://mementomoriweeks.com/?lang=es">
-  <link rel="alternate" hreflang="fr" href="https://mementomoriweeks.com/?lang=fr">
-  <link rel="alternate" hreflang="de" href="https://mementomoriweeks.com/?lang=de">
-  <link rel="alternate" hreflang="it" href="https://mementomoriweeks.com/?lang=it">
+  <link rel="canonical" href="https://mementomoriweeks.com/">
+  <!-- O mesmo site em cada idioma (para buscadores). As pastas /pt/, /en/... são geradas por gerar-idiomas.js: rode-o ao mudar este arquivo -->
+  <link rel="alternate" hreflang="pt" href="https://mementomoriweeks.com/pt/">
+  <link rel="alternate" hreflang="en" href="https://mementomoriweeks.com/en/">
+  <link rel="alternate" hreflang="es" href="https://mementomoriweeks.com/es/">
+  <link rel="alternate" hreflang="fr" href="https://mementomoriweeks.com/fr/">
+  <link rel="alternate" hreflang="de" href="https://mementomoriweeks.com/de/">
+  <link rel="alternate" hreflang="it" href="https://mementomoriweeks.com/it/">
   <link rel="alternate" hreflang="x-default" href="https://mementomoriweeks.com/">
 
   <!-- Prévia quando o link é compartilhado (WhatsApp, redes sociais) -->
@@ -1536,10 +1537,17 @@
     const $ = (id) => document.getElementById(id);
 
     // ---------- Idioma e costumes de cada lugar ----------
-    // Idioma: o do link (?lang=es), senão o escolhido antes, senão o do navegador; se nenhum servir, inglês
+    // Páginas por idioma (/pt/, /en/...): trazem data-idioma, título e descrição próprios
+    const IDIOMA_PAGINA = document.documentElement.dataset.idioma || "";
+    const RAIZ = new URL(IDIOMA_PAGINA ? "../" : "./", location.href);
+    // Fixa os endereços antes de o endereço da página mudar com a troca de idioma
+    document.querySelectorAll('link[rel="manifest"], link[rel="icon"], link[rel="apple-touch-icon"]').forEach((l) => { l.href = l.href; });
+
+    // Idioma: o do link (?lang=es ou /es/), senão o escolhido antes, senão o do navegador; se nenhum servir, inglês
     function idiomaInicial() {
       const doLink = (new URLSearchParams(location.search).get("lang") || "").toLowerCase();
       if (TEXTOS[doLink]) return doLink;
+      if (TEXTOS[IDIOMA_PAGINA]) return IDIOMA_PAGINA;
       try {
         const salvo = JSON.parse(localStorage.getItem(CHAVE_CONFIG) || "null");
         if (salvo && TEXTOS[salvo.idioma]) return salvo.idioma;
@@ -2372,8 +2380,10 @@
     function aplicarTextos() {
       const t = TEXTOS[idioma];
       document.documentElement.lang = t.locale || idioma;
-      document.title = t.titulo;
-      document.querySelector('meta[name="description"]').setAttribute("content", t.descricao);
+      if (idioma !== IDIOMA_PAGINA) { // a página do próprio idioma mantém o título pensado para as buscas
+        document.title = t.titulo;
+        document.querySelector('meta[name="description"]').setAttribute("content", t.descricao);
+      }
       $("titulo").textContent = t.pdfTitulo;
       $("titulo-painel").textContent = t.pdfTitulo;
       document.querySelector(".config").setAttribute("aria-label", t.ariaConfig);
@@ -3216,11 +3226,9 @@
       aplicarTextos();
       salvarConfig();
       atualizarPrevia();
-      // O endereço passa a levar o idioma (?lang=xx): quem receber o link já abre no mesmo idioma
+      // O endereço passa a ser o do idioma (/xx/): quem receber o link já abre no mesmo idioma
       try {
-        const endereco = new URL(location.href);
-        endereco.searchParams.set("lang", idioma);
-        history.replaceState(null, "", endereco);
+        history.replaceState(null, "", new URL(idioma + "/", RAIZ));
       } catch (erro) { /* endereço que não aceita mudança: segue sem */ }
     });
 

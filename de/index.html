@@ -1,0 +1,3352 @@
+<!DOCTYPE html>
+<html lang="de" data-idioma="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <!-- Segurança: a página só carrega arquivos deste site. A única conexão externa é o contador de visitas
+       (GoatCounter: conta a página aberta, sem cookies e sem nada do que a pessoa digita). Sem formulários, sem plugins -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://peukz.goatcounter.com; media-src 'self' blob:; connect-src 'self' https://peukz.goatcounter.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Memento-Mori-Kalender: dein Leben in Wochen (PDF gratis)</title>
+  <meta name="description" content="Erstelle deinen Memento-Mori-Kalender und sieh dein Leben in Wochen. Kostenloses PDF zum Ausdrucken, ohne Anmeldung.">
+
+  <link rel="canonical" href="https://mementomoriweeks.com/de/">
+  <!-- O mesmo site em cada idioma (para buscadores). As pastas /pt/, /en/... são geradas por gerar-idiomas.js: rode-o ao mudar este arquivo -->
+  <link rel="alternate" hreflang="pt" href="https://mementomoriweeks.com/pt/">
+  <link rel="alternate" hreflang="en" href="https://mementomoriweeks.com/en/">
+  <link rel="alternate" hreflang="es" href="https://mementomoriweeks.com/es/">
+  <link rel="alternate" hreflang="fr" href="https://mementomoriweeks.com/fr/">
+  <link rel="alternate" hreflang="de" href="https://mementomoriweeks.com/de/">
+  <link rel="alternate" hreflang="it" href="https://mementomoriweeks.com/it/">
+  <link rel="alternate" hreflang="x-default" href="https://mementomoriweeks.com/">
+
+  <!-- Prévia quando o link é compartilhado (WhatsApp, redes sociais) -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Memento Mori">
+  <meta property="og:title" content="Memento-Mori-Kalender: dein Leben in Wochen (PDF gratis)">
+  <meta property="og:description" content="Erstelle deinen Memento-Mori-Kalender und sieh dein Leben in Wochen. Kostenloses PDF zum Ausdrucken, ohne Anmeldung.">
+  <meta property="og:url" content="https://mementomoriweeks.com/de/">
+  <meta property="og:image" content="https://mementomoriweeks.com/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Memento Mori: calendário da vida em semanas">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="manifest" href="../manifest.json">
+  <link rel="icon" href="../icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../icon-180.png">
+  <meta name="theme-color" content="#f4f1ea">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Memento Mori">
+
+  <style>
+    :root {
+      --fundo: #f4f1ea;
+      --texto: #222;
+      --cinza: #666;
+      --borda: #cfc9bd;
+      --linha: #ebe6dc;
+      --suave: #ebe6dc;
+      --painel: #fff;
+      --foco: #7aa7ff;
+      --erro: #b00020;
+    }
+
+    * { box-sizing: border-box; }
+    /* Como app: a página não amplia (pinça nem toque duplo); só a prévia do PDF tem zoom próprio */
+    html { -webkit-tap-highlight-color: transparent; touch-action: pan-x pan-y; }
+    [hidden] { display: none !important; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--fundo);
+      color: var(--texto);
+      -webkit-text-size-adjust: 100%;
+      min-height: 100vh;
+    }
+    button { font-family: inherit; }
+    /* Toque: sem atraso e sem zoom com toque duplo nos controles */
+    button, input, select, label { touch-action: manipulation; }
+
+    /* ---------- Cabeçalho (celular) ---------- */
+    /* Título e abas ficam fixos no topo enquanto a página rola */
+    .fixo-celular {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--fundo);
+      padding: env(safe-area-inset-top) 0 8px;
+    }
+    .topo { padding: 12px 16px 0; }
+    .topo h1 { font-size: 1.1rem; margin: 0; }
+    .topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .titulo-painel { display: none; margin: 0; font-size: 1.15rem; }
+    .cab-painel { display: none; }
+
+    /* Seletor de idioma (com o globo) */
+    .escolha-idioma { position: relative; display: flex; align-items: center; margin: 0; flex-shrink: 0; font-weight: 400; }
+    .escolha-idioma .globo { position: absolute; left: 10px; width: 16px; height: 16px; color: #555; pointer-events: none; }
+    .escolha-idioma select {
+      width: auto; min-height: 38px; padding: 6px 32px 6px 32px;
+      border-radius: 10px; font-size: 16px; background-color: #fff;
+    }
+
+    /* ---------- Abas (só celular) ---------- */
+    .abas {
+      display: flex;
+      margin: 10px 16px 0;
+      background: #e7e2d7;
+      border-radius: 12px;
+      padding: 4px;
+    }
+    .abas button {
+      flex: 1;
+      min-height: 44px;
+      border: 0;
+      background: transparent;
+      border-radius: 9px;
+      font-size: 1rem;
+      color: var(--texto);
+      cursor: pointer;
+    }
+    .abas button[aria-selected="true"] {
+      background: #fff;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ---------- Puxar para atualizar ---------- */
+    .puxar {
+      position: fixed; left: 50%; top: env(safe-area-inset-top); z-index: 50;
+      width: 40px; height: 40px; margin-left: -20px; border-radius: 50%;
+      background: #fff; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; line-height: 1; color: #999;
+      opacity: 0; transform: translateY(-50px); pointer-events: none;
+    }
+    .puxar.pronto { color: #222; }
+    .puxar.girando span { display: block; animation: girar 0.8s linear infinite; }
+    @keyframes girar { to { transform: rotate(360deg); } }
+
+    /* ---------- Estrutura ---------- */
+    .app { padding: 4px 16px 0; max-width: 1100px; margin: 0 auto; }
+    .app[data-aba="config"] .previa { display: none; }
+    .app[data-aba="previa"] .config { display: none; }
+
+    .painel {
+      background: var(--painel);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+      margin-bottom: 16px;
+    }
+
+    fieldset { border: 0; padding: 0; margin: 0 0 24px; min-width: 0; }
+    legend { font-weight: 700; font-size: 1rem; padding: 0; margin-bottom: 4px; }
+
+    label { display: block; font-size: 0.9rem; font-weight: 600; margin: 14px 0 6px; }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    select {
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 12px;
+      border: 1px solid var(--borda);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 16px; /* 16px evita zoom automático no iPhone */
+      background: #fff;
+      color: var(--texto);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    /* iPhone: a data fica alinhada à esquerda, como os outros campos */
+    input[type="date"] { display: block; text-align: left; }
+    input[type="date"]::-webkit-date-and-time-value { text-align: left; }
+    input:disabled, select:disabled { opacity: 0.45; }
+    select {
+      background-image: linear-gradient(45deg, transparent 50%, #666 50%),
+                        linear-gradient(135deg, #666 50%, transparent 50%);
+      background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+      padding-right: 36px;
+    }
+    input[type="color"] {
+      flex-shrink: 0;
+      width: 48px; height: 36px; padding: 3px;
+      border: 1px solid var(--borda); border-radius: 9px;
+      background: #fff; cursor: pointer;
+    }
+    input[type="color"]:disabled { cursor: default; }
+
+    :focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+
+    /* ---------- Interruptores (liga/desliga) ---------- */
+    .opcao {
+      display: flex; align-items: center; gap: 12px;
+      min-height: 52px;
+      border-top: 1px solid var(--linha);
+    }
+    legend + .opcao, .dica-secao + .opcao { border-top: 0; }
+    .opcao-nome { flex: 1; font-size: 0.95rem; }
+    /* Em tela estreita, a escolha desce para baixo do nome, alinhada à direita */
+    .opcao { flex-wrap: wrap; row-gap: 6px; padding: 4px 0; }
+    .opcao > .seg { margin-left: auto; }
+    .dica-secao { margin: 0 0 6px; font-size: 0.85rem; color: var(--cinza); }
+    /* Escolha principal em cartões (título + explicação) */
+    .rotulo-cartoes { margin: 10px 0 8px; font-size: 0.95rem; }
+    .cartoes-escolha { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .cartao-escolha { position: relative; display: flex; margin: 0; font-weight: 400; cursor: pointer; }
+    .cartao-escolha input { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+    .cartao-corpo { flex: 1; display: block; padding: 10px 12px; border: 1px solid var(--borda); border-radius: 12px; background: #fff; }
+    .cartao-corpo strong { display: block; font-size: 0.9rem; }
+    .cartao-corpo small { display: block; margin-top: 3px; font-size: 0.78rem; line-height: 1.3; color: var(--cinza); }
+    .cartao-escolha input:checked + .cartao-corpo { border-color: #222; box-shadow: inset 0 0 0 1px #222; background: #faf8f4; }
+    .cartao-escolha input:focus-visible + .cartao-corpo { outline: 3px solid var(--foco); outline-offset: 2px; }
+    .interruptor {
+      position: relative;
+      flex: 1; min-width: 0;
+      display: flex; align-items: center; gap: 12px;
+      min-height: 44px; margin: 0;
+      font-size: 0.95rem; font-weight: 400;
+      cursor: pointer;
+    }
+    .interruptor input {
+      position: absolute; left: 0; top: 50%; z-index: 1;
+      width: 44px; height: 26px; margin: -13px 0 0;
+      opacity: 0; cursor: pointer;
+    }
+    .trilho {
+      position: relative; flex-shrink: 0;
+      width: 44px; height: 26px; border-radius: 13px;
+      background: #cfc9bd;
+      transition: background 0.15s;
+    }
+    .trilho::after {
+      content: ""; position: absolute; top: 3px; left: 3px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      transition: transform 0.15s;
+    }
+    .interruptor input:checked + .trilho { background: #222; }
+    .interruptor input:checked + .trilho::after { transform: translateX(18px); }
+    .interruptor input:focus-visible + .trilho { outline: 3px solid var(--foco); outline-offset: 2px; }
+
+    /* ---------- Botões segmentados (escolha uma opção) ---------- */
+    .seg {
+      display: inline-flex; flex-shrink: 0; gap: 2px;
+      padding: 3px; border-radius: 10px;
+      background: var(--suave);
+    }
+    .seg label { position: relative; display: flex; margin: 0; font-weight: 400; cursor: pointer; }
+    .seg input {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      margin: 0; opacity: 0; cursor: pointer;
+    }
+    .seg label > span {
+      display: flex; align-items: center; justify-content: center;
+      min-width: 32px; height: 32px; padding: 0 6px;
+      border-radius: 7px; color: #5a554c; line-height: 1;
+    }
+    .seg input:checked + span {
+      background: #fff; color: #111; font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+    }
+    .seg input:focus-visible + span { outline: 3px solid var(--foco); outline-offset: 1px; }
+    .seg svg { display: block; width: 16px; height: 16px; }
+    .seg b { font-weight: inherit; }
+    .seg-texto label > span { padding: 0 10px; font-size: 0.82rem; }
+    .letra-p { font-size: 11px; }
+    .letra-m { font-size: 14px; }
+    .letra-g { font-size: 18px; }
+
+    /* ---------- Botões ---------- */
+    .btn-sec {
+      min-height: 44px; padding: 0 14px;
+      border: 1px solid var(--borda); border-radius: 10px;
+      background: #fff; color: var(--texto); font-size: 0.95rem; cursor: pointer;
+    }
+    .btn-link {
+      display: block; margin: 0 auto;
+      min-height: 40px; padding: 8px;
+      border: 0; background: none;
+      color: var(--cinza); font-size: 0.85rem; text-decoration: underline;
+      cursor: pointer;
+    }
+    .btn-icone {
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; padding: 0;
+      border: 0; border-radius: 8px;
+      background: none; color: #555; cursor: pointer;
+    }
+    .btn-icone svg { width: 18px; height: 18px; }
+    .btn-icone:disabled { opacity: 0.25; cursor: default; }
+    .btn-icone.perigo { color: var(--erro); }
+
+    /* ---------- Textos do PDF: separados por área da página ---------- */
+    .zona-titulo {
+      display: flex; align-items: center; gap: 10px;
+      margin: 12px 0 8px;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em;
+      text-transform: uppercase; color: #8a8377;
+    }
+    .zona-titulo::after { content: ""; flex: 1; height: 1px; background: var(--linha); }
+    .lista-textos { display: flex; flex-direction: column; gap: 8px; }
+    .lista-textos:empty { display: none; }
+    .item-texto {
+      border: 1px solid var(--borda); border-radius: 12px;
+      padding: 4px 6px 10px 12px;
+      background: #fff;
+    }
+    .item-texto.desligado { padding-bottom: 4px; background: #faf8f4; }
+    .item-texto.desligado .item-nome { color: var(--cinza); font-weight: 400; }
+    .item-texto.realce { animation: realce 1.2s ease-out; }
+    @keyframes realce {
+      from { box-shadow: 0 0 0 3px #e9b949; }
+      to { box-shadow: 0 0 0 3px rgba(233, 185, 73, 0); }
+    }
+    .item-topo { display: flex; align-items: center; gap: 2px; }
+    .item-nome { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; font-size: 0.92rem; }
+    .item-campos { display: flex; flex-direction: column; gap: 8px; padding-right: 6px; }
+    .item-campos input[type="text"] { min-height: 44px; padding-top: 8px; padding-bottom: 8px; }
+    .aviso-campo { margin: -2px 0 0; font-size: 0.8rem; color: #8a5a00; }
+    .item-controles { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; }
+    .assinatura-linha { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .assinatura-linha .btn-sec { flex-shrink: 0; }
+    .mini-assinatura { display: block; min-width: 0; max-width: 100%; max-height: 44px; object-fit: contain; }
+    .btn-add {
+      display: block; width: 100%; min-height: 44px; margin-top: 8px;
+      border: 1px dashed #bdb5a6; border-radius: 12px;
+      background: none; color: #555; font-size: 0.9rem; cursor: pointer;
+    }
+
+    /* ---------- Janela da assinatura ---------- */
+    .dlg {
+      border: 0; border-radius: 14px; padding: 18px;
+      width: min(560px, calc(100vw - 24px));
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+    }
+    .dlg::backdrop { background: rgba(0, 0, 0, 0.45); }
+    .dlg-titulo { margin: 0 0 10px; font-weight: 700; }
+    #pad {
+      display: block; width: 100%; height: 200px;
+      border: 1px dashed var(--borda); border-radius: 10px;
+      background: #fff; touch-action: none; cursor: crosshair;
+    }
+    .dlg-fontes { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    .dlg-fontes .btn-sec { flex: 1; }
+    .dlg-ajuste { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 4px 12px; margin-top: 10px; }
+    .dlg-ajuste label { margin: 0; font-weight: 600; font-size: 0.9rem; }
+    .dlg-ajuste .interruptor { grid-column: 1 / -1; font-weight: 400; }
+    .dlg-ajuste input[type="range"] { width: 100%; accent-color: #222; }
+    .dlg-dica { font-size: 0.85rem; color: var(--cinza); margin: 8px 0 12px; }
+    .dlg-botoes { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+    .dlg-botoes .btn-principal { width: auto; min-height: 44px; padding: 0 20px; font-size: 0.95rem; }
+
+    /* Webcam do computador para fotografar a assinatura */
+    .camera-quadro { position: relative; border-radius: 10px; overflow: hidden; background: #111; }
+    #camera-video { display: block; width: 100%; height: auto; }
+    .camera-guia {
+      position: absolute; left: 8%; right: 8%; top: 22%; bottom: 22%;
+      border: 2px dashed rgba(255, 255, 255, 0.95); border-radius: 8px;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+      pointer-events: none;
+    }
+
+    /* ---------- Prévia ---------- */
+    .previa-moldura {
+      background: #e7e2d7;
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .previa-moldura { position: relative; overflow: hidden; touch-action: none; }
+    .previa-moldura.ampliada { cursor: grab; }
+    .previa-moldura.arrastando { cursor: grabbing; }
+    .previa-moldura canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; }
+    .resumo { text-align: center; color: var(--texto); font-size: 0.9rem; line-height: 1.5; margin: 12px 0 0; min-height: 1.2em; white-space: pre-line; }
+    .info { font-size: 0.8rem; color: #888; text-align: center; margin: 6px 0 0; }
+    /* Apoio: café e sugestões, discretos embaixo da prévia */
+    .apoio { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 18px; margin: 4px 0 0; }
+    .apoio .btn-link { display: inline-flex; align-items: center; margin: 0; min-height: 36px; padding: 6px 4px; text-decoration: none; color: #6b665d; font-size: 0.85rem; }
+    .apoio .btn-link:hover, .apoio .btn-link:focus-visible { text-decoration: underline; }
+    .cafe-opcao { border: 1px solid var(--borda); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
+    .cafe-opcao strong { display: block; font-size: 0.95rem; margin-bottom: 2px; }
+    .cafe-opcao small { display: block; color: var(--cinza); font-size: 0.82rem; margin-bottom: 10px; }
+    .cafe-chave { display: flex; gap: 8px; align-items: center; }
+    .cafe-chave code { flex: 1; min-width: 0; overflow-wrap: anywhere; background: #f4f1ea; border-radius: 8px; padding: 10px; font-size: 0.9rem; }
+    a.btn-principal { display: flex; align-items: center; justify-content: center; text-decoration: none; min-height: 46px; font-size: 0.95rem; }
+
+    /* ---------- Ações ---------- */
+    .acoes {
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      background: var(--fundo);
+      margin: 0 -16px;
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+      box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.06);
+    }
+    .btn-principal {
+      width: 100%;
+      min-height: 52px;
+      background: #222;
+      color: #fff;
+      border: 0;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-principal:active { transform: scale(0.99); }
+    .btn-principal:disabled { opacity: 0.5; cursor: default; }
+    .msg { font-size: 0.9rem; margin: 8px 0 0; text-align: center; }
+    .msg:empty { display: none; }
+    .msg.erro { color: var(--erro); }
+    .msg.aviso { color: #8a5a00; }
+
+    .abas button:active, .btn-principal:active { opacity: 0.85; }
+
+    @media (hover: hover) {
+      .btn-principal:hover { background: #000; }
+      .abas button:hover:not([aria-selected="true"]) { background: rgba(255, 255, 255, 0.6); }
+      .btn-sec:hover { background: #f8f6f1; border-color: #b9b2a4; }
+      .btn-icone:not(:disabled):hover { background: var(--suave); }
+      .btn-add:hover { background: #fff; color: #222; border-color: #999; }
+      .btn-link:hover { color: var(--texto); }
+      .seg label:hover input:not(:checked) + span { background: rgba(255, 255, 255, 0.6); }
+      .cartao-escolha:hover input:not(:checked) + .cartao-corpo { border-color: #b9b2a4; }
+    }
+
+    /* ---------- Celular: menos margem e o botão sempre no pé da tela ---------- */
+    /* Janela da assinatura em tela estreita: botões ocupam a largura, o principal embaixo */
+    @media (max-width: 480px) {
+      .dlg { width: calc(100vw - 16px); padding: 16px 14px; }
+      .dlg-botoes > button { flex: 1 1 auto; }
+      .dlg-botoes .btn-principal { flex-basis: 100%; }
+    }
+
+    /* Celular: tela fixa como um app. Topo e botão parados; só as configurações rolam por dentro,
+       sem "puxar para atualizar" nem quique; a prévia se ajusta à altura livre, sem rolagem */
+    @media (max-width: 767px) {
+      html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+      /* Altura medida na tela (--altura-app): no app instalado do iPhone, 100dvh pode passar
+         da área visível e cortar o botão */
+      body { position: fixed; top: 0; left: 0; right: 0; height: var(--altura-app, 100%); display: flex; flex-direction: column; }
+      .fixo-celular { position: static; flex-shrink: 0; }
+      .app { flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; }
+      .painel { padding: 16px 14px; margin-bottom: 0; }
+      .config {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+      }
+      .previa { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 12px; }
+      .previa-moldura {
+        flex: 1;
+        min-height: 0;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .acoes { position: static; flex-shrink: 0; box-shadow: none; }
+      /* Controles não selecionam texto nem abrem menu ao segurar (comportamento de app) */
+      button, .abas, .seg, .interruptor, .cartao-escolha, legend, .opcao-nome {
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+      }
+    }
+
+    /* ---------- Tablet e desktop (768px+): tela fixa, sem rolagem da página ----------
+       Configurações à esquerda, prévia à direita, botão embaixo das configurações.
+       Só o painel de configurações tem rolagem interna, caso a tela seja muito baixa. */
+    @media (min-width: 768px) {
+      html, body { height: 100%; overflow: hidden; }
+      body { display: flex; flex-direction: column; }
+
+      .fixo-celular { display: none; }
+      .titulo-painel { display: block; }
+      .cab-painel { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+      .escolha-idioma select { min-height: 36px; font-size: 0.9rem; }
+
+      .app {
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 20px;
+        display: grid;
+        grid-template-columns: 340px minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr) auto;
+        grid-template-areas:
+          "config previa"
+          "acoes  previa";
+        gap: 16px 20px;
+      }
+      .app .config, .app .previa { display: flex !important; flex-direction: column; }
+
+      .config {
+        grid-area: config;
+        min-height: 0;
+        margin: 0;
+        padding: 16px 16px 8px;
+        overflow-y: auto; /* só se a tela for muito baixa */
+        overscroll-behavior: contain;
+      }
+
+      /* Dados: nome à esquerda, campo à direita */
+      .secao-dados {
+        display: grid;
+        grid-template-columns: max-content minmax(0, 1fr);
+        column-gap: 14px;
+        row-gap: 10px;
+        align-items: center;
+      }
+      .secao-dados legend { grid-column: 1 / -1; }
+      .secao-dados label { margin: 0; }
+
+      .previa {
+        grid-area: previa;
+        min-height: 0;
+        margin: 0;
+        padding: 16px;
+      }
+      .previa-moldura {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .acoes {
+        grid-area: acoes;
+        position: static;
+        background: none;
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+      }
+      .btn-principal { min-height: 48px; }
+
+      /* Telas mais baixas: espaçamento menor para caber mais */
+      @media (max-height: 860px) {
+        .painel { padding: 14px; }
+        .config { padding: 12px 14px 6px; }
+        fieldset { margin-bottom: 16px; }
+        .opcao { min-height: 46px; }
+        input[type="text"], input[type="date"], input[type="number"], select { min-height: 42px; padding: 8px 12px; }
+      }
+    }
+
+    /* Tablet em pé: configurações mais estreitas para a prévia ganhar espaço;
+       o nome do campo fica acima do controle */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .app { grid-template-columns: 300px minmax(0, 1fr); padding: 16px; gap: 12px 16px; }
+      .config { padding: 14px 14px 6px; }
+      .previa { padding: 10px; }
+      .previa-moldura { padding: 8px; }
+      .secao-dados { display: block; }
+      .secao-dados label { margin: 10px 0 4px; }
+    }
+
+    /* ---------- Desktop (1024px+): colunas um pouco mais largas ---------- */
+    @media (min-width: 1024px) {
+      .app { grid-template-columns: 380px minmax(0, 1fr); max-width: 1400px; padding: 24px 32px; gap: 16px 24px; }
+      .previa { padding: 20px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="puxar" id="puxar" aria-hidden="true"><span>↻</span></div>
+
+  <div class="fixo-celular">
+  <header class="topo">
+    <h1 id="titulo"></h1>
+    <div class="lugar-idioma" id="lugar-idioma-celular">
+      <label class="escolha-idioma" id="escolha-idioma"><svg class="globo" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.3" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M1.8 8h12.4M8 1.7c1.9 1.8 2.8 3.9 2.8 6.3S9.9 12.5 8 14.3M8 1.7C6.1 3.5 5.2 5.6 5.2 8s.9 4.5 2.8 6.3" fill="none" stroke="currentColor" stroke-width="1.3"/></svg><select id="idioma"></select></label>
+    </div>
+  </header>
+
+  <nav class="abas" role="tablist" aria-label="Seções">
+    <button role="tab" id="aba-config" data-aba="config" aria-selected="true" aria-controls="app"></button>
+    <button role="tab" id="aba-previa" data-aba="previa" aria-selected="false" aria-controls="app"></button>
+  </nav>
+  </div>
+
+  <main class="app" id="app" data-aba="config">
+
+    <section class="painel config" aria-label="Configurações">
+      <div class="cab-painel">
+        <h2 class="titulo-painel" id="titulo-painel"></h2>
+        <div class="lugar-idioma" id="lugar-idioma-painel"></div>
+      </div>
+
+      <fieldset class="secao-dados">
+        <legend id="sec-dados"></legend>
+        <label for="nascimento" id="lbl-nascimento"></label>
+        <input type="date" id="nascimento" name="mm-data-calendario" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
+
+        <label for="expectativa" id="lbl-expectativa"></label>
+        <input type="number" id="expectativa" name="mm-anos-calendario" min="1" max="120" inputmode="numeric" value="90" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other">
+      </fieldset>
+
+      <fieldset>
+        <legend id="sec-calendario"></legend>
+        <div class="opcao">
+          <label class="interruptor"><input type="checkbox" role="switch" id="preencher"><span class="trilho" aria-hidden="true"></span><span id="lbl-preencher"></span></label>
+          <input type="color" id="corVividas" value="#4a4a4a">
+        </div>
+        <div class="opcao">
+          <label class="interruptor"><input type="checkbox" role="switch" id="atual"><span class="trilho" aria-hidden="true"></span><span id="lbl-atual"></span></label>
+          <input type="color" id="corAtual" value="#c0392b">
+        </div>
+        <div class="opcao">
+          <label class="interruptor"><input type="checkbox" role="switch" id="legenda"><span class="trilho" aria-hidden="true"></span><span id="lbl-legenda"></span></label>
+        </div>
+        <div class="opcao">
+          <span class="opcao-nome" id="lbl-formato"></span>
+          <div class="seg" role="radiogroup" aria-labelledby="lbl-formato">
+            <label><input type="radio" name="formato" value="quadrado" id="formato-quadrado" checked><span><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="1" fill="currentColor"/></svg></span></label>
+            <label><input type="radio" name="formato" value="circulo" id="formato-circulo"><span><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor"/></svg></span></label>
+          </div>
+        </div>
+        <div class="opcao">
+          <span class="opcao-nome" id="lbl-papel"></span>
+          <div class="seg seg-texto" role="radiogroup" aria-labelledby="lbl-papel">
+            <label><input type="radio" name="papel" value="a4" id="papel-a4" checked><span></span></label>
+            <label><input type="radio" name="papel" value="carta" id="papel-carta"><span></span></label>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend id="sec-divisoes"></legend>
+        <p class="dica-secao" id="dica-divisoes"></p>
+        <p class="rotulo-cartoes" id="lbl-linhasPor"></p>
+        <div class="cartoes-escolha" role="radiogroup" aria-labelledby="lbl-linhasPor">
+          <label class="cartao-escolha"><input type="radio" name="linhasPor" value="vida" id="linhasPor-vida"><span class="cartao-corpo"><strong></strong><small></small></span></label>
+          <label class="cartao-escolha"><input type="radio" name="linhasPor" value="civil" id="linhasPor-civil" checked><span class="cartao-corpo"><strong></strong><small></small></span></label>
+        </div>
+        <div class="opcao">
+          <span class="opcao-nome" id="lbl-divAnos"></span>
+          <div class="seg seg-texto" role="radiogroup" aria-labelledby="lbl-divAnos">
+            <label><input type="radio" name="divAnos" value="0" id="divAnos-0"><span></span></label>
+            <label><input type="radio" name="divAnos" value="5" id="divAnos-5" checked><span></span></label>
+            <label><input type="radio" name="divAnos" value="10" id="divAnos-10"><span></span></label>
+          </div>
+        </div>
+        <div class="opcao" id="linha-divSemanas">
+          <span class="opcao-nome" id="lbl-divSemanas"></span>
+          <div class="seg seg-texto" role="radiogroup" aria-labelledby="lbl-divSemanas">
+            <label><input type="radio" name="divSemanas" value="0" id="divSemanas-0"><span></span></label>
+            <label><input type="radio" name="divSemanas" value="meses" id="divSemanas-meses" checked><span></span></label>
+            <label><input type="radio" name="divSemanas" value="trimestres" id="divSemanas-trimestres"><span></span></label>
+          </div>
+        </div>
+        <div class="opcao">
+          <label class="interruptor"><input type="checkbox" role="switch" id="rotulos" checked><span class="trilho" aria-hidden="true"></span><span id="lbl-rotulos"></span></label>
+        </div>
+        <div class="opcao">
+          <label class="interruptor"><input type="checkbox" role="switch" id="numerar" checked><span class="trilho" aria-hidden="true"></span><span id="lbl-numerar"></span></label>
+        </div>
+        <div class="opcao">
+          <span class="opcao-nome" id="lbl-contorno"></span>
+          <div class="seg seg-texto" role="radiogroup" aria-labelledby="lbl-contorno">
+            <label><input type="radio" name="contorno" value="claro" id="contorno-claro"><span></span></label>
+            <label><input type="radio" name="contorno" value="escuro" id="contorno-escuro" checked><span></span></label>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend id="sec-textos"></legend>
+        <h3 class="zona-titulo" id="lbl-zona-topo"></h3>
+        <div class="lista-textos" id="lista-topo"></div>
+        <button type="button" class="btn-add" data-zona="topo"></button>
+        <h3 class="zona-titulo" id="lbl-zona-rodape"></h3>
+        <div class="lista-textos" id="lista-rodape"></div>
+        <button type="button" class="btn-add" data-zona="rodape"></button>
+        <datalist id="sugestoes-frase"></datalist>
+      </fieldset>
+
+
+      <button type="button" class="btn-link" id="restaurar"></button>
+    </section>
+
+    <section class="painel previa" aria-label="Prévia do PDF">
+      <div class="previa-moldura">
+        <canvas id="previa" role="img" aria-label="Prévia do calendário em PDF"></canvas>
+      </div>
+      <p class="resumo" id="resumo"></p>
+      <p class="info" id="info"></p>
+      <p class="apoio" id="apoio" hidden>
+        <button type="button" class="btn-link" id="btn-cafe" hidden></button>
+        <a class="btn-link" id="link-sugestoes" target="_blank" rel="noopener noreferrer" hidden></a>
+      </p>
+    </section>
+
+    <div class="acoes">
+      <button class="btn-principal" id="botao" type="button"></button>
+      <p class="msg" id="msg" role="alert"></p>
+    </div>
+</main>
+
+  <dialog class="dlg" id="dlg-cafe" aria-labelledby="cafe-titulo">
+    <p class="dlg-titulo" id="cafe-titulo"></p>
+    <p class="dlg-dica" id="cafe-dica"></p>
+    <div class="cafe-opcao" id="cafe-pix" hidden>
+      <strong id="cafe-pix-titulo"></strong>
+      <small id="cafe-pix-dica"></small>
+      <div class="cafe-chave"><code id="cafe-chave"></code><button type="button" class="btn-sec" id="cafe-copiar"></button></div>
+    </div>
+    <div class="cafe-opcao" id="cafe-kofi" hidden>
+      <strong id="cafe-kofi-titulo"></strong>
+      <small id="cafe-kofi-dica"></small>
+      <a class="btn-principal" id="cafe-kofi-link" target="_blank" rel="noopener noreferrer"></a>
+    </div>
+    <div class="dlg-botoes"><button type="button" class="btn-sec" id="cafe-fechar"></button></div>
+  </dialog>
+
+  <dialog class="dlg" id="dlg-assinatura" aria-labelledby="dlg-titulo">
+    <p class="dlg-titulo" id="dlg-titulo"></p>
+    <div class="dlg-fontes">
+      <button type="button" class="btn-sec" id="pad-importar"></button>
+      <button type="button" class="btn-sec" id="pad-foto"></button>
+      <input type="file" id="arq-importar" accept="image/*" hidden>
+      <input type="file" id="arq-foto" accept="image/*" capture="environment" hidden>
+    </div>
+    <canvas id="pad"></canvas>
+    <div class="camera-quadro" id="camera" hidden>
+      <video id="camera-video" autoplay playsinline muted></video>
+      <div class="camera-guia" id="camera-guia"></div>
+    </div>
+    <div class="dlg-ajuste" id="pad-ajuste" hidden>
+      <label for="pad-sens" id="lbl-sens"></label>
+      <input type="range" id="pad-sens" min="1" max="10" step="1" value="5">
+      <label class="interruptor"><input type="checkbox" role="switch" id="pad-preta"><span class="trilho" aria-hidden="true"></span><span id="lbl-preta"></span></label>
+    </div>
+    <p class="dlg-dica" id="dlg-dica"></p>
+    <div class="dlg-botoes" id="pad-botoes">
+      <button type="button" class="btn-sec" id="pad-limpar"></button>
+      <button type="button" class="btn-sec" id="pad-cancelar"></button>
+      <button type="button" class="btn-principal" id="pad-salvar"></button>
+    </div>
+    <div class="dlg-botoes" id="camera-botoes" hidden>
+      <button type="button" class="btn-sec" id="camera-voltar"></button>
+      <button type="button" class="btn-principal" id="camera-capturar"></button>
+    </div>
+  </dialog>
+
+  <!-- jsPDF 4.2.1 guardado no próprio site: funciona offline e não depende de servidor de terceiros
+       (para atualizar: troque o arquivo em lib/ e confira com "npm audit" que não há falhas conhecidas) -->
+  <script src="../lib/jspdf.umd.min.js" defer></script>
+  <!-- Contador de visitas (GoatCounter), guardado no próprio site. Painel: https://peukz.goatcounter.com -->
+  <script data-goatcounter="https://peukz.goatcounter.com/count" async src="../lib/goatcounter-count.js"></script>
+  <script>
+    // ============================================================
+    // TEXTOS POR IDIOMA
+    // Para adicionar um idioma, copie o bloco "pt", traduza e
+    // ele aparece sozinho na lista de idiomas.
+    // ============================================================
+    // ---------- Apoio: café e sugestões ----------
+    // Preencha para mostrar no site; o que ficar vazio não aparece
+    const APOIO = {
+      pix: "",        // chave Pix
+      kofi: "",       // link da página no Ko-fi (https://ko-fi.com/...)
+      sugestoes: ""   // link do Formulário Google
+    };
+
+    const TEXTOS = {
+      pt: {
+        nomeIdioma: "Português",
+        locale: "pt-BR",
+        titulo: "Calendário Memento Mori",
+        abaConfig: "Configurar",
+        abaPrevia: "Visualizar",
+        secDados: "Seus dados",
+        secCalendario: "Calendário",
+        nascimento: "Data de nascimento",
+        expectativa: "Expectativa de vida (anos)",
+        corVividas: "Cor das semanas vividas",
+        corAtual: "Cor da semana atual",
+        preencher: "Preencher semanas vividas",
+        destacarAtual: "Destacar a semana atual",
+        legSemana: "Uma semana",
+        legenda: "Mostrar legenda",
+        formato: "Formato das semanas",
+        formatos: { quadrado: "Quadrados", circulo: "Círculos" },
+        secDivisoes: "Divisões",
+        dicaDivisoes: "Como organizar a grade, com espaços e marcações para achar cada semana com facilidade, inclusive ao pintar à mão no papel.",
+        linhasPor: "Cada linha do calendário é",
+        linhasPorOpcoes: { vida: "Um ano de vida", civil: "Um ano do calendário" },
+        linhasPorDicas: {
+          vida: "Do aniversário ao seguinte. O clássico.",
+          civil: "De janeiro a dezembro, com as semanas reais de cada mês."
+        },
+        rotulosCivil: "Mostrar anos e idades nas laterais",
+        numerarMeses: "Mostrar os meses no topo",
+        mesesCurtos: ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"],
+        mesesLongos: ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"],
+        hojeVida: (anos, semana) => `Hoje: ${anos} ${anos === 1 ? "ano" : "anos"}, semana ${semana}`,
+        hojeCivil: (semana, mes, ano) => `Hoje: semana ${semana} de ${mes} de ${ano}`,
+        divAnos: "Separar anos",
+        divAnosOpcoes: { "0": "Não", "5": "5 em 5", "10": "10 em 10" },
+        divAnosDicas: { "0": "Sem espaço entre os anos", "5": "Espaço a cada 5 anos (maior a cada 10)", "10": "Espaço a cada 10 anos" },
+        divSemanas: "Separar semanas",
+        divSemanasOpcoes: { "0": "Não", meses: "Meses", trimestres: "Trimestres" },
+        divSemanasDicas: { "0": "Sem espaço entre as semanas", meses: "Os meses de verdade, a partir do seu aniversário (4 ou 5 semanas cada)", trimestres: "4 grupos de 13 semanas" },
+        rotulos: "Mostrar idades na lateral",
+        numerar: "Numerar semanas no topo",
+        contorno: "Contorno das semanas",
+        contornoOpcoes: { claro: "Claro", escuro: "Escuro" },
+        contornoDicas: { claro: "Mais discreto", escuro: "Mais fácil de ver e de pintar no papel" },
+        secTextos: "Textos do PDF",
+        zonas: { topo: "Topo da página", rodape: "Rodapé" },
+        tiposTexto: { titulo: "Título", nome: "Nome", frase: "Frase", assinatura: "Assinatura", livre: "Texto" },
+        placeholders: { titulo: "Título", nome: "Seu nome", frase: "Escreva uma frase", livre: "Escreva um texto" },
+        alinhamento: "Alinhamento",
+        alinhamentos: { esq: "À esquerda", centro: "No centro", dir: "À direita" },
+        tamanho: "Tamanho",
+        tamanhos: { p: "Pequeno", m: "Médio", g: "Grande" },
+        subir: "Mover para cima",
+        descer: "Mover para baixo",
+        paraTopo: "Mover para o topo da página",
+        paraRodape: "Mover para o rodapé",
+        addTexto: "+ Adicionar texto",
+        remover: "Remover texto",
+        restaurar: "Restaurar configurações padrão",
+        confirmarRestaurar: "Voltar as configurações ao padrão? Sua data de nascimento será mantida; os textos, as cores e a assinatura voltam ao início.",
+        desenharAssinatura: "Adicionar assinatura",
+        refazerAssinatura: "Refazer assinatura",
+        dlgTitulo: "Sua assinatura",
+        dlgDica: "Assine com o dedo ou o mouse no espaço acima. Se preferir, assine num papel branco e use “Tirar foto” ou “Importar imagem”.",
+        cameraDica: "Aproxime o papel com a assinatura até ele preencher o retângulo, com boa luz, e clique em “Capturar”.",
+        capturar: "Capturar",
+        voltar: "Voltar",
+        erroCamera: "Não foi possível usar a câmera. Confira se ela está conectada e se o navegador tem permissão, ou use “Importar imagem”.",
+        dlgDicaImportada: "O fundo foi removido. Ajuste até sobrar só a escrita; você ainda pode desenhar por cima.",
+        importar: "Importar imagem",
+        foto: "Tirar foto",
+        sensibilidade: "Remover fundo",
+        tintaPreta: "Deixar a tinta preta",
+        erroImagem: "Não foi possível abrir essa imagem.",
+        limpar: "Limpar",
+        cancelar: "Cancelar",
+        salvar: "Usar assinatura",
+        frases: [
+          "Lembre-se de que você vai morrer.",
+          "Memento mori",
+          "Cada semana conta.",
+          "Carpe diem.",
+          "O tempo é o que temos."
+        ],
+        idioma: "Idioma",
+        botao: "Baixar PDF",
+        botaoCompartilhar: "Salvar ou compartilhar PDF",
+        gerando: "Gerando PDF...",
+        previaVazia: "Informe a data de nascimento para ver a prévia.",
+        resumo: (vividas, restantes, pct) => `${vividas} semanas vividas · ${restantes} restantes (${pct})`,
+        resumoVazio: (total) => `${total} semanas em branco`,
+        erroNascimento: "Informe uma data de nascimento válida (ano com 4 dígitos, a partir de 1900, e não pode ser no futuro).",
+        erroExpectativa: "A expectativa de vida deve estar entre 1 e 120 anos.",
+        avisoExpectativa: "A expectativa já foi ultrapassada: todas as semanas aparecem como vividas.",
+        erroGerar: "Não foi possível gerar o PDF. Tente de novo.",
+        info: "Seus dados não saem do seu navegador: tudo acontece nele.",
+        cafe: "☕ Pague meu café",
+        sugestoes: "💡 Sugestões",
+        cafeTitulo: "Pague meu café",
+        cafeDica: "Se o calendário foi útil, um café ajuda a manter o site no ar e gratuito. Obrigado!",
+        pixTitulo: "Pix (Brasil)",
+        pixDica: "Copie a chave e cole no app do seu banco.",
+        copiar: "Copiar",
+        copiado: "Copiado!",
+        kofiTitulo: "Ko-fi",
+        kofiDica: "Cartão ou PayPal, de qualquer país.",
+        kofiAbrir: "Abrir o Ko-fi",
+        fechar: "Fechar",
+        pdfTitulo: "Memento Mori",
+        pdfIdade: "Idade",
+        pdfSemana: "Semana",
+        pdfAno: "Ano",
+        legVividas: "Semanas vividas",
+        legAtual: "Semana atual",
+        legRestantes: "Semanas restantes",
+        pdfArquivo: "memento-mori.pdf",
+        descricao: "Sua vida em semanas, num calendário para imprimir em PDF.",
+        ariaConfig: "Configurações",
+        ariaPrevia: "Prévia do PDF",
+        ariaCanvas: "Prévia do calendário em PDF",
+        ariaAbas: "Seções",
+        papel: "Tamanho do papel",
+        papelOpcoes: { a4: "A4", carta: "Carta" },
+        papelDicas: { a4: "210 × 297 mm, o padrão no Brasil e na maior parte do mundo", carta: "8,5 × 11 pol., o padrão nos EUA, no Canadá e no México" },
+        primeiroDiaSemana: 0,
+        avisoCaracteres: "Estes caracteres não saem no PDF (só funciona o alfabeto latino): "
+      },
+      en: {
+        nomeIdioma: "English",
+        locale: "en-US",
+        titulo: "Memento Mori Calendar",
+        abaConfig: "Settings",
+        abaPrevia: "Preview",
+        secDados: "Your details",
+        secCalendario: "Calendar",
+        nascimento: "Date of birth",
+        expectativa: "Life expectancy (years)",
+        corVividas: "Color of weeks lived",
+        corAtual: "Color of the current week",
+        preencher: "Fill in weeks lived",
+        destacarAtual: "Highlight the current week",
+        legSemana: "One week",
+        legenda: "Show legend",
+        formato: "Week shape",
+        formatos: { quadrado: "Squares", circulo: "Circles" },
+        secDivisoes: "Grid",
+        dicaDivisoes: "How to organize the grid, with gaps and labels that make each week easy to find, even when coloring it in by hand on paper.",
+        linhasPor: "Each row of the calendar is",
+        linhasPorOpcoes: { vida: "One year of life", civil: "One calendar year" },
+        linhasPorDicas: {
+          vida: "From one birthday to the next. The classic.",
+          civil: "January to December, with the real weeks of each month."
+        },
+        rotulosCivil: "Show years and ages on the sides",
+        numerarMeses: "Show months at the top",
+        mesesCurtos: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        mesesLongos: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+        hojeVida: (anos, semana) => `Today: age ${anos}, week ${semana}`,
+        hojeCivil: (semana, mes, ano) => `Today: week ${semana} of ${mes} ${ano}`,
+        divAnos: "Group years",
+        divAnosOpcoes: { "0": "No", "5": "By 5", "10": "By 10" },
+        divAnosDicas: { "0": "No gap between years", "5": "A gap every 5 years (bigger every 10)", "10": "A gap every 10 years" },
+        divSemanas: "Group weeks",
+        divSemanasOpcoes: { "0": "No", meses: "Months", trimestres: "Quarters" },
+        divSemanasDicas: { "0": "No gap between weeks", meses: "The real months, counted from your birthday (4 or 5 weeks each)", trimestres: "4 groups of 13 weeks" },
+        rotulos: "Show ages on the side",
+        numerar: "Number the weeks at the top",
+        contorno: "Week outline",
+        contornoOpcoes: { claro: "Light", escuro: "Dark" },
+        contornoDicas: { claro: "More subtle", escuro: "Easier to see and to color in on paper" },
+        secTextos: "PDF text",
+        zonas: { topo: "Top of the page", rodape: "Footer" },
+        tiposTexto: { titulo: "Title", nome: "Name", frase: "Quote", assinatura: "Signature", livre: "Text" },
+        placeholders: { titulo: "Title", nome: "Your name", frase: "Write a quote", livre: "Write some text" },
+        alinhamento: "Alignment",
+        alinhamentos: { esq: "Left", centro: "Center", dir: "Right" },
+        tamanho: "Size",
+        tamanhos: { p: "Small", m: "Medium", g: "Large" },
+        subir: "Move up",
+        descer: "Move down",
+        paraTopo: "Move to the top of the page",
+        paraRodape: "Move to the footer",
+        addTexto: "+ Add text",
+        remover: "Remove text",
+        restaurar: "Restore default settings",
+        confirmarRestaurar: "Restore the default settings? Your date of birth is kept; texts, colors and signature go back to the start.",
+        desenharAssinatura: "Add signature",
+        refazerAssinatura: "Redo signature",
+        dlgTitulo: "Your signature",
+        dlgDica: "Sign with your finger or mouse in the space above. If you prefer, sign on white paper and use “Take photo” or “Import image”.",
+        cameraDica: "Bring the paper with your signature closer until it fills the rectangle, in good light, and click “Capture”.",
+        capturar: "Capture",
+        voltar: "Back",
+        erroCamera: "Couldn't use the camera. Check that it's connected and that the browser has permission, or use “Import image”.",
+        dlgDicaImportada: "The background was removed. Adjust until only the writing is left; you can still draw over it.",
+        importar: "Import image",
+        foto: "Take photo",
+        sensibilidade: "Remove background",
+        tintaPreta: "Make the ink black",
+        erroImagem: "Couldn't open this image.",
+        limpar: "Clear",
+        cancelar: "Cancel",
+        salvar: "Use signature",
+        frases: [
+          "Remember that you will die.",
+          "Memento mori",
+          "Every week counts.",
+          "Carpe diem.",
+          "Time is what we have."
+        ],
+        idioma: "Language",
+        botao: "Download PDF",
+        botaoCompartilhar: "Save or share PDF",
+        gerando: "Creating PDF...",
+        previaVazia: "Enter your date of birth to see the preview.",
+        resumo: (vividas, restantes, pct) => `${vividas} weeks lived · ${restantes} left (${pct})`,
+        resumoVazio: (total) => `${total} blank weeks`,
+        erroNascimento: "Enter a valid date of birth (4-digit year, from 1900, and not in the future).",
+        erroExpectativa: "Life expectancy must be between 1 and 120 years.",
+        avisoExpectativa: "Life expectancy has already been passed: all weeks are shown as lived.",
+        erroGerar: "Couldn't create the PDF. Please try again.",
+        info: "Your data never leaves your browser: everything happens right here.",
+        cafe: "☕ Buy me a coffee",
+        sugestoes: "💡 Suggestions",
+        cafeTitulo: "Buy me a coffee",
+        cafeDica: "If the calendar was useful, a coffee helps keep the site online and free. Thank you!",
+        pixTitulo: "Pix (Brazil)",
+        pixDica: "Copy the key and paste it into your bank app.",
+        copiar: "Copy",
+        copiado: "Copied!",
+        kofiTitulo: "Ko-fi",
+        kofiDica: "Card or PayPal, from any country.",
+        kofiAbrir: "Open Ko-fi",
+        fechar: "Close",
+        pdfTitulo: "Memento Mori",
+        pdfIdade: "Age",
+        pdfSemana: "Week",
+        pdfAno: "Year",
+        legVividas: "Weeks lived",
+        legAtual: "This week",
+        legRestantes: "Weeks left",
+        pdfArquivo: "memento-mori.pdf",
+        descricao: "Your life in weeks, as a calendar to print as a PDF.",
+        ariaConfig: "Settings",
+        ariaPrevia: "PDF preview",
+        ariaCanvas: "Preview of the calendar PDF",
+        ariaAbas: "Sections",
+        papel: "Paper size",
+        papelOpcoes: { a4: "A4", carta: "Letter" },
+        papelDicas: { a4: "210 × 297 mm, the standard in most of the world", carta: "8.5 × 11 in, the standard in the US, Canada and Mexico" },
+        primeiroDiaSemana: 0,
+        avisoCaracteres: "These characters won't print in the PDF (only the Latin alphabet works): "
+      },
+      es: {
+        nomeIdioma: "Español",
+        locale: "es-ES",
+        titulo: "Calendario Memento Mori",
+        abaConfig: "Configurar",
+        abaPrevia: "Vista previa",
+        secDados: "Tus datos",
+        secCalendario: "Calendario",
+        nascimento: "Fecha de nacimiento",
+        expectativa: "Esperanza de vida (años)",
+        corVividas: "Color de las semanas vividas",
+        corAtual: "Color de la semana actual",
+        preencher: "Rellenar las semanas vividas",
+        destacarAtual: "Destacar la semana actual",
+        legSemana: "Una semana",
+        legenda: "Mostrar leyenda",
+        formato: "Forma de las semanas",
+        formatos: { quadrado: "Cuadrados", circulo: "Círculos" },
+        secDivisoes: "Divisiones",
+        dicaDivisoes: "Cómo organizar la cuadrícula, con espacios y marcas para encontrar cada semana fácilmente, incluso al pintarla a mano en papel.",
+        linhasPor: "Cada fila del calendario es",
+        linhasPorOpcoes: { vida: "Un año de vida", civil: "Un año del calendario" },
+        linhasPorDicas: {
+          vida: "De un cumpleaños al siguiente. El clásico.",
+          civil: "De enero a diciembre, con las semanas reales de cada mes."
+        },
+        rotulosCivil: "Mostrar años y edades a los lados",
+        numerarMeses: "Mostrar los meses arriba",
+        mesesCurtos: ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"],
+        mesesLongos: ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
+        hojeVida: (anos, semana) => `Hoy: ${anos} ${anos === 1 ? "año" : "años"}, semana ${semana}`,
+        hojeCivil: (semana, mes, ano) => `Hoy: semana ${semana} de ${mes} de ${ano}`,
+        divAnos: "Separar años",
+        divAnosOpcoes: { "0": "No", "5": "Cada 5", "10": "Cada 10" },
+        divAnosDicas: { "0": "Sin espacio entre los años", "5": "Un espacio cada 5 años (mayor cada 10)", "10": "Un espacio cada 10 años" },
+        divSemanas: "Separar semanas",
+        divSemanasOpcoes: { "0": "No", meses: "Meses", trimestres: "Trimestres" },
+        divSemanasDicas: { "0": "Sin espacio entre las semanas", meses: "Los meses reales, contados desde tu cumpleaños (4 o 5 semanas cada uno)", trimestres: "4 grupos de 13 semanas" },
+        rotulos: "Mostrar edades al lado",
+        numerar: "Numerar las semanas arriba",
+        contorno: "Contorno de las semanas",
+        contornoOpcoes: { claro: "Claro", escuro: "Oscuro" },
+        contornoDicas: { claro: "Más discreto", escuro: "Más fácil de ver y de pintar en papel" },
+        secTextos: "Textos del PDF",
+        zonas: { topo: "Parte superior", rodape: "Pie de página" },
+        tiposTexto: { titulo: "Título", nome: "Nombre", frase: "Frase", assinatura: "Firma", livre: "Texto" },
+        placeholders: { titulo: "Título", nome: "Tu nombre", frase: "Escribe una frase", livre: "Escribe un texto" },
+        alinhamento: "Alineación",
+        alinhamentos: { esq: "A la izquierda", centro: "Al centro", dir: "A la derecha" },
+        tamanho: "Tamaño",
+        tamanhos: { p: "Pequeño", m: "Mediano", g: "Grande" },
+        subir: "Subir",
+        descer: "Bajar",
+        paraTopo: "Mover a la parte superior",
+        paraRodape: "Mover al pie de página",
+        addTexto: "+ Añadir texto",
+        remover: "Eliminar texto",
+        restaurar: "Restaurar la configuración predeterminada",
+        confirmarRestaurar: "¿Volver a la configuración predeterminada? Tu fecha de nacimiento se mantiene; los textos, los colores y la firma vuelven al inicio.",
+        desenharAssinatura: "Añadir firma",
+        refazerAssinatura: "Rehacer firma",
+        dlgTitulo: "Tu firma",
+        dlgDica: "Firma con el dedo o el ratón en el espacio de arriba. Si lo prefieres, firma en un papel blanco y usa «Tomar foto» o «Importar imagen».",
+        cameraDica: "Acerca el papel con la firma hasta que llene el rectángulo, con buena luz, y haz clic en «Capturar».",
+        capturar: "Capturar",
+        voltar: "Volver",
+        erroCamera: "No se pudo usar la cámara. Comprueba que esté conectada y que el navegador tenga permiso, o usa «Importar imagen».",
+        dlgDicaImportada: "Se quitó el fondo. Ajusta hasta que solo quede la escritura; todavía puedes dibujar encima.",
+        importar: "Importar imagen",
+        foto: "Tomar foto",
+        sensibilidade: "Quitar fondo",
+        tintaPreta: "Dejar la tinta negra",
+        erroImagem: "No se pudo abrir esta imagen.",
+        limpar: "Borrar",
+        cancelar: "Cancelar",
+        salvar: "Usar firma",
+        frases: [
+          "Recuerda que vas a morir.",
+          "Memento mori",
+          "Cada semana cuenta.",
+          "Carpe diem.",
+          "El tiempo es lo que tenemos."
+        ],
+        idioma: "Idioma",
+        botao: "Descargar PDF",
+        botaoCompartilhar: "Guardar o compartir PDF",
+        gerando: "Generando PDF...",
+        previaVazia: "Indica tu fecha de nacimiento para ver la vista previa.",
+        resumo: (vividas, restantes, pct) => `${vividas} semanas vividas · ${restantes} restantes (${pct})`,
+        resumoVazio: (total) => `${total} semanas en blanco`,
+        erroNascimento: "Indica una fecha de nacimiento válida (año de 4 dígitos, desde 1900 y que no sea futura).",
+        erroExpectativa: "La esperanza de vida debe estar entre 1 y 120 años.",
+        avisoExpectativa: "Ya se superó la esperanza de vida: todas las semanas aparecen como vividas.",
+        erroGerar: "No se pudo generar el PDF. Inténtalo de nuevo.",
+        info: "Tus datos no salen de tu navegador: todo ocurre en él.",
+        cafe: "☕ Invítame un café",
+        sugestoes: "💡 Sugerencias",
+        cafeTitulo: "Invítame un café",
+        cafeDica: "Si el calendario te fue útil, un café ayuda a mantener el sitio en línea y gratuito. ¡Gracias!",
+        pixTitulo: "Pix (Brasil)",
+        pixDica: "Copia la clave y pégala en la app de tu banco.",
+        copiar: "Copiar",
+        copiado: "¡Copiado!",
+        kofiTitulo: "Ko-fi",
+        kofiDica: "Tarjeta o PayPal, desde cualquier país.",
+        kofiAbrir: "Abrir Ko-fi",
+        fechar: "Cerrar",
+        pdfTitulo: "Memento Mori",
+        pdfIdade: "Edad",
+        pdfSemana: "Semana",
+        pdfAno: "Año",
+        legVividas: "Semanas vividas",
+        legAtual: "Semana actual",
+        legRestantes: "Semanas restantes",
+        pdfArquivo: "memento-mori.pdf",
+        descricao: "Tu vida en semanas, en un calendario para imprimir en PDF.",
+        ariaConfig: "Configuración",
+        ariaPrevia: "Vista previa del PDF",
+        ariaCanvas: "Vista previa del calendario en PDF",
+        ariaAbas: "Secciones",
+        papel: "Tamaño del papel",
+        papelOpcoes: { a4: "A4", carta: "Carta" },
+        papelDicas: { a4: "210 × 297 mm, el estándar en casi todo el mundo", carta: "8,5 × 11 pulg., el estándar en EE. UU., Canadá y México" },
+        primeiroDiaSemana: 1,
+        avisoCaracteres: "Estos caracteres no salen en el PDF (solo funciona el alfabeto latino): "
+      },
+      fr: {
+        nomeIdioma: "Français",
+        locale: "fr-FR",
+        titulo: "Calendrier Memento Mori",
+        abaConfig: "Réglages",
+        abaPrevia: "Aperçu",
+        secDados: "Vos informations",
+        secCalendario: "Calendrier",
+        nascimento: "Date de naissance",
+        expectativa: "Espérance de vie (années)",
+        corVividas: "Couleur des semaines vécues",
+        corAtual: "Couleur de la semaine en cours",
+        preencher: "Remplir les semaines vécues",
+        destacarAtual: "Mettre en évidence la semaine en cours",
+        legSemana: "Une semaine",
+        legenda: "Afficher la légende",
+        formato: "Forme des semaines",
+        formatos: { quadrado: "Carrés", circulo: "Cercles" },
+        secDivisoes: "Découpage",
+        dicaDivisoes: "Comment organiser la grille, avec des espaces et des repères pour trouver facilement chaque semaine, même en la coloriant à la main sur papier.",
+        linhasPor: "Chaque ligne du calendrier est",
+        linhasPorOpcoes: { vida: "Une année de vie", civil: "Une année civile" },
+        linhasPorDicas: {
+          vida: "D’un anniversaire au suivant. Le classique.",
+          civil: "De janvier à décembre, avec les vraies semaines de chaque mois."
+        },
+        rotulosCivil: "Afficher les années et les âges sur les côtés",
+        numerarMeses: "Afficher les mois en haut",
+        mesesCurtos: ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"],
+        mesesLongos: ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+        hojeVida: (anos, semana) => `Aujourd’hui : ${anos} ${anos === 1 ? "an" : "ans"}, semaine ${semana}`,
+        hojeCivil: (semana, mes, ano) => `Aujourd’hui : semaine ${semana} ${/^[aeiouy]/.test(mes) ? "d’" : "de "}${mes} ${ano}`,
+        divAnos: "Grouper les années",
+        divAnosOpcoes: { "0": "Non", "5": "Par 5", "10": "Par 10" },
+        divAnosDicas: { "0": "Pas d’espace entre les années", "5": "Un espace tous les 5 ans (plus grand tous les 10)", "10": "Un espace tous les 10 ans" },
+        divSemanas: "Grouper les semaines",
+        divSemanasOpcoes: { "0": "Non", meses: "Mois", trimestres: "Trimestres" },
+        divSemanasDicas: { "0": "Pas d’espace entre les semaines", meses: "Les vrais mois, comptés à partir de votre anniversaire (4 ou 5 semaines chacun)", trimestres: "4 groupes de 13 semaines" },
+        rotulos: "Afficher les âges sur le côté",
+        numerar: "Numéroter les semaines en haut",
+        contorno: "Contour des semaines",
+        contornoOpcoes: { claro: "Clair", escuro: "Foncé" },
+        contornoDicas: { claro: "Plus discret", escuro: "Plus facile à voir et à colorier sur papier" },
+        secTextos: "Textes du PDF",
+        zonas: { topo: "Haut de page", rodape: "Bas de page" },
+        tiposTexto: { titulo: "Titre", nome: "Nom", frase: "Phrase", assinatura: "Signature", livre: "Texte" },
+        placeholders: { titulo: "Titre", nome: "Votre nom", frase: "Écrivez une phrase", livre: "Écrivez un texte" },
+        alinhamento: "Alignement",
+        alinhamentos: { esq: "À gauche", centro: "Au centre", dir: "À droite" },
+        tamanho: "Taille",
+        tamanhos: { p: "Petit", m: "Moyen", g: "Grand" },
+        subir: "Monter",
+        descer: "Descendre",
+        paraTopo: "Déplacer en haut de page",
+        paraRodape: "Déplacer en bas de page",
+        addTexto: "+ Ajouter un texte",
+        remover: "Supprimer le texte",
+        restaurar: "Rétablir les réglages par défaut",
+        confirmarRestaurar: "Rétablir les réglages par défaut ? Votre date de naissance est conservée ; les textes, les couleurs et la signature reviennent au début.",
+        desenharAssinatura: "Ajouter une signature",
+        refazerAssinatura: "Refaire la signature",
+        dlgTitulo: "Votre signature",
+        dlgDica: "Signez avec le doigt ou la souris dans l’espace ci-dessus. Si vous préférez, signez sur un papier blanc et utilisez « Prendre une photo » ou « Importer une image ».",
+        cameraDica: "Approchez le papier avec la signature jusqu’à ce qu’il remplisse le rectangle, avec une bonne lumière, puis cliquez sur « Capturer ».",
+        capturar: "Capturer",
+        voltar: "Retour",
+        erroCamera: "Impossible d’utiliser la caméra. Vérifiez qu’elle est branchée et que le navigateur a l’autorisation, ou utilisez « Importer une image ».",
+        dlgDicaImportada: "Le fond a été retiré. Ajustez jusqu’à ce qu’il ne reste que l’écriture ; vous pouvez encore dessiner par-dessus.",
+        importar: "Importer une image",
+        foto: "Prendre une photo",
+        sensibilidade: "Retirer le fond",
+        tintaPreta: "Rendre l’encre noire",
+        erroImagem: "Impossible d’ouvrir cette image.",
+        limpar: "Effacer",
+        cancelar: "Annuler",
+        salvar: "Utiliser la signature",
+        frases: [
+          "Souviens-toi que tu vas mourir.",
+          "Memento mori",
+          "Chaque semaine compte.",
+          "Carpe diem.",
+          "Le temps est ce que nous avons."
+        ],
+        idioma: "Langue",
+        botao: "Télécharger le PDF",
+        botaoCompartilhar: "Enregistrer ou partager le PDF",
+        gerando: "Création du PDF...",
+        previaVazia: "Indiquez votre date de naissance pour voir l’aperçu.",
+        resumo: (vividas, restantes, pct) => `${vividas} semaines vécues · ${restantes} restantes (${pct})`,
+        resumoVazio: (total) => `${total} semaines vierges`,
+        erroNascimento: "Indiquez une date de naissance valide (année à 4 chiffres, à partir de 1900, et pas dans le futur).",
+        erroExpectativa: "L’espérance de vie doit être comprise entre 1 et 120 ans.",
+        avisoExpectativa: "L’espérance de vie est déjà dépassée : toutes les semaines apparaissent comme vécues.",
+        erroGerar: "Impossible de créer le PDF. Réessayez.",
+        info: "Vos données ne quittent pas votre navigateur : tout se passe ici.",
+        cafe: "☕ Offrez-moi un café",
+        sugestoes: "💡 Suggestions",
+        cafeTitulo: "Offrez-moi un café",
+        cafeDica: "Si le calendrier vous a été utile, un café aide à garder le site en ligne et gratuit. Merci !",
+        pixTitulo: "Pix (Brésil)",
+        pixDica: "Copiez la clé et collez-la dans l’app de votre banque.",
+        copiar: "Copier",
+        copiado: "Copié !",
+        kofiTitulo: "Ko-fi",
+        kofiDica: "Carte ou PayPal, depuis n’importe quel pays.",
+        kofiAbrir: "Ouvrir Ko-fi",
+        fechar: "Fermer",
+        pdfTitulo: "Memento Mori",
+        pdfIdade: "Âge",
+        pdfSemana: "Semaine",
+        pdfAno: "Année",
+        legVividas: "Semaines vécues",
+        legAtual: "Semaine en cours",
+        legRestantes: "Semaines restantes",
+        pdfArquivo: "memento-mori.pdf",
+        descricao: "Votre vie en semaines, dans un calendrier à imprimer en PDF.",
+        ariaConfig: "Réglages",
+        ariaPrevia: "Aperçu du PDF",
+        ariaCanvas: "Aperçu du calendrier en PDF",
+        ariaAbas: "Sections",
+        papel: "Format du papier",
+        papelOpcoes: { a4: "A4", carta: "Lettre US" },
+        papelDicas: { a4: "210 × 297 mm, le standard dans la plupart du monde", carta: "8,5 × 11 po, le standard aux États-Unis, au Canada et au Mexique" },
+        primeiroDiaSemana: 1,
+        avisoCaracteres: "Ces caractères ne s’impriment pas dans le PDF (seul l’alphabet latin fonctionne) : "
+      },
+      de: {
+        nomeIdioma: "Deutsch",
+        locale: "de-DE",
+        titulo: "Memento-Mori-Kalender",
+        abaConfig: "Einstellungen",
+        abaPrevia: "Vorschau",
+        secDados: "Deine Daten",
+        secCalendario: "Kalender",
+        nascimento: "Geburtsdatum",
+        expectativa: "Lebenserwartung (Jahre)",
+        corVividas: "Farbe der gelebten Wochen",
+        corAtual: "Farbe der aktuellen Woche",
+        preencher: "Gelebte Wochen ausfüllen",
+        destacarAtual: "Aktuelle Woche hervorheben",
+        legSemana: "Eine Woche",
+        legenda: "Legende anzeigen",
+        formato: "Form der Wochen",
+        formatos: { quadrado: "Quadrate", circulo: "Kreise" },
+        secDivisoes: "Einteilung",
+        dicaDivisoes: "Wie das Raster aufgebaut ist: mit Abständen und Markierungen, damit du jede Woche leicht findest, auch beim Ausmalen von Hand auf Papier.",
+        linhasPor: "Jede Zeile des Kalenders ist",
+        linhasPorOpcoes: { vida: "Ein Lebensjahr", civil: "Ein Kalenderjahr" },
+        linhasPorDicas: {
+          vida: "Von einem Geburtstag zum nächsten. Der Klassiker.",
+          civil: "Von Januar bis Dezember, mit den echten Wochen jedes Monats."
+        },
+        rotulosCivil: "Jahre und Alter an den Seiten anzeigen",
+        numerarMeses: "Monate oben anzeigen",
+        mesesCurtos: ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"],
+        mesesLongos: ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+        hojeVida: (anos, semana) => `Heute: ${anos} ${anos === 1 ? "Jahr" : "Jahre"}, Woche ${semana}`,
+        hojeCivil: (semana, mes, ano) => `Heute: Woche ${semana} im ${mes} ${ano}`,
+        divAnos: "Jahre gruppieren",
+        divAnosOpcoes: { "0": "Nein", "5": "Je 5", "10": "Je 10" },
+        divAnosDicas: { "0": "Kein Abstand zwischen den Jahren", "5": "Ein Abstand alle 5 Jahre (größer alle 10)", "10": "Ein Abstand alle 10 Jahre" },
+        divSemanas: "Wochen gruppieren",
+        divSemanasOpcoes: { "0": "Nein", meses: "Monate", trimestres: "Quartale" },
+        divSemanasDicas: { "0": "Kein Abstand zwischen den Wochen", meses: "Die echten Monate, gezählt ab deinem Geburtstag (je 4 oder 5 Wochen)", trimestres: "4 Gruppen zu je 13 Wochen" },
+        rotulos: "Alter an der Seite anzeigen",
+        numerar: "Wochen oben nummerieren",
+        contorno: "Umriss der Wochen",
+        contornoOpcoes: { claro: "Hell", escuro: "Dunkel" },
+        contornoDicas: { claro: "Dezenter", escuro: "Auf Papier leichter zu sehen und auszumalen" },
+        secTextos: "Texte im PDF",
+        zonas: { topo: "Oberer Seitenrand", rodape: "Fußzeile" },
+        tiposTexto: { titulo: "Titel", nome: "Name", frase: "Spruch", assinatura: "Unterschrift", livre: "Text" },
+        placeholders: { titulo: "Titel", nome: "Dein Name", frase: "Schreib einen Spruch", livre: "Schreib einen Text" },
+        alinhamento: "Ausrichtung",
+        alinhamentos: { esq: "Links", centro: "Mittig", dir: "Rechts" },
+        tamanho: "Größe",
+        tamanhos: { p: "Klein", m: "Mittel", g: "Groß" },
+        subir: "Nach oben",
+        descer: "Nach unten",
+        paraTopo: "An den oberen Seitenrand verschieben",
+        paraRodape: "In die Fußzeile verschieben",
+        addTexto: "+ Text hinzufügen",
+        remover: "Text entfernen",
+        restaurar: "Standardeinstellungen wiederherstellen",
+        confirmarRestaurar: "Standardeinstellungen wiederherstellen? Dein Geburtsdatum bleibt erhalten; Texte, Farben und Unterschrift werden zurückgesetzt.",
+        desenharAssinatura: "Unterschrift hinzufügen",
+        refazerAssinatura: "Unterschrift neu machen",
+        dlgTitulo: "Deine Unterschrift",
+        dlgDica: "Unterschreib mit dem Finger oder der Maus im Feld oben. Wenn du magst, unterschreib auf weißem Papier und nutze „Foto aufnehmen“ oder „Bild importieren“.",
+        cameraDica: "Halte das Papier mit der Unterschrift so nah, dass es das Rechteck ausfüllt, bei gutem Licht, und klick auf „Aufnehmen“.",
+        capturar: "Aufnehmen",
+        voltar: "Zurück",
+        erroCamera: "Die Kamera konnte nicht genutzt werden. Prüf, ob sie angeschlossen ist und der Browser die Berechtigung hat, oder nutze „Bild importieren“.",
+        dlgDicaImportada: "Der Hintergrund wurde entfernt. Stell es so ein, dass nur die Schrift übrig bleibt; du kannst noch darüber zeichnen.",
+        importar: "Bild importieren",
+        foto: "Foto aufnehmen",
+        sensibilidade: "Hintergrund entfernen",
+        tintaPreta: "Tinte schwarz machen",
+        erroImagem: "Dieses Bild konnte nicht geöffnet werden.",
+        limpar: "Löschen",
+        cancelar: "Abbrechen",
+        salvar: "Unterschrift verwenden",
+        frases: [
+          "Bedenke, dass du sterben wirst.",
+          "Memento mori",
+          "Jede Woche zählt.",
+          "Carpe diem.",
+          "Zeit ist, was wir haben."
+        ],
+        idioma: "Sprache",
+        botao: "PDF herunterladen",
+        botaoCompartilhar: "PDF sichern oder teilen",
+        gerando: "PDF wird erstellt...",
+        previaVazia: "Gib dein Geburtsdatum ein, um die Vorschau zu sehen.",
+        resumo: (vividas, restantes, pct) => `${vividas} Wochen gelebt · ${restantes} übrig (${pct})`,
+        resumoVazio: (total) => `${total} leere Wochen`,
+        erroNascimento: "Gib ein gültiges Geburtsdatum ein (vierstelliges Jahr, ab 1900, nicht in der Zukunft).",
+        erroExpectativa: "Die Lebenserwartung muss zwischen 1 und 120 Jahren liegen.",
+        avisoExpectativa: "Die Lebenserwartung ist bereits überschritten: Alle Wochen erscheinen als gelebt.",
+        erroGerar: "Das PDF konnte nicht erstellt werden. Bitte versuch es noch einmal.",
+        info: "Deine Daten verlassen deinen Browser nicht: Alles passiert hier.",
+        cafe: "☕ Spendier mir einen Kaffee",
+        sugestoes: "💡 Vorschläge",
+        cafeTitulo: "Spendier mir einen Kaffee",
+        cafeDica: "Wenn dir der Kalender geholfen hat, hilft ein Kaffee, die Seite online und kostenlos zu halten. Danke!",
+        pixTitulo: "Pix (Brasilien)",
+        pixDica: "Kopiere den Schlüssel und füge ihn in deine Banking-App ein.",
+        copiar: "Kopieren",
+        copiado: "Kopiert!",
+        kofiTitulo: "Ko-fi",
+        kofiDica: "Karte oder PayPal, aus jedem Land.",
+        kofiAbrir: "Ko-fi öffnen",
+        fechar: "Schließen",
+        pdfTitulo: "Memento Mori",
+        pdfIdade: "Alter",
+        pdfSemana: "Woche",
+        pdfAno: "Jahr",
+        legVividas: "Gelebte Wochen",
+        legAtual: "Aktuelle Woche",
+        legRestantes: "Verbleibende Wochen",
+        pdfArquivo: "memento-mori.pdf",
+        descricao: "Dein Leben in Wochen, als Kalender zum Ausdrucken als PDF.",
+        ariaConfig: "Einstellungen",
+        ariaPrevia: "PDF-Vorschau",
+        ariaCanvas: "Vorschau des Kalender-PDFs",
+        ariaAbas: "Bereiche",
+        papel: "Papierformat",
+        papelOpcoes: { a4: "A4", carta: "US-Letter" },
+        papelDicas: { a4: "210 × 297 mm, der Standard fast überall auf der Welt", carta: "8,5 × 11 Zoll, der Standard in den USA, Kanada und Mexiko" },
+        primeiroDiaSemana: 1,
+        avisoCaracteres: "Diese Zeichen erscheinen nicht im PDF (nur das lateinische Alphabet funktioniert): "
+      },
+      it: {
+        nomeIdioma: "Italiano",
+        locale: "it-IT",
+        titulo: "Calendario Memento Mori",
+        abaConfig: "Impostazioni",
+        abaPrevia: "Anteprima",
+        secDados: "I tuoi dati",
+        secCalendario: "Calendario",
+        nascimento: "Data di nascita",
+        expectativa: "Aspettativa di vita (anni)",
+        corVividas: "Colore delle settimane vissute",
+        corAtual: "Colore della settimana attuale",
+        preencher: "Riempi le settimane vissute",
+        destacarAtual: "Evidenzia la settimana attuale",
+        legSemana: "Una settimana",
+        legenda: "Mostra la legenda",
+        formato: "Forma delle settimane",
+        formatos: { quadrado: "Quadrati", circulo: "Cerchi" },
+        secDivisoes: "Suddivisioni",
+        dicaDivisoes: "Come organizzare la griglia, con spazi e riferimenti per trovare facilmente ogni settimana, anche colorandola a mano sulla carta.",
+        linhasPor: "Ogni riga del calendario è",
+        linhasPorOpcoes: { vida: "Un anno di vita", civil: "Un anno solare" },
+        linhasPorDicas: {
+          vida: "Da un compleanno al successivo. Il classico.",
+          civil: "Da gennaio a dicembre, con le settimane reali di ogni mese."
+        },
+        rotulosCivil: "Mostra anni ed età ai lati",
+        numerarMeses: "Mostra i mesi in alto",
+        mesesCurtos: ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"],
+        mesesLongos: ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"],
+        hojeVida: (anos, semana) => `Oggi: ${anos} ${anos === 1 ? "anno" : "anni"}, settimana ${semana}`,
+        hojeCivil: (semana, mes, ano) => `Oggi: settimana ${semana} di ${mes} ${ano}`,
+        divAnos: "Raggruppa gli anni",
+        divAnosOpcoes: { "0": "No", "5": "Ogni 5", "10": "Ogni 10" },
+        divAnosDicas: { "0": "Nessuno spazio tra gli anni", "5": "Uno spazio ogni 5 anni (più grande ogni 10)", "10": "Uno spazio ogni 10 anni" },
+        divSemanas: "Raggruppa le settimane",
+        divSemanasOpcoes: { "0": "No", meses: "Mesi", trimestres: "Trimestri" },
+        divSemanasDicas: { "0": "Nessuno spazio tra le settimane", meses: "I mesi veri, contati dal tuo compleanno (4 o 5 settimane ciascuno)", trimestres: "4 gruppi di 13 settimane" },
+        rotulos: "Mostra le età di lato",
+        numerar: "Numera le settimane in alto",
+        contorno: "Contorno delle settimane",
+        contornoOpcoes: { claro: "Chiaro", escuro: "Scuro" },
+        contornoDicas: { claro: "Più discreto", escuro: "Più facile da vedere e da colorare sulla carta" },
+        secTextos: "Testi del PDF",
+        zonas: { topo: "In alto", rodape: "Piè di pagina" },
+        tiposTexto: { titulo: "Titolo", nome: "Nome", frase: "Frase", assinatura: "Firma", livre: "Testo" },
+        placeholders: { titulo: "Titolo", nome: "Il tuo nome", frase: "Scrivi una frase", livre: "Scrivi un testo" },
+        alinhamento: "Allineamento",
+        alinhamentos: { esq: "A sinistra", centro: "Al centro", dir: "A destra" },
+        tamanho: "Dimensione",
+        tamanhos: { p: "Piccolo", m: "Medio", g: "Grande" },
+        subir: "Sposta su",
+        descer: "Sposta giù",
+        paraTopo: "Sposta in alto nella pagina",
+        paraRodape: "Sposta nel piè di pagina",
+        addTexto: "+ Aggiungi testo",
+        remover: "Rimuovi testo",
+        restaurar: "Ripristina le impostazioni predefinite",
+        confirmarRestaurar: "Ripristinare le impostazioni predefinite? La tua data di nascita resta; testi, colori e firma tornano all’inizio.",
+        desenharAssinatura: "Aggiungi firma",
+        refazerAssinatura: "Rifai la firma",
+        dlgTitulo: "La tua firma",
+        dlgDica: "Firma con il dito o il mouse nello spazio sopra. Se preferisci, firma su un foglio bianco e usa «Scatta foto» o «Importa immagine».",
+        cameraDica: "Avvicina il foglio con la firma finché riempie il rettangolo, con buona luce, e fai clic su «Cattura».",
+        capturar: "Cattura",
+        voltar: "Indietro",
+        erroCamera: "Impossibile usare la fotocamera. Controlla che sia collegata e che il browser abbia il permesso, oppure usa «Importa immagine».",
+        dlgDicaImportada: "Lo sfondo è stato rimosso. Regola finché resta solo la scrittura; puoi ancora disegnarci sopra.",
+        importar: "Importa immagine",
+        foto: "Scatta foto",
+        sensibilidade: "Rimuovi sfondo",
+        tintaPreta: "Rendi l’inchiostro nero",
+        erroImagem: "Impossibile aprire questa immagine.",
+        limpar: "Cancella",
+        cancelar: "Annulla",
+        salvar: "Usa la firma",
+        frases: [
+          "Ricorda che morirai.",
+          "Memento mori",
+          "Ogni settimana conta.",
+          "Carpe diem.",
+          "Il tempo è ciò che abbiamo."
+        ],
+        idioma: "Lingua",
+        botao: "Scarica PDF",
+        botaoCompartilhar: "Salva o condividi PDF",
+        gerando: "Creazione del PDF...",
+        previaVazia: "Inserisci la tua data di nascita per vedere l’anteprima.",
+        resumo: (vividas, restantes, pct) => `${vividas} settimane vissute · ${restantes} rimanenti (${pct})`,
+        resumoVazio: (total) => `${total} settimane vuote`,
+        erroNascimento: "Inserisci una data di nascita valida (anno a 4 cifre, dal 1900, e non nel futuro).",
+        erroExpectativa: "L’aspettativa di vita deve essere tra 1 e 120 anni.",
+        avisoExpectativa: "L’aspettativa di vita è già stata superata: tutte le settimane appaiono come vissute.",
+        erroGerar: "Impossibile creare il PDF. Riprova.",
+        info: "I tuoi dati non lasciano il browser: tutto avviene qui.",
+        cafe: "☕ Offrimi un caffè",
+        sugestoes: "💡 Suggerimenti",
+        cafeTitulo: "Offrimi un caffè",
+        cafeDica: "Se il calendario ti è stato utile, un caffè aiuta a mantenere il sito online e gratuito. Grazie!",
+        pixTitulo: "Pix (Brasile)",
+        pixDica: "Copia la chiave e incollala nell’app della tua banca.",
+        copiar: "Copia",
+        copiado: "Copiato!",
+        kofiTitulo: "Ko-fi",
+        kofiDica: "Carta o PayPal, da qualsiasi paese.",
+        kofiAbrir: "Apri Ko-fi",
+        fechar: "Chiudi",
+        pdfTitulo: "Memento Mori",
+        pdfIdade: "Età",
+        pdfSemana: "Settimana",
+        pdfAno: "Anno",
+        legVividas: "Settimane vissute",
+        legAtual: "Settimana attuale",
+        legRestantes: "Settimane rimanenti",
+        pdfArquivo: "memento-mori.pdf",
+        descricao: "La tua vita in settimane, in un calendario da stampare in PDF.",
+        ariaConfig: "Impostazioni",
+        ariaPrevia: "Anteprima del PDF",
+        ariaCanvas: "Anteprima del calendario in PDF",
+        ariaAbas: "Sezioni",
+        papel: "Formato della carta",
+        papelOpcoes: { a4: "A4", carta: "Letter" },
+        papelDicas: { a4: "210 × 297 mm, lo standard in quasi tutto il mondo", carta: "8,5 × 11 pollici, lo standard negli USA, in Canada e in Messico" },
+        primeiroDiaSemana: 1,
+        avisoCaracteres: "Questi caratteri non escono nel PDF (funziona solo l’alfabeto latino): "
+      }
+    };
+
+    // ---------- Estado ----------
+    const CHAVE_CONFIG = "memento-mori-config";
+    const SEMANAS_ANO = 52;
+    const ANO_MIN = 1900;
+    const $ = (id) => document.getElementById(id);
+
+    // ---------- Idioma e costumes de cada lugar ----------
+    // Páginas por idioma (/pt/, /en/...): trazem data-idioma, título e descrição próprios
+    const IDIOMA_PAGINA = document.documentElement.dataset.idioma || "";
+    const RAIZ = new URL(IDIOMA_PAGINA ? "../" : "./", location.href);
+    // Fixa os endereços antes de o endereço da página mudar com a troca de idioma
+    document.querySelectorAll('link[rel="manifest"], link[rel="icon"], link[rel="apple-touch-icon"]').forEach((l) => { l.href = l.href; });
+
+    // Idioma: o do link (?lang=es ou /es/), senão o escolhido antes, senão o do navegador; se nenhum servir, inglês
+    function idiomaInicial() {
+      const doLink = (new URLSearchParams(location.search).get("lang") || "").toLowerCase();
+      if (TEXTOS[doLink]) return doLink;
+      if (TEXTOS[IDIOMA_PAGINA]) return IDIOMA_PAGINA;
+      try {
+        const salvo = JSON.parse(localStorage.getItem(CHAVE_CONFIG) || "null");
+        if (salvo && TEXTOS[salvo.idioma]) return salvo.idioma;
+      } catch (e) { /* sem configuração salva */ }
+      const pedidos = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ""];
+      for (const tag of pedidos) {
+        const base = String(tag).toLowerCase().split("-")[0];
+        if (TEXTOS[base]) return base;
+      }
+      return "en";
+    }
+    let idioma = idiomaInicial();
+    const idiomaDoNavegador = () => (navigator.language || "").toLowerCase().split("-")[0];
+
+    // Números no formato da região quando ela fala o idioma escolhido (ex.: es-MX), senão no padrão do idioma
+    function localeAtual() {
+      return idiomaDoNavegador() === idioma ? navigator.language : TEXTOS[idioma].locale;
+    }
+
+    // Primeiro dia da semana (0 = domingo, 1 = segunda): o da região, se o navegador souber; senão o costume do idioma
+    function primeiroDiaDaSemana() {
+      try {
+        if (idiomaDoNavegador() === idioma) {
+          const local = new Intl.Locale(navigator.language);
+          const info = typeof local.getWeekInfo === "function" ? local.getWeekInfo() : local.weekInfo;
+          if (info && info.firstDay) return info.firstDay % 7; // 7 (domingo) vira 0
+        }
+      } catch (e) { /* navegador sem essa informação */ }
+      return TEXTOS[idioma].primeiroDiaSemana;
+    }
+
+    // Papel: Carta (Letter) nos países que usam esse padrão; A4 no resto do mundo
+    const PAPEIS = { a4: { w: 210, h: 297, jspdf: "a4" }, carta: { w: 215.9, h: 279.4, jspdf: "letter" } };
+    const PAISES_CARTA = ["US", "CA", "MX", "PH", "CL", "CO", "VE", "CR", "GT", "DO", "PA", "PR", "SV", "NI", "HN"];
+    function papelPadrao() {
+      const regiao = ((navigator.language || "").split("-")[1] || "").toUpperCase();
+      return PAISES_CARTA.includes(regiao) ? "carta" : "a4";
+    }
+
+    // A fonte do PDF imprime o alfabeto latino (com acentos) e a pontuação comum; outros alfabetos saem errado
+    const IMPRIMIVEL = /^[\x20-\x7E\xA0-\xFF€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ]$/;
+    function semSuporte(texto) {
+      return [...new Set([...(texto || "")].filter((ch) => !IMPRIMIVEL.test(ch)))].join(" ");
+    }
+
+    // Ao trocar de idioma, o título e as frases sugeridas que não foram mudados acompanham a troca
+    function traduzirTextosPadrao(de, para) {
+      const a = TEXTOS[de], b = TEXTOS[para];
+      if (!a || !b || de === para) return;
+      textos.forEach((bloco) => {
+        if (bloco.tipo === "titulo" && bloco.valor === a.pdfTitulo) bloco.valor = b.pdfTitulo;
+        const i = a.frases.indexOf(bloco.valor);
+        if (bloco.tipo === "frase" && i >= 0 && b.frases[i]) bloco.valor = b.frases[i];
+      });
+    }
+
+    // ---------- Textos do PDF (título, nome, frase, assinatura e textos livres) ----------
+    // Posição = área da página (topo/rodape) + alinhamento (esq/centro/dir)
+    const ZONAS = ["topo", "rodape"];
+    const LADOS = ["esq", "centro", "dir"];
+    const POSICOES = ZONAS.flatMap((z) => LADOS.map((l) => `${z}-${l}`));
+    const zonaDe = (b) => b.pos.split("-")[0];
+    const ladoDe = (b) => b.pos.split("-")[1];
+    const FORMATOS = ["quadrado", "circulo"];
+
+    // ---------- Divisões da grade ----------
+    // Espaços extras entre grupos de anos (linhas) e de semanas (colunas), em "passos" da grade.
+    // Duas intensidades: o espaço maior separa grupos grandes (décadas, trimestres),
+    // o menor separa os grupos de dentro (5 anos, meses).
+    const DIV_ANOS = ["0", "5", "10"];
+    const DIV_SEMANAS = ["0", "meses", "trimestres"];
+    const ESPACO_MAIOR = 0.6, ESPACO_MENOR = 0.3;
+    // Meses: 12 grupos de 4 ou 5 semanas distribuídos como os meses do ano (13 semanas por trimestre)
+    const FIM_MESES = Array.from({ length: 11 }, (_, m) => Math.round((SEMANAS_ANO * (m + 1)) / 12));
+    const CONTORNOS = { claro: { cor: "#c8c8c8", lw: 0.1 }, escuro: { cor: "#8c8c8c", lw: 0.15 } };
+
+    // Espaço depois de k anos
+    function espacoAnos(div) {
+      if (div === "10") return (k) => (k % 10 === 0 ? ESPACO_MAIOR : 0);
+      if (div === "5") return (k) => (k % 10 === 0 ? ESPACO_MAIOR : k % 5 === 0 ? ESPACO_MENOR : 0);
+      return () => 0;
+    }
+    // Espaço depois de k semanas
+    function espacoSemanas(div) {
+      if (div === "trimestres") return (k) => (k % 13 === 0 ? ESPACO_MAIOR : 0);
+      if (div === "meses") return (k) => (k % 13 === 0 ? ESPACO_MAIOR : FIM_MESES.includes(k) ? ESPACO_MENOR : 0);
+      return () => 0;
+    }
+    // Deslocamento acumulado de cada linha/coluna por causa dos espaços (o último é o espaço total)
+    function deslocamentos(n, espacoDepois) {
+      const d = new Array(n).fill(0);
+      for (let i = 1; i < n; i++) d[i] = d[i - 1] + espacoDepois(i);
+      return d;
+    }
+    // Colunas que recebem número no topo: o início de cada grupo; sem divisão, 1, 5, 10, 15... 50
+    function inicioGrupos(div) {
+      if (div === "trimestres") return [0, 13, 26, 39];
+      if (div === "meses") return [0, ...FIM_MESES];
+      return [0, ...Array.from({ length: 10 }, (_, k) => 5 * (k + 1) - 1)];
+    }
+    const TAMANHOS = { p: 0.75, m: 1, g: 1.35 };
+    const ESTILO_TEXTO = {
+      titulo: { pt: 20, estilo: "bold", cor: "#000000" },
+      nome: { pt: 12, estilo: "bold", cor: "#222222" },
+      frase: { pt: 10, estilo: "italic", cor: "#646464" },
+      livre: { pt: 11, estilo: "normal", cor: "#3c3c3c" }
+    };
+    const ASSINATURA_ALT = 12;   // altura da assinatura em mm (tamanho médio)
+    const ASSINATURA_LARG = 80;  // largura máxima em mm
+
+    function textosPadrao(t) {
+      return [
+        { tipo: "titulo", ativo: true, valor: t.pdfTitulo, pos: "topo-centro", tam: "m" },
+        { tipo: "nome", ativo: false, valor: "", pos: "topo-centro", tam: "m" },
+        { tipo: "frase", ativo: true, valor: t.frases[0], pos: "rodape-centro", tam: "m" },
+        { tipo: "assinatura", ativo: false, valor: "", proporcao: 3, pos: "rodape-dir", tam: "m" }
+      ];
+    }
+    let textos = textosPadrao(TEXTOS[idioma]);
+
+    // ---------- Utilidades ----------
+    // "AAAA-MM-DD" -> data local (evita erro de fuso horário)
+    function lerData(texto) {
+      const [a, m, d] = texto.split("-").map(Number);
+      return new Date(a, m - 1, d);
+    }
+
+    const DIA_MS = 24 * 60 * 60 * 1000;
+    // Contas com datas sempre pelo calendário (dia a dia), sem erro de horário de verão
+    const somarDias = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+    // Início da semana que contém a data (primeiro: 0 = domingo, 1 = segunda)
+    const inicioDaSemana = (d, primeiro) => somarDias(d, -((d.getDay() - (primeiro || 0) + 7) % 7));
+    function hojeLocal() {
+      const h = new Date();
+      return new Date(h.getFullYear(), h.getMonth(), h.getDate());
+    }
+
+    // Data de nascimento válida, ou null (para os usos em que ela é opcional)
+    function dataNascimento(op) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(op.nascimento || "")) return null;
+      const d = lerData(op.nascimento);
+      return isNaN(d) || d.getFullYear() < ANO_MIN ? null : d;
+    }
+
+    // Idade completa e semanas desde o último aniversário: cada linha da grade começa num aniversário
+    // (assim a grade não "escorrega": 52 semanas são 364 dias, e o ano tem 365 ou 366)
+    function posicaoNaVida(nasc, hoje) {
+      const aniversario = (a) => new Date(nasc.getFullYear() + a, nasc.getMonth(), nasc.getDate());
+      let anos = hoje.getFullYear() - nasc.getFullYear();
+      if (aniversario(anos) > hoje) anos--;
+      const dias = Math.round((hoje - aniversario(anos)) / DIA_MS);
+      return { anos, semana: Math.min(SEMANAS_ANO - 1, Math.floor(dias / 7)) };
+    }
+
+    // Contagem real de semanas (de 7 em 7 dias) para o resumo: vividas e total até a expectativa
+    function contagem(op) {
+      const nasc = lerData(op.nascimento), hoje = hojeLocal();
+      const fim = new Date(nasc.getFullYear() + op.anos, nasc.getMonth(), nasc.getDate());
+      const semanas = (a, b) => Math.floor(Math.round((b - a) / DIA_MS) / 7);
+      const total = semanas(nasc, fim);
+      const vividas = Math.min(Math.max(semanas(nasc, hoje), 0), total);
+      return { vividas, total, restantes: total - vividas, passou: hoje >= fim };
+    }
+
+    // A data é obrigatória quando a grade usa o "hoje" ou o calendário
+    const precisaDaData = (op) => op.preencher || op.atual || op.linhasPor === "civil";
+
+    function hexParaRgb(hex) {
+      const n = parseInt(hex.slice(1), 16);
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    }
+
+    // ---------- Opções (lidas da tela) ----------
+    function lerOpcoes() {
+      return {
+        idioma,
+        nascimento: $("nascimento").value,
+        anos: Number($("expectativa").value),
+        corVividas: $("corVividas").value,
+        corAtual: $("corAtual").value,
+        preencher: $("preencher").checked,
+        atual: $("atual").checked,
+        legenda: $("legenda").checked,
+        rotulos: $("rotulos").checked,
+        formato: $("formato-circulo").checked ? "circulo" : "quadrado",
+        linhasPor: valorMarcado("linhasPor", "vida"),
+        papel: valorMarcado("papel", "a4"),
+        primeiroDia: primeiroDiaDaSemana(),
+        divAnos: valorMarcado("divAnos", "10"),
+        divSemanas: valorMarcado("divSemanas", "meses"),
+        numerar: $("numerar").checked,
+        contorno: valorMarcado("contorno", "claro"),
+        textos
+      };
+    }
+
+    function valorMarcado(nome, padrao) {
+      const marcado = document.querySelector(`input[name="${nome}"]:checked`);
+      return marcado ? marcado.value : padrao;
+    }
+
+    function validar(op, t) {
+      if (!precisaDaData(op)) {
+        // Sem preenchimento, sem destaque e por ano de vida, a data de nascimento não é obrigatória
+        if (!Number.isInteger(op.anos) || op.anos < 1 || op.anos > 120) return t.erroExpectativa;
+        return null;
+      }
+      if (!op.nascimento) return t.erroNascimento;
+      // Ano com mais de 4 dígitos (o campo nativo permite digitar até 6) ou antes de 1900
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(op.nascimento) || Number(op.nascimento.slice(0, 4)) < ANO_MIN) return t.erroNascimento;
+      const nasc = lerData(op.nascimento);
+      if (isNaN(nasc) || nasc > new Date()) return t.erroNascimento;
+      if (!Number.isInteger(op.anos) || op.anos < 1 || op.anos > 120) return t.erroExpectativa;
+      return null;
+    }
+
+    // ---------- Modelo da grade ----------
+    // Decide o que vai em cada linha e coluna, sem medidas: as células (vivida, atual ou restante),
+    // os espaços entre grupos e os rótulos. O layout depois transforma isso em desenho.
+
+    // Meses de verdade dentro de um ano de vida (que começa no aniversário): grupos de semanas
+    // seguidas do mesmo mês. Cada semana conta para o mês que tem a maior parte dos seus dias.
+    // A conta é feita num ano sem 29 de fevereiro, para ficar igual em todas as linhas.
+    function mesesDoAnoDeVida(nasc) {
+      const inicio = new Date(2025, nasc.getMonth(), nasc.getDate());
+      const grupos = [];
+      for (let w = 0; w < SEMANAS_ANO; w++) {
+        const mes = somarDias(inicio, 7 * w + 3).getMonth();
+        const ultimo = grupos[grupos.length - 1];
+        if (ultimo && ultimo.mes === mes) ultimo.fim = w;
+        else grupos.push({ mes, ini: w, fim: w });
+      }
+      return grupos;
+    }
+
+    // Cada linha é um ano de vida: começa no aniversário e tem 52 semanas
+    function gradeAnoDeVida(op, t) {
+      const linhas = op.anos, colunas = SEMANAS_ANO, total = linhas * colunas;
+      const nasc = dataNascimento(op);
+      // Posição da semana atual (linha × 52 + coluna); sem preenchimento nem destaque, a grade fica em branco
+      let atual = -1;
+      if ((op.preencher || op.atual) && nasc) {
+        const p = posicaoNaVida(nasc, hojeLocal());
+        atual = Math.min(p.anos * colunas + p.semana, total);
+      }
+      const celulas = [];
+      for (let i = 0; i < total; i++) {
+        const tipo = op.preencher && i < atual ? "vivida" : op.atual && i === atual ? "atual" : "restante";
+        celulas.push({ linha: Math.floor(i / colunas), coluna: i % colunas, tipo });
+      }
+
+      // Semanas: meses de verdade a partir do aniversário (precisa da data), trimestres de 13 semanas ou nada
+      const meses = op.divSemanas === "meses" && nasc ? mesesDoAnoDeVida(nasc) : null;
+      let espacoColuna = espacoSemanas(op.divSemanas); // sem a data, "meses" fica em grupos aproximados
+      let topo = [];
+      if (meses) {
+        const inicios = new Map(meses.slice(1).map((m) => [m.ini, m.mes]));
+        // Espaço maior antes de janeiro, abril, julho e outubro (os trimestres do calendário)
+        espacoColuna = (k) => (!inicios.has(k) ? 0 : inicios.get(k) % 3 === 0 ? ESPACO_MAIOR : ESPACO_MENOR);
+        if (op.numerar) {
+          topo = meses.map((m) => ({ coluna: m.ini, n: m.fim - m.ini + 1, textos: [t.mesesCurtos[m.mes], t.mesesCurtos[m.mes][0]] }));
+        }
+      } else if (op.numerar) {
+        topo = inicioGrupos(op.divSemanas).map((coluna) => ({ coluna, n: 1, textos: [String(coluna + 1)], numero: true }));
+      }
+
+      const cada = op.divAnos === "5" ? 5 : 10;
+      const esquerda = [];
+      if (op.rotulos) for (let l = 0; l < linhas; l += cada) esquerda.push({ linha: l, s: String(l) });
+      return {
+        linhas, colunas, celulas, topo, esquerda, direita: [],
+        espacoLinha: espacoAnos(op.divAnos), espacoColuna,
+        tituloTopo: op.numerar && !meses ? t.pdfSemana : null,
+        tituloEsquerda: op.rotulos ? t.pdfIdade : null,
+        tituloDireita: null
+      };
+    }
+
+    // Cada linha é um ano do calendário (janeiro a dezembro), com um bloco de 5 posições por mês.
+    // As semanas começam no domingo ou na segunda (conforme o costume do lugar) e contam para o mês
+    // (e o ano) do seu 4º dia, onde está a maior parte delas; então cada mês tem 4 ou 5 semanas,
+    // como numa folhinha, e a 5ª posição fica vazia nos meses de 4.
+    const POSICOES_MES = 5;
+    function gradeAnoCivil(op, t) {
+      const nasc = dataNascimento(op);
+      const fim = new Date(nasc.getFullYear() + op.anos, nasc.getMonth(), nasc.getDate());
+      const semanaDe = (d) => inicioDaSemana(d, op.primeiroDia);
+      const primeira = semanaDe(nasc), ultima = semanaDe(fim), deHoje = semanaDe(hojeLocal());
+      const ano0 = somarDias(primeira, 3).getFullYear();
+      const linhas = somarDias(ultima, 3).getFullYear() - ano0 + 1;
+      const celulas = [];
+      for (let s = primeira; s <= ultima; s = somarDias(s, 7)) {
+        const quarta = somarDias(s, 3);
+        const vivida = op.preencher && s < deHoje;
+        const atual = op.atual && s.getTime() === deHoje.getTime();
+        celulas.push({
+          linha: quarta.getFullYear() - ano0,
+          coluna: quarta.getMonth() * POSICOES_MES + Math.floor((quarta.getDate() - 1) / 7),
+          tipo: vivida ? "vivida" : atual ? "atual" : "restante"
+        });
+      }
+
+      // Espaço entre os meses (maior entre trimestres) e entre grupos de anos do calendário
+      const espacoColuna = (k) => (k % POSICOES_MES ? 0 : k % (3 * POSICOES_MES) ? ESPACO_MENOR : ESPACO_MAIOR);
+      const espacoLinha = (k) => {
+        const ano = ano0 + k; // o ano que começa depois do espaço
+        if (op.divAnos === "0") return 0;
+        if (ano % 10 === 0) return ESPACO_MAIOR;
+        return op.divAnos === "5" && ano % 5 === 0 ? ESPACO_MENOR : 0;
+      };
+      const topo = op.numerar
+        ? t.mesesCurtos.map((m, i) => ({ coluna: i * POSICOES_MES, n: POSICOES_MES, textos: [m, m[0]] }))
+        : [];
+
+      // Laterais: o ano à esquerda e, à direita, a idade que se completa naquele ano.
+      // Cada lado marca os seus próprios números redondos (anos 2005, 2010...; idades 0, 5, 10...)
+      const esquerda = [], direita = [];
+      if (op.rotulos) {
+        const cada = op.divAnos === "5" ? 5 : 10;
+        for (let l = 0; l < linhas; l++) {
+          const ano = ano0 + l;
+          const idade = ano - nasc.getFullYear();
+          const primeiraLinha = l === 0 && cada - (ano % cada) >= 3; // o ano de nascimento, se não colar no próximo
+          if (ano % cada === 0 || primeiraLinha) esquerda.push({ linha: l, s: String(ano) });
+          if (idade >= 0 && idade % cada === 0) direita.push({ linha: l, s: String(idade) });
+        }
+      }
+      return {
+        linhas, colunas: 12 * POSICOES_MES, celulas, topo, esquerda, direita,
+        espacoLinha, espacoColuna,
+        tituloTopo: null,
+        tituloEsquerda: op.rotulos ? t.pdfAno : null,
+        tituloDireita: op.rotulos ? t.pdfIdade : null
+      };
+    }
+
+    // ---------- Layout ----------
+    // Gera uma lista de desenhos em milímetros (página A4).
+    // Usada tanto pela prévia (canvas) quanto pelo PDF: o que você vê é o que sai.
+    function layout(op, t) {
+      const { w: W, h: H } = PAPEIS[op.papel] || PAPEIS.a4;
+      // O que vai em cada linha e coluna: por ano de vida (o clássico) ou por ano do calendário
+      const g = op.linhasPor === "civil" ? gradeAnoCivil(op, t) : gradeAnoDeVida(op, t);
+      const c = [];
+      c.info = { celulas: g.celulas.length };
+
+      // Fundo branco
+      c.push({ t: "rect", x: 0, y: 0, w: W, h: H, fill: "#ffffff" });
+
+      // Textos do topo e do rodapé, organizados em linhas: cada posição empilha os seus,
+      // e um texto que encostaria em outro da mesma linha desce para a seguinte
+      const GAP = 1.5, MARGEM_TOPO = 12, MARGEM_BASE = 10, FOLGA = 4;
+      const blocos = blocosVisiveis(op.textos);
+      const lado = (b) => b.pos.split("-")[1];
+      const montarLinhas = (lista, xEsq, xDir) => {
+        const linhas = [];
+        const ultima = {};
+        lista.forEach((b) => {
+          const l = lado(b);
+          const x = l === "esq" ? xEsq : l === "dir" ? xDir - b.largura : W / 2 - b.largura / 2;
+          const ini = x - FOLGA / 2, fim = x + b.largura + FOLGA / 2;
+          let k = (ultima[l] === undefined ? -1 : ultima[l]) + 1;
+          while (k < linhas.length && linhas[k].itens.some((o) => ini < o.fim && o.ini < fim)) k++;
+          if (k === linhas.length) linhas.push({ itens: [], altura: 0 });
+          linhas[k].itens.push({ b, x, ini, fim });
+          linhas[k].altura = Math.max(linhas[k].altura, b.altura);
+          ultima[l] = k;
+        });
+        return linhas;
+      };
+      const alturaLinhas = (linhas) => linhas.reduce((soma, ln, i) => soma + ln.altura + (i ? GAP : 0), 0);
+      const doTopo = blocos.filter((b) => b.pos.startsWith("topo"));
+      const doRodape = blocos.filter((b) => b.pos.startsWith("rodape"));
+
+      // Espaços das divisões, medidos em "passos" da grade (um passo = uma semana com o seu respiro)
+      const desY = deslocamentos(g.linhas, g.espacoLinha);
+      const desX = deslocamentos(g.colunas, g.espacoColuna);
+      const extraY = desY[g.linhas - 1], extraX = desX[g.colunas - 1];
+      const temCabecalho = g.topo.length || g.tituloEsquerda || g.tituloDireita;
+
+      // Grade: ocupa o espaço que os textos deixam. Como os textos dos lados se alinham às bordas
+      // da grade, e a largura da grade depende da altura livre, algumas passadas estabilizam o cálculo.
+      let xGrade = 22.5, larguraGrade = W - 45, linhasTopo, linhasRodape, gradeY, rodapeIni, legendaY, passo;
+      for (let k = 0; k < 4; k++) {
+        linhasTopo = montarLinhas(doTopo, xGrade, xGrade + larguraGrade);
+        linhasRodape = montarLinhas(doRodape, xGrade, xGrade + larguraGrade);
+        rodapeIni = H - MARGEM_BASE - alturaLinhas(linhasRodape);
+        legendaY = rodapeIni - (doRodape.length ? 5 : 2);
+        gradeY = Math.max(MARGEM_TOPO + alturaLinhas(linhasTopo) + (temCabecalho ? 7 : 5), 15);
+        const gradeFim = op.legenda ? legendaY - 8 : rodapeIni - 5;
+        passo = Math.min((W - 45) / (g.colunas + extraX), (gradeFim - gradeY) / (g.linhas + extraY));
+        larguraGrade = passo * (g.colunas + extraX);
+        xGrade = (W - larguraGrade) / 2; // centralizada; os rótulos ficam do lado de fora
+      }
+      const tam = passo * 0.78;
+      const xColuna = (coluna) => xGrade + (coluna + desX[coluna]) * passo;
+      const yLinha = (linha) => gradeY + (linha + desY[linha]) * passo;
+      const xEsq = xGrade - 3;                                // rótulos da esquerda (alinhados à direita)
+      const xDir = xGrade + larguraGrade - (passo - tam) + 3; // rótulos da direita
+      const yCabecalho = gradeY - 1.6;
+      const CINZA = "#787878";
+      const contorno = CONTORNOS[op.contorno] || CONTORNOS.claro;
+
+      // Cabeçalho: números das semanas ou nomes dos meses, centralizados no seu grupo;
+      // o nome do mês encolhe para a inicial (ou some) quando o grupo é estreito demais
+      g.topo.forEach((r) => {
+        const ini = xColuna(r.coluna), fim = xColuna(r.coluna + r.n - 1) + tam;
+        const pt = r.numero ? 6 : 6.5;
+        const s = r.numero ? r.textos[0] : r.textos.find((x) => medirTexto(x, pt, "normal") <= fim - ini + 0.6);
+        if (s) c.push({ t: "texto", x: (ini + fim) / 2, y: yCabecalho, s, pt, cor: CINZA, align: "center" });
+      });
+
+      // Laterais (idades ou anos à esquerda; idades à direita no modo calendário)
+      g.esquerda.forEach((r) => c.push({ t: "texto", x: xEsq, y: yLinha(r.linha) + tam / 2 + 0.9, s: r.s, pt: 7, cor: CINZA, align: "right" }));
+      g.direita.forEach((r) => c.push({ t: "texto", x: xDir, y: yLinha(r.linha) + tam / 2 + 0.9, s: r.s, pt: 7, cor: CINZA, align: "left" }));
+
+      // Títulos: "Semana" no canto; nesse caso o título da esquerda ("Idade") vai na vertical
+      if (g.tituloTopo) c.push({ t: "texto", x: xEsq, y: yCabecalho, s: g.tituloTopo, pt: 6, cor: CINZA, align: "right" });
+      if (g.tituloEsquerda && g.tituloTopo) {
+        const larguraRotulos = Math.max(0, ...g.esquerda.map((r) => medirTexto(r.s, 7, "normal")));
+        const yMeio = gradeY + ((g.linhas + extraY) * passo) / 2;
+        c.push({
+          t: "texto", x: xEsq - larguraRotulos - 1.8, y: yMeio + medirTexto(g.tituloEsquerda, 7, "normal") / 2,
+          s: g.tituloEsquerda, pt: 7, cor: CINZA, angulo: 90
+        });
+      } else if (g.tituloEsquerda) {
+        c.push({ t: "texto", x: xEsq, y: yCabecalho, s: g.tituloEsquerda, pt: 7, cor: CINZA, align: "right" });
+      }
+      if (g.tituloDireita) c.push({ t: "texto", x: xDir, y: yCabecalho, s: g.tituloDireita, pt: 7, cor: CINZA, align: "left" });
+
+      // Cada semana: quadrado ou círculo, ocupando o mesmo espaço
+      const circulo = op.formato === "circulo";
+      const marca = (x, y, medida, estilo) => c.push(circulo
+        ? { t: "circ", x: x + medida / 2, y: y + medida / 2, r: medida / 2, ...estilo }
+        : { t: "rect", x, y, w: medida, h: medida, ...estilo });
+
+      g.celulas.forEach(({ linha, coluna, tipo }) => {
+        const x = xColuna(coluna);
+        const y = yLinha(linha);
+        if (tipo === "vivida") {
+          marca(x, y, tam, { fill: op.corVividas });
+        } else if (tipo === "atual") {
+          // Semana atual: um pouco maior, centralizada, para se destacar
+          const maior = tam * 1.25;
+          const d = (maior - tam) / 2;
+          marca(x - d, y - d, maior, { fill: op.corAtual });
+        } else {
+          marca(x, y, tam, { stroke: contorno.cor, lw: contorno.lw });
+        }
+      });
+
+      // Legenda
+      if (op.legenda) {
+        const ly = legendaY;
+        const itens = [];
+        if (op.preencher) itens.push({ fill: op.corVividas, s: t.legVividas });
+        if (op.atual) itens.push({ fill: op.corAtual, s: t.legAtual });
+        itens.push({ stroke: contorno.cor, s: op.preencher ? t.legRestantes : t.legSemana });
+        // Distribui os itens centralizados na página
+        const larg = 44;
+        itens.forEach((it, k) => { it.x = W / 2 - (itens.length * larg) / 2 + 6 + k * larg; });
+        itens.forEach((it) => {
+          marca(it.x, ly - 3, 3, it.fill ? { fill: it.fill } : { stroke: it.stroke, lw: contorno.lw });
+          c.push({ t: "texto", x: it.x + 5, y: ly, s: it.s, pt: 9, cor: "#3c3c3c", align: "left" });
+        });
+      }
+
+      // Textos: os de cada linha ficam alinhados pela base
+      const desenharLinhas = (linhas, yInicial) => {
+        let y = yInicial;
+        linhas.forEach((ln) => {
+          const base = y + ln.altura;
+          ln.itens.forEach(({ b, x }) => {
+            const yItem = base - b.altura;
+            if (b.tipo === "assinatura") {
+              c.push({ t: "img", src: b.valor, x, y: yItem, w: b.w, h: b.h });
+            } else {
+              const l = lado(b);
+              const xt = l === "esq" ? x : l === "dir" ? x + b.largura : x + b.largura / 2;
+              const align = l === "esq" ? "left" : l === "dir" ? "right" : "center";
+              c.push({ t: "texto", x: xt, y: yItem + b.mm * 0.8, s: b.valor.trim(), pt: b.pt, estilo: b.estilo, cor: b.cor, align });
+            }
+          });
+          y = base + GAP;
+        });
+      };
+      desenharLinhas(linhasTopo, MARGEM_TOPO);
+      desenharLinhas(linhasRodape, rodapeIni);
+
+      return c;
+    }
+
+    // Só entra no PDF o que está ligado e tem conteúdo; calcula a altura de cada bloco em mm
+    function blocosVisiveis(lista) {
+      return (lista || [])
+        .filter((b) => b.ativo && POSICOES.includes(b.pos) && typeof b.valor === "string" && b.valor.trim())
+        .map((b) => {
+          const f = TAMANHOS[b.tam] || 1;
+          if (b.tipo === "assinatura") {
+            const prop = b.proporcao > 0 ? b.proporcao : 3;
+            const w = Math.min(ASSINATURA_ALT * f * prop, ASSINATURA_LARG * f);
+            const h = w / prop;
+            return { ...b, w, h, altura: h, largura: w };
+          }
+          const e = ESTILO_TEXTO[b.tipo] || ESTILO_TEXTO.livre;
+          const pt = e.pt * f;
+          const mm = pt * 0.3528;
+          return { ...b, pt, mm, estilo: e.estilo, cor: e.cor, altura: mm * 1.25, largura: medirTexto(b.valor.trim(), pt, e.estilo) };
+        });
+    }
+
+    // Largura de um texto em mm (Helvetica, a mesma fonte do PDF)
+    let ctxMedida;
+    function medirTexto(texto, pt, estilo) {
+      ctxMedida = ctxMedida || document.createElement("canvas").getContext("2d");
+      ctxMedida.font = `${estilo === "italic" ? "italic " : ""}${estilo === "bold" ? "bold " : ""}${pt}px Helvetica, Arial, sans-serif`;
+      return ctxMedida.measureText(texto).width * 0.3528;
+    }
+
+    // Imagens (assinatura) carregadas uma vez para a prévia
+    const imagens = {};
+    function imagem(src) {
+      if (!imagens[src]) {
+        const im = new Image();
+        im.onload = () => atualizarPrevia();
+        im.src = src;
+        imagens[src] = im;
+      }
+      return imagens[src];
+    }
+
+    // ---------- Desenho na prévia (canvas) ----------
+    function desenharCanvas(ctx, cmds, px) {
+      cmds.forEach((c) => {
+        if (c.t === "rect") {
+          if (c.fill) {
+            ctx.fillStyle = c.fill;
+            ctx.fillRect(c.x * px, c.y * px, c.w * px, c.h * px);
+          }
+          if (c.stroke) {
+            ctx.strokeStyle = c.stroke;
+            ctx.lineWidth = c.lw * px;
+            ctx.strokeRect(c.x * px, c.y * px, c.w * px, c.h * px);
+          }
+        } else if (c.t === "circ") {
+          ctx.beginPath();
+          ctx.arc(c.x * px, c.y * px, c.r * px, 0, Math.PI * 2);
+          if (c.fill) {
+            ctx.fillStyle = c.fill;
+            ctx.fill();
+          }
+          if (c.stroke) {
+            ctx.strokeStyle = c.stroke;
+            ctx.lineWidth = c.lw * px;
+            ctx.stroke();
+          }
+        } else if (c.t === "texto") {
+          const estilo = (c.estilo === "italic" ? "italic " : "") + (c.estilo === "bold" ? "bold " : "");
+          ctx.font = `${estilo}${c.pt * 0.3528 * px}px Helvetica, Arial, sans-serif`;
+          ctx.fillStyle = c.cor;
+          ctx.textBaseline = "alphabetic";
+          if (c.angulo) {
+            // Texto girado (sentido anti-horário), lido de baixo para cima
+            ctx.save();
+            ctx.translate(c.x * px, c.y * px);
+            ctx.rotate((-c.angulo * Math.PI) / 180);
+            ctx.textAlign = "left";
+            ctx.fillText(c.s, 0, 0);
+            ctx.restore();
+          } else {
+            ctx.textAlign = c.align || "left";
+            ctx.fillText(c.s, c.x * px, c.y * px);
+          }
+        } else if (c.t === "img") {
+          const im = imagem(c.src);
+          if (im.complete && im.naturalWidth) ctx.drawImage(im, c.x * px, c.y * px, c.w * px, c.h * px);
+        }
+      });
+    }
+
+    // ---------- Desenho no PDF (jsPDF) ----------
+    function desenharPDF(doc, cmds) {
+      cmds.forEach((c) => {
+        if (c.t === "rect" || c.t === "circ") {
+          if (c.fill) doc.setFillColor(...hexParaRgb(c.fill));
+          if (c.stroke) {
+            doc.setDrawColor(...hexParaRgb(c.stroke));
+            doc.setLineWidth(c.lw);
+          }
+          const estilo = c.fill && c.stroke ? "FD" : c.fill ? "F" : "S";
+          if (c.t === "rect") doc.rect(c.x, c.y, c.w, c.h, estilo);
+          else doc.circle(c.x, c.y, c.r, estilo);
+        } else if (c.t === "texto") {
+          doc.setFont("helvetica", c.estilo || "normal");
+          doc.setFontSize(c.pt);
+          doc.setTextColor(...hexParaRgb(c.cor));
+          doc.text(c.s, c.x, c.y, c.angulo ? { angle: c.angulo } : { align: c.align || "left" });
+        } else if (c.t === "img") {
+          doc.addImage(c.src, "PNG", c.x, c.y, c.w, c.h);
+        }
+      });
+    }
+
+    // ---------- Prévia na tela ----------
+    function atualizarPrevia() {
+      const t = TEXTOS[idioma];
+      const op = lerOpcoes();
+      atualizarControles(op);
+      const canvas = $("previa");
+
+      // O canvas ocupa a moldura inteira; a folha é desenhada dentro dele (centralizada, ou
+      // onde o zoom deixou), sempre na resolução real da tela
+      const moldura = canvas.parentElement;
+      const estilo = getComputedStyle(moldura);
+      const W = moldura.clientWidth, H = moldura.clientHeight;
+      const dispW = W - parseFloat(estilo.paddingLeft) - parseFloat(estilo.paddingRight);
+      const dispH = H - parseFloat(estilo.paddingTop) - parseFloat(estilo.paddingBottom);
+      const papel = PAPEIS[op.papel] || PAPEIS.a4;
+      let w = dispW > 0 ? dispW : 300;
+      let h = w * papel.h / papel.w;
+      if (dispH > 0 && h > dispH) {
+        h = dispH;
+        w = h * papel.w / papel.h;
+      }
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      Object.assign(vista, { W, H, w, h, dpr, papel, cmds: null });
+      pintarPrevia();
+
+      if (precisaDaData(op) && !op.nascimento) {
+        $("resumo").textContent = t.previaVazia;
+        mostrarMensagem("", "");
+        return;
+      }
+      const erro = validar(op, t);
+      if (erro) {
+        $("resumo").textContent = "";
+        mostrarMensagem(erro, "erro");
+        return;
+      }
+
+      const cmds = layout(op, t);
+      vista.cmds = cmds;
+      pintarPrevia();
+
+      // Resumo: onde está a semana de hoje na grade e a contagem (1.654 e 35,3% em português)
+      const num = (n, formato) => n.toLocaleString(localeAtual(), formato);
+      const hoje = op.atual || op.preencher ? textoHoje(op, t) : "";
+      if (!op.preencher) {
+        $("resumo").textContent = (hoje ? hoje + "\n" : "") + t.resumoVazio(num(cmds.info.celulas));
+        mostrarMensagem("", "");
+        return;
+      }
+      const ct = contagem(op);
+      const pct = num(ct.vividas / ct.total, { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      $("resumo").textContent = (hoje ? hoje + "\n" : "") + t.resumo(num(ct.vividas), num(ct.restantes), pct);
+
+      if (ct.passou) mostrarMensagem(t.avisoExpectativa, "aviso");
+      else mostrarMensagem("", "");
+    }
+
+    // "Hoje: ..." — onde achar a semana atual na grade, do jeito de cada organização
+    function textoHoje(op, t) {
+      const nasc = dataNascimento(op), hoje = hojeLocal();
+      if (!nasc) return "";
+      const fim = new Date(nasc.getFullYear() + op.anos, nasc.getMonth(), nasc.getDate());
+      if (hoje >= fim) return "";
+      if (op.linhasPor === "civil") {
+        const quarta = somarDias(inicioDaSemana(hoje, op.primeiroDia), 3);
+        return t.hojeCivil(Math.floor((quarta.getDate() - 1) / 7) + 1, t.mesesLongos[quarta.getMonth()], quarta.getFullYear());
+      }
+      const p = posicaoNaVida(nasc, hoje);
+      return t.hojeVida(p.anos, p.semana + 1);
+    }
+
+    // Liga, desliga e renomeia controles conforme as escolhas (a data só é pedida quando é usada)
+    function atualizarControles(op) {
+      const t = TEXTOS[idioma];
+      const civil = op.linhasPor === "civil";
+      const mesesReais = !civil && op.divSemanas === "meses";
+      $("nascimento").disabled = !(precisaDaData(op) || mesesReais);
+      $("corVividas").disabled = !op.preencher;
+      $("corAtual").disabled = !op.atual;
+      $("linha-divSemanas").hidden = civil; // no calendário, as semanas já ficam separadas por mês
+      $("lbl-rotulos").textContent = civil ? t.rotulosCivil : t.rotulos;
+      $("lbl-numerar").textContent = civil || (mesesReais && dataNascimento(op)) ? t.numerarMeses : t.numerar;
+    }
+
+    function mostrarMensagem(texto, tipo) {
+      const el = $("msg");
+      el.textContent = texto;
+      el.className = "msg" + (tipo ? " " + tipo : "");
+    }
+
+    // ---------- PDF ----------
+    // iPhone/iPad: a janela de compartilhar do sistema (Salvar em Arquivos, Imprimir, WhatsApp...)
+    // funciona melhor que o download, principalmente no app instalado na Tela de Início
+    const EH_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const USA_COMPARTILHAR = EH_IOS && typeof navigator.canShare === "function";
+
+    // Conta no GoatCounter só que um PDF foi baixado (nada do que está nele). Se o contador
+    // estiver bloqueado ou sem internet, o download segue normalmente
+    function contarDownload() {
+      try {
+        if (window.goatcounter && window.goatcounter.count) {
+          window.goatcounter.count({ path: "baixou-pdf", title: "Baixou o PDF", event: true });
+        }
+      } catch (e) { /* ignora */ }
+    }
+
+    async function entregarPDF(doc, t) {
+      if (USA_COMPARTILHAR) {
+        const arquivo = new File([doc.output("blob")], t.pdfArquivo, { type: "application/pdf" });
+        if (navigator.canShare({ files: [arquivo] })) {
+          try {
+            await navigator.share({ files: [arquivo], title: t.pdfTitulo });
+            contarDownload();
+            return;
+          } catch (e) {
+            if (e.name === "AbortError") return; // a pessoa fechou a janela de compartilhar
+          }
+        }
+      }
+      doc.save(t.pdfArquivo);
+      contarDownload();
+    }
+
+    async function baixarPDF() {
+      const t = TEXTOS[idioma];
+      const op = lerOpcoes();
+      const erro = validar(op, t);
+      if (erro) {
+        mostrarMensagem(erro, "erro");
+        return;
+      }
+
+      const botao = $("botao");
+      const textoOriginal = botao.textContent;
+      botao.disabled = true;
+      botao.textContent = t.gerando;
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: "mm", format: (PAPEIS[op.papel] || PAPEIS.a4).jspdf, orientation: "portrait", compress: true });
+        desenharPDF(doc, layout(op, t));
+        await entregarPDF(doc, t);
+        if (op.preencher && contagem(op).passou) mostrarMensagem(t.avisoExpectativa, "aviso");
+      } catch (e) {
+        console.error(e);
+        mostrarMensagem(t.erroGerar, "erro");
+      } finally {
+        botao.disabled = false;
+        botao.textContent = textoOriginal;
+      }
+    }
+
+    // ---------- Configurações salvas no navegador ----------
+    function salvarConfig() {
+      try { localStorage.setItem(CHAVE_CONFIG, JSON.stringify(lerOpcoes())); } catch (e) { /* ignora */ }
+    }
+
+    function carregarConfig() {
+      try {
+        const salvo = JSON.parse(localStorage.getItem(CHAVE_CONFIG) || "null");
+        if (!salvo) return;
+        const t = TEXTOS[idioma];
+        if (Array.isArray(salvo.textos)) {
+          textos = salvo.textos
+            .filter((b) => b && (ESTILO_TEXTO[b.tipo] || b.tipo === "assinatura"))
+            .map((b) => ({
+              ...b,
+              valor: typeof b.valor === "string" ? b.valor : "",
+              pos: POSICOES.includes(b.pos) ? b.pos : "rodape-centro",
+              tam: TAMANHOS[b.tam] ? b.tam : "m"
+            }))
+            // Assinatura só vale se for uma imagem PNG de verdade (dado adulterado é descartado)
+            .map((b) => {
+              if (b.tipo !== "assinatura") return b;
+              const valida = /^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(b.valor);
+              const proporcao = Number(b.proporcao);
+              return {
+                ...b,
+                valor: valida ? b.valor : "",
+                ativo: valida ? b.ativo : false,
+                proporcao: proporcao >= 0.2 && proporcao <= 20 ? proporcao : 3
+              };
+            });
+        } else {
+          // Configuração de versões anteriores: aproveita o nome e a frase escolhida
+          textos = textosPadrao(t);
+          if (typeof salvo.nome === "string") textos[1].valor = salvo.nome;
+          if (Number.isInteger(salvo.frase) && t.frases[salvo.frase]) textos[2].valor = t.frases[salvo.frase];
+        }
+        if (salvo.nascimento) $("nascimento").value = salvo.nascimento;
+        if (salvo.anos) $("expectativa").value = salvo.anos;
+        if (salvo.corVividas) $("corVividas").value = salvo.corVividas;
+        if (salvo.corAtual) $("corAtual").value = salvo.corAtual;
+        if (salvo.legenda !== undefined) $("legenda").checked = salvo.legenda;
+        if (salvo.atual !== undefined) $("atual").checked = salvo.atual;
+        if (salvo.preencher !== undefined) $("preencher").checked = salvo.preencher;
+        if (salvo.rotulos !== undefined) $("rotulos").checked = salvo.rotulos;
+        if (FORMATOS.includes(salvo.formato)) $("formato-" + salvo.formato).checked = true;
+        if (["vida", "civil"].includes(salvo.linhasPor)) $("linhasPor-" + salvo.linhasPor).checked = true;
+        if (DIV_ANOS.includes(salvo.divAnos)) $("divAnos-" + salvo.divAnos).checked = true;
+        if (DIV_SEMANAS.includes(salvo.divSemanas)) $("divSemanas-" + salvo.divSemanas).checked = true;
+        if (salvo.numerar !== undefined) $("numerar").checked = salvo.numerar;
+        if (Object.keys(CONTORNOS).includes(salvo.contorno)) $("contorno-" + salvo.contorno).checked = true;
+        if (Object.keys(PAPEIS).includes(salvo.papel)) $("papel-" + salvo.papel).checked = true;
+        // Aberto em outro idioma (ex.: link com ?lang=en): título e frases padrão vêm traduzidos
+        if (TEXTOS[salvo.idioma]) traduzirTextosPadrao(salvo.idioma, idioma);
+        $("idioma").value = idioma;
+      } catch (e) { /* configuração inválida: usa os padrões */ }
+    }
+
+    // ---------- Interface ----------
+    function preencherSelects() {
+      const selIdioma = $("idioma");
+      selIdioma.innerHTML = "";
+      Object.keys(TEXTOS).forEach((codigo) => {
+        const opt = document.createElement("option");
+        opt.value = codigo;
+        opt.textContent = TEXTOS[codigo].nomeIdioma;
+        selIdioma.appendChild(opt);
+      });
+      selIdioma.value = idioma;
+      // Esconde a escolha de idioma enquanto houver só um
+    }
+
+    function aplicarTextos() {
+      const t = TEXTOS[idioma];
+      document.documentElement.lang = t.locale || idioma;
+      if (idioma !== IDIOMA_PAGINA) { // a página do próprio idioma mantém o título pensado para as buscas
+        document.title = t.titulo;
+        document.querySelector('meta[name="description"]').setAttribute("content", t.descricao);
+      }
+      $("titulo").textContent = t.pdfTitulo;
+      $("titulo-painel").textContent = t.pdfTitulo;
+      document.querySelector(".config").setAttribute("aria-label", t.ariaConfig);
+      document.querySelector(".previa").setAttribute("aria-label", t.ariaPrevia);
+      $("previa").setAttribute("aria-label", t.ariaCanvas);
+      document.querySelector(".abas").setAttribute("aria-label", t.ariaAbas);
+      $("lbl-papel").textContent = t.papel;
+      Object.keys(PAPEIS).forEach((p) => {
+        $("papel-" + p).nextElementSibling.textContent = t.papelOpcoes[p];
+        $("papel-" + p).parentElement.title = t.papelDicas[p];
+      });
+      $("aba-config").textContent = t.abaConfig;
+      $("aba-previa").textContent = t.abaPrevia;
+      $("sec-dados").textContent = t.secDados;
+      $("sec-calendario").textContent = t.secCalendario;
+      $("sec-textos").textContent = t.secTextos;
+      $("lbl-nascimento").textContent = t.nascimento;
+      $("lbl-expectativa").textContent = t.expectativa;
+      $("lbl-preencher").textContent = t.preencher;
+      $("lbl-atual").textContent = t.destacarAtual;
+      $("lbl-legenda").textContent = t.legenda;
+      $("lbl-rotulos").textContent = t.rotulos;
+      $("lbl-formato").textContent = t.formato;
+      $("sec-divisoes").textContent = t.secDivisoes;
+      $("dica-divisoes").textContent = t.dicaDivisoes;
+      $("lbl-divAnos").textContent = t.divAnos;
+      $("lbl-divSemanas").textContent = t.divSemanas;
+      $("lbl-numerar").textContent = t.numerar;
+      $("lbl-contorno").textContent = t.contorno;
+      $("lbl-linhasPor").textContent = t.linhasPor;
+      ["vida", "civil"].forEach((v) => {
+        const corpo = $("linhasPor-" + v).nextElementSibling;
+        corpo.querySelector("strong").textContent = t.linhasPorOpcoes[v];
+        corpo.querySelector("small").textContent = t.linhasPorDicas[v];
+      });
+      // Escolhas com texto: nome visível e uma dica ao passar o mouse
+      [["divAnos", DIV_ANOS], ["divSemanas", DIV_SEMANAS], ["contorno", Object.keys(CONTORNOS)]].forEach(([grupo, valores]) => {
+        valores.forEach((v) => {
+          const opcao = $(`${grupo}-${v}`);
+          opcao.nextElementSibling.textContent = t[grupo + "Opcoes"][v];
+          opcao.parentElement.title = t[grupo + "Dicas"][v];
+        });
+      });
+      FORMATOS.forEach((f) => {
+        $("formato-" + f).setAttribute("aria-label", t.formatos[f]);
+        $("formato-" + f).parentElement.title = t.formatos[f];
+      });
+      [["corVividas", t.corVividas], ["corAtual", t.corAtual]].forEach(([id, nome]) => {
+        $(id).setAttribute("aria-label", nome);
+        $(id).title = nome;
+      });
+      ZONAS.forEach((z) => { $("lbl-zona-" + z).textContent = t.zonas[z]; });
+      document.querySelectorAll(".btn-add").forEach((bt) => {
+        bt.textContent = t.addTexto;
+        bt.setAttribute("aria-label", `${t.addTexto.replace(/^\+\s*/, "")}: ${t.zonas[bt.dataset.zona]}`);
+      });
+      $("restaurar").textContent = t.restaurar;
+      aplicarTextosApoio(t);
+      $("dlg-titulo").textContent = t.dlgTitulo;
+      $("dlg-dica").textContent = t.dlgDica;
+      $("pad-limpar").textContent = t.limpar;
+      $("pad-cancelar").textContent = t.cancelar;
+      $("pad-salvar").textContent = t.salvar;
+      $("pad-importar").textContent = t.importar;
+      $("pad-foto").textContent = t.foto;
+      $("camera-voltar").textContent = t.voltar;
+      $("camera-capturar").textContent = t.capturar;
+      $("lbl-sens").textContent = t.sensibilidade;
+      $("lbl-preta").textContent = t.tintaPreta;
+      $("idioma").setAttribute("aria-label", t.idioma);
+      $("escolha-idioma").title = t.idioma;
+      $("botao").textContent = USA_COMPARTILHAR ? t.botaoCompartilhar : t.botao;
+      $("info").textContent = t.info;
+
+      // Sugestões para o campo da frase
+      $("sugestoes-frase").innerHTML = "";
+      t.frases.forEach((f) => {
+        const opt = document.createElement("option");
+        opt.value = f;
+        $("sugestoes-frase").appendChild(opt);
+      });
+      renderTextos();
+    }
+
+    // ---------- Lista de textos do PDF ----------
+    // Ícones (SVG fixos, definidos aqui mesmo)
+    const ICONES = {
+      esq: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M2 6.5h8M2 9.5h12M2 12.5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+      centro: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M4 6.5h8M2 9.5h12M4 12.5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+      dir: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M6 6.5h8M2 9.5h12M6 12.5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+      subir: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 10l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      descer: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      remover: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4.5h11M6.5 4.5V3h3v1.5M4 4.5l.7 9h6.6l.7-9M6.7 7v4.5M9.3 7v4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    };
+
+    // Identificador de cada texto enquanto a página está aberta (não é salvo)
+    const idsTexto = new WeakMap();
+    let proximoId = 1;
+    function idDe(b) {
+      if (!idsTexto.has(b)) idsTexto.set(b, proximoId++);
+      return idsTexto.get(b);
+    }
+
+    function criar(tag, classe, props) {
+      const el = document.createElement(tag);
+      if (classe) el.className = classe;
+      if (props) Object.assign(el, props);
+      return el;
+    }
+
+    function botaoIcone(icone, rotulo, desativado, aoClicar, foco, classeExtra) {
+      const bt = criar("button", "btn-icone" + (classeExtra ? " " + classeExtra : ""), { type: "button", title: rotulo, disabled: desativado });
+      bt.setAttribute("aria-label", rotulo);
+      bt.innerHTML = ICONES[icone];
+      if (foco) bt.dataset.foco = foco;
+      bt.addEventListener("click", aoClicar);
+      return bt;
+    }
+
+    // Botões segmentados: escolha única entre poucas opções (alinhamento, tamanho)
+    function segmentado(nome, rotulo, opcoes, valor, aoMudar, foco) {
+      const grupo = criar("div", "seg");
+      grupo.setAttribute("role", "radiogroup");
+      grupo.setAttribute("aria-label", rotulo);
+      opcoes.forEach((o) => {
+        const lab = criar("label", "", { title: o.titulo });
+        const inp = criar("input", "", { type: "radio", name: nome, value: o.valor, checked: o.valor === valor });
+        inp.setAttribute("aria-label", o.titulo);
+        inp.dataset.foco = `${foco}-${o.valor}`;
+        inp.addEventListener("change", () => { if (inp.checked) aoMudar(o.valor); });
+        const visual = criar("span");
+        visual.innerHTML = o.html; // ícones e letras fixos, definidos neste arquivo
+        lab.append(inp, visual);
+        grupo.append(lab);
+      });
+      return grupo;
+    }
+
+    // A lista segue a ordem da página: primeiro os textos do topo, depois os do rodapé.
+    // Dentro de cada área, a ordem da lista é a ordem em que eles aparecem empilhados no PDF.
+    function ordenarPorZona() {
+      textos = ZONAS.flatMap((z) => textos.filter((b) => zonaDe(b) === z));
+    }
+
+    // Monta os cartões de texto. "realcar": texto que acabou de mudar de lugar (pisca e fica à vista)
+    function renderTextos(realcar) {
+      const t = TEXTOS[idioma];
+      const ativo = document.activeElement;
+      const foco = ativo && ativo.dataset ? ativo.dataset.foco : "";
+      ordenarPorZona();
+      ZONAS.forEach((z) => { $("lista-" + z).innerHTML = ""; });
+      textos.forEach((b, i) => $("lista-" + zonaDe(b)).append(cartaoTexto(b, i, t)));
+
+      // Devolve o foco ao mesmo controle (útil no teclado); se a seta ficou desativada, vai para a outra
+      if (foco) {
+        let el = document.querySelector(`[data-foco="${foco}"]`);
+        if (el && el.disabled) {
+          const outra = foco.endsWith("-subir") ? foco.replace(/-subir$/, "-descer") : foco.replace(/-descer$/, "-subir");
+          el = document.querySelector(`[data-foco="${outra}"]`);
+        }
+        if (el && !el.disabled) el.focus({ preventScroll: true });
+      }
+      if (realcar) {
+        const cartao = document.querySelector(`.item-texto[data-id="${idDe(realcar)}"]`);
+        if (cartao) {
+          cartao.classList.add("realce");
+          cartao.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        }
+      }
+    }
+
+    function cartaoTexto(b, i, t) {
+      const id = idDe(b);
+      const zona = zonaDe(b);
+      const nome = t.tiposTexto[b.tipo] || t.tiposTexto.livre;
+      const item = criar("div", "item-texto" + (b.ativo ? "" : " desligado"));
+      item.dataset.id = id;
+
+      // Cabeçalho: liga/desliga com o nome, setas de ordem e (texto livre) remover
+      const topo = criar("div", "item-topo");
+      const lab = criar("label", "interruptor");
+      const chk = criar("input", "", { type: "checkbox", checked: b.ativo });
+      chk.setAttribute("role", "switch");
+      chk.dataset.foco = id + "-ativo";
+      const trilho = criar("span", "trilho");
+      trilho.setAttribute("aria-hidden", "true");
+      lab.append(chk, trilho, criar("span", "item-nome", { textContent: nome }));
+      topo.append(lab);
+
+      // Setas: trocam a ordem dentro da área; na divisa entre topo e rodapé, passam o texto para a outra área
+      const mesmaAntes = i > 0 && zonaDe(textos[i - 1]) === zona;
+      const mesmaDepois = i < textos.length - 1 && zonaDe(textos[i + 1]) === zona;
+      const rotuloSubir = mesmaAntes ? t.subir : t.paraTopo;
+      const rotuloDescer = mesmaDepois ? t.descer : t.paraRodape;
+      topo.append(
+        botaoIcone("subir", rotuloSubir, !mesmaAntes && zona === "topo", () => mover(b, -1), id + "-subir"),
+        botaoIcone("descer", rotuloDescer, !mesmaDepois && zona === "rodape", () => mover(b, 1), id + "-descer")
+      );
+      if (b.tipo === "livre") topo.append(botaoIcone("remover", t.remover, false, () => remover(b), null, "perigo"));
+
+      const campos = criar("div", "item-campos");
+      campos.hidden = !b.ativo;
+      chk.addEventListener("change", () => {
+        b.ativo = chk.checked;
+        campos.hidden = !b.ativo;
+        item.classList.toggle("desligado", !b.ativo);
+        mudouTextos();
+      });
+
+      if (b.tipo === "assinatura") {
+        const linha = criar("div", "assinatura-linha");
+        const bt = criar("button", "btn-sec", { type: "button", textContent: b.valor ? t.refazerAssinatura : t.desenharAssinatura });
+        bt.dataset.foco = id + "-assinar";
+        bt.addEventListener("click", () => abrirPad(b));
+        linha.append(bt);
+        if (b.valor) linha.append(criar("img", "mini-assinatura", { src: b.valor, alt: nome }));
+        campos.append(linha);
+      } else {
+        const inp = criar("input", "", {
+          type: "text", maxLength: 80, value: b.valor,
+          placeholder: t.placeholders[b.tipo] || "", autocomplete: "off"
+        });
+        inp.setAttribute("aria-label", nome);
+        inp.dataset.foco = id + "-texto";
+        if (b.tipo === "frase") inp.setAttribute("list", "sugestoes-frase");
+        // Aviso logo abaixo do campo quando há letras que a fonte do PDF não imprime (ex.: ł, 日, emoji)
+        const aviso = criar("p", "aviso-campo");
+        aviso.setAttribute("role", "status");
+        const avisar = () => {
+          const ruins = semSuporte(inp.value);
+          aviso.hidden = !ruins;
+          aviso.textContent = ruins ? t.avisoCaracteres + ruins : "";
+        };
+        avisar();
+        inp.addEventListener("input", () => { b.valor = inp.value; avisar(); mudouTextos(); });
+        campos.append(inp, aviso);
+      }
+
+      const controles = criar("div", "item-controles");
+      controles.append(
+        segmentado(`alinhamento-${id}`, t.alinhamento,
+          LADOS.map((l) => ({ valor: l, html: ICONES[l], titulo: t.alinhamentos[l] })),
+          ladoDe(b), (l) => { b.pos = `${zonaDe(b)}-${l}`; mudouTextos(); }, `${id}-alinhamento`),
+        segmentado(`tamanho-${id}`, t.tamanho,
+          Object.keys(TAMANHOS).map((k) => ({ valor: k, html: `<b class="letra-${k}">A</b>`, titulo: t.tamanhos[k] })),
+          b.tam, (k) => { b.tam = k; mudouTextos(); }, `${id}-tamanho`)
+      );
+      campos.append(controles);
+      item.append(topo, campos);
+      return item;
+    }
+
+    function mover(b, direcao) {
+      const i = textos.indexOf(b);
+      const vizinho = textos[i + direcao];
+      if (vizinho && zonaDe(vizinho) === zonaDe(b)) {
+        textos[i] = vizinho;
+        textos[i + direcao] = b;
+      } else if (direcao < 0 && zonaDe(b) === "rodape") {
+        b.pos = `topo-${ladoDe(b)}`;    // último do topo
+      } else if (direcao > 0 && zonaDe(b) === "topo") {
+        b.pos = `rodape-${ladoDe(b)}`;  // primeiro do rodapé
+      } else {
+        return;
+      }
+      renderTextos(b);
+      mudouTextos();
+    }
+
+    function remover(b) {
+      const zona = zonaDe(b);
+      textos = textos.filter((x) => x !== b);
+      renderTextos();
+      mudouTextos();
+      document.querySelector(`.btn-add[data-zona="${zona}"]`).focus();
+    }
+
+    function mudouTextos() { salvarConfig(); atualizarPrevia(); }
+
+    // ---------- Assinatura desenhada ----------
+    let assinaturaAlvo = null;
+    let tracou = false;
+
+    function abrirPad(bloco) {
+      assinaturaAlvo = bloco;
+      $("dlg-assinatura").showModal();
+      const pad = $("pad");
+      const dpr = window.devicePixelRatio || 1;
+      pad.width = Math.round(pad.clientWidth * dpr);
+      pad.height = Math.round(pad.clientHeight * dpr);
+      const ctx = pad.getContext("2d");
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = 2.6 * dpr;
+      ctx.strokeStyle = "#1a1a1a";
+      ctx.fillStyle = "#1a1a1a";
+      tracou = false;
+      fotoOriginal = null;
+      $("pad-ajuste").hidden = true;
+      $("dlg-dica").textContent = TEXTOS[idioma].dlgDica;
+    }
+
+    (function prepararPad() {
+      const pad = $("pad");
+      const ctx = pad.getContext("2d");
+      let desenhando = false, ultimo = null;
+      const ponto = (e) => {
+        const r = pad.getBoundingClientRect();
+        return { x: (e.clientX - r.left) * pad.width / r.width, y: (e.clientY - r.top) * pad.height / r.height };
+      };
+      pad.addEventListener("pointerdown", (e) => {
+        desenhando = true;
+        pad.setPointerCapture(e.pointerId);
+        ultimo = ponto(e);
+        ctx.beginPath();
+        ctx.arc(ultimo.x, ultimo.y, ctx.lineWidth / 2, 0, Math.PI * 2);
+        ctx.fill();
+        tracou = true;
+      });
+      pad.addEventListener("pointermove", (e) => {
+        if (!desenhando) return;
+        const p = ponto(e);
+        ctx.beginPath();
+        ctx.moveTo(ultimo.x, ultimo.y);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+        ultimo = p;
+      });
+      const parar = () => { desenhando = false; };
+      pad.addEventListener("pointerup", parar);
+      pad.addEventListener("pointercancel", parar);
+
+      $("pad-limpar").addEventListener("click", () => {
+        ctx.clearRect(0, 0, pad.width, pad.height);
+        tracou = false;
+        fotoOriginal = null;
+        $("pad-ajuste").hidden = true;
+        $("dlg-dica").textContent = TEXTOS[idioma].dlgDica;
+      });
+
+      // Importar imagem ou tirar foto.
+      // Celular/tablet: "Tirar foto" abre a câmera do aparelho (input com capture).
+      // Computador: esse input só abriria a escolha de arquivo, então a webcam abre aqui mesmo.
+      $("pad-importar").addEventListener("click", () => $("arq-importar").click());
+      $("pad-foto").addEventListener("click", () => {
+        const toque = window.matchMedia("(pointer: coarse)").matches;
+        const temWebcam = navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
+        if (toque || !temWebcam) $("arq-foto").click();
+        else abrirCamera();
+      });
+      ["arq-importar", "arq-foto"].forEach((id) => {
+        $(id).addEventListener("change", (e) => {
+          const arq = e.target.files && e.target.files[0];
+          e.target.value = "";
+          if (!arq) return;
+          const url = URL.createObjectURL(arq);
+          const im = new Image();
+          im.onload = () => {
+            URL.revokeObjectURL(url);
+            usarImagem(im);
+          };
+          im.onerror = () => {
+            URL.revokeObjectURL(url);
+            $("dlg-dica").textContent = TEXTOS[idioma].erroImagem;
+          };
+          im.src = url;
+        });
+      });
+      $("pad-sens").addEventListener("input", mostrarFotoNoPad);
+      $("pad-preta").addEventListener("change", mostrarFotoNoPad);
+
+      function usarImagem(img) {
+        fotoOriginal = img;
+        $("pad-ajuste").hidden = false;
+        $("dlg-dica").textContent = TEXTOS[idioma].dlgDicaImportada;
+        mostrarFotoNoPad();
+      }
+
+      // ---------- Webcam (computador) ----------
+      let fluxoCamera = null;
+      let pedidoCamera = 0; // invalida pedidos antigos se a pessoa voltar ou fechar antes da câmera abrir
+
+      function modoCamera(ligado) {
+        $("camera").hidden = !ligado;
+        $("camera-botoes").hidden = !ligado;
+        pad.hidden = ligado;
+        $("pad-botoes").hidden = ligado;
+        document.querySelector(".dlg-fontes").hidden = ligado;
+        $("pad-ajuste").hidden = ligado || !fotoOriginal;
+      }
+
+      function pararCamera() {
+        pedidoCamera++;
+        if (fluxoCamera) fluxoCamera.getTracks().forEach((faixa) => faixa.stop());
+        fluxoCamera = null;
+        $("camera-video").srcObject = null;
+      }
+
+      async function abrirCamera() {
+        const meu = ++pedidoCamera;
+        const video = $("camera-video");
+        $("camera-capturar").disabled = true;
+        modoCamera(true);
+        $("dlg-dica").textContent = TEXTOS[idioma].cameraDica;
+        try {
+          const fluxo = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 1920 }, height: { ideal: 1080 } },
+            audio: false
+          });
+          if (meu !== pedidoCamera) { fluxo.getTracks().forEach((faixa) => faixa.stop()); return; }
+          fluxoCamera = fluxo;
+          video.srcObject = fluxo;
+          await video.play();
+          if (meu === pedidoCamera) $("camera-capturar").disabled = false;
+        } catch (e) {
+          if (meu !== pedidoCamera) return;
+          pararCamera();
+          modoCamera(false);
+          $("dlg-dica").textContent = TEXTOS[idioma].erroCamera;
+        }
+      }
+
+      $("camera-capturar").addEventListener("click", () => {
+        const video = $("camera-video");
+        const vw = video.videoWidth, vh = video.videoHeight;
+        if (!vw || !vh) return;
+        // Usa só a área do retângulo-guia (deixa de fora mãos e o fundo da sala)
+        const rv = video.getBoundingClientRect(), rg = $("camera-guia").getBoundingClientRect();
+        const sx = Math.max(0, (rg.left - rv.left) / rv.width * vw);
+        const sy = Math.max(0, (rg.top - rv.top) / rv.height * vh);
+        const sw = Math.min(vw - sx, rg.width / rv.width * vw);
+        const sh = Math.min(vh - sy, rg.height / rv.height * vh);
+        const foto = document.createElement("canvas");
+        foto.width = Math.max(1, Math.round(sw));
+        foto.height = Math.max(1, Math.round(sh));
+        foto.getContext("2d").drawImage(video, sx, sy, sw, sh, 0, 0, foto.width, foto.height);
+        pararCamera();
+        modoCamera(false);
+        usarImagem(foto);
+      });
+
+      $("camera-voltar").addEventListener("click", () => {
+        pararCamera();
+        modoCamera(false);
+        $("dlg-dica").textContent = fotoOriginal ? TEXTOS[idioma].dlgDicaImportada : TEXTOS[idioma].dlgDica;
+      });
+
+      // Fechar a janela (inclusive com Esc) sempre desliga a webcam
+      $("dlg-assinatura").addEventListener("close", () => { pararCamera(); modoCamera(false); });
+
+      // Desenha a assinatura importada (já sem fundo) centralizada no espaço de assinar
+      function mostrarFotoNoPad() {
+        if (!fotoOriginal) return;
+        const limpa = removerFundo(fotoOriginal, Number($("pad-sens").value), $("pad-preta").checked);
+        ctx.clearRect(0, 0, pad.width, pad.height);
+        const m = 12 * (window.devicePixelRatio || 1);
+        const esc = Math.min((pad.width - 2 * m) / limpa.width, (pad.height - 2 * m) / limpa.height);
+        const w = limpa.width * esc, h = limpa.height * esc;
+        ctx.drawImage(limpa, (pad.width - w) / 2, (pad.height - h) / 2, w, h);
+        tracou = true;
+      }
+      $("pad-cancelar").addEventListener("click", () => $("dlg-assinatura").close());
+      $("pad-salvar").addEventListener("click", () => {
+        const recorte = tracou ? recortarAssinatura(pad) : null;
+        if (assinaturaAlvo) {
+          assinaturaAlvo.valor = recorte ? recorte.src : "";
+          assinaturaAlvo.proporcao = recorte ? recorte.proporcao : 3;
+          if (recorte) assinaturaAlvo.ativo = true;
+        }
+        $("dlg-assinatura").close();
+        renderTextos();
+        mudouTextos();
+      });
+    })();
+
+    // Remove o fundo de uma foto ou imagem de assinatura, mantendo a escrita real.
+    // 1) Estima o fundo de cada região (o papel, mesmo com sombra ou luz desigual);
+    // 2) o que for mais escuro que o fundo vira tinta, com transparência proporcional (bordas suaves);
+    // 3) apaga pontinhos soltos (poeira, textura do papel).
+    let fotoOriginal = null;
+    function removerFundo(img, sensibilidade, tintaPreta) {
+      const MAX = 1200;
+      const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height; // <img> ou <canvas> (webcam)
+      const esc = Math.min(1, MAX / Math.max(iw, ih));
+      const w = Math.max(1, Math.round(iw * esc));
+      const h = Math.max(1, Math.round(ih * esc));
+      const cv = document.createElement("canvas");
+      cv.width = w; cv.height = h;
+      const cx = cv.getContext("2d", { willReadFrequently: true });
+      cx.fillStyle = "#fff"; // imagens com transparência: fundo branco antes de analisar
+      cx.fillRect(0, 0, w, h);
+      cx.drawImage(img, 0, 0, w, h);
+      const im = cx.getImageData(0, 0, w, h);
+      const d = im.data;
+      const n = w * h;
+
+      // Luminosidade de cada pixel
+      const lum = new Float32Array(n);
+      for (let i = 0; i < n; i++) lum[i] = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
+
+      // Fundo: o pixel mais claro de cada bloco (o papel), suavizado entre blocos vizinhos
+      const B = Math.max(8, Math.round(Math.max(w, h) / 40));
+      const bw = Math.ceil(w / B), bh = Math.ceil(h / B);
+      const blocoMax = new Float32Array(bw * bh);
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const k = Math.floor(y / B) * bw + Math.floor(x / B);
+          if (lum[y * w + x] > blocoMax[k]) blocoMax[k] = lum[y * w + x];
+        }
+      }
+      const fundoBloco = new Float32Array(bw * bh);
+      for (let by = 0; by < bh; by++) {
+        for (let bx = 0; bx < bw; bx++) {
+          let soma = 0, cont = 0;
+          for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+              const yy = by + dy, xx = bx + dx;
+              if (yy >= 0 && yy < bh && xx >= 0 && xx < bw) { soma += blocoMax[yy * bw + xx]; cont++; }
+            }
+          }
+          fundoBloco[by * bw + bx] = soma / cont;
+        }
+      }
+      const fundoEm = (x, y) => {
+        // interpolação bilinear entre os centros dos blocos
+        const fx = Math.min(Math.max(x / B - 0.5, 0), bw - 1), fy = Math.min(Math.max(y / B - 0.5, 0), bh - 1);
+        const x0 = Math.floor(fx), y0 = Math.floor(fy);
+        const x1 = Math.min(x0 + 1, bw - 1), y1 = Math.min(y0 + 1, bh - 1);
+        const ax = fx - x0, ay = fy - y0;
+        const a = fundoBloco[y0 * bw + x0] * (1 - ax) + fundoBloco[y0 * bw + x1] * ax;
+        const b = fundoBloco[y1 * bw + x0] * (1 - ax) + fundoBloco[y1 * bw + x1] * ax;
+        return a * (1 - ay) + b * ay;
+      };
+
+      // Tinta: quanto mais escuro que o papel, mais opaco
+      const t0 = Math.max(0.02, 0.30 - sensibilidade * 0.035);
+      const t1 = t0 + 0.2;
+      const alfa = new Uint8ClampedArray(n);
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const i = y * w + x;
+          const f = Math.max(fundoEm(x, y), 1);
+          const escuro = (f - lum[i]) / f;
+          const a = Math.min(1, Math.max(0, (escuro - t0) / (t1 - t0)));
+          alfa[i] = Math.round(a * 255);
+        }
+      }
+
+      // Apaga manchas pequenas e soltas
+      const minimo = Math.max(12, Math.round(n * 0.00004));
+      const visto = new Uint8Array(n);
+      const fila = new Int32Array(n);
+      for (let s0 = 0; s0 < n; s0++) {
+        if (!alfa[s0] || visto[s0]) continue;
+        let ini = 0, fim = 0;
+        fila[fim++] = s0; visto[s0] = 1;
+        while (ini < fim) {
+          const i = fila[ini++];
+          const x = i % w, y = (i - x) / w;
+          if (x > 0 && alfa[i - 1] && !visto[i - 1]) { visto[i - 1] = 1; fila[fim++] = i - 1; }
+          if (x < w - 1 && alfa[i + 1] && !visto[i + 1]) { visto[i + 1] = 1; fila[fim++] = i + 1; }
+          if (y > 0 && alfa[i - w] && !visto[i - w]) { visto[i - w] = 1; fila[fim++] = i - w; }
+          if (y < h - 1 && alfa[i + w] && !visto[i + w]) { visto[i + w] = 1; fila[fim++] = i + w; }
+        }
+        if (fim < minimo) for (let k = 0; k < fim; k++) alfa[fila[k]] = 0;
+      }
+
+      // Cor: a da caneta (corrigindo o tom do papel e reforçando um pouco), ou preta
+      for (let i = 0; i < n; i++) {
+        const p = i * 4;
+        if (tintaPreta) {
+          d[p] = d[p + 1] = d[p + 2] = 26;
+        } else {
+          const f = Math.max(fundoEm(i % w, Math.floor(i / w)), 1);
+          for (let c = 0; c < 3; c++) d[p + c] = Math.min(255, Math.max(0, (d[p + c] * 255 / f) * 0.8));
+        }
+        d[p + 3] = alfa[i];
+      }
+      cx.putImageData(im, 0, 0);
+      return cv;
+    }
+
+    // Corta as sobras em branco e reduz a imagem (fica leve para salvar no navegador)
+    function recortarAssinatura(pad) {
+      const { width: w, height: h } = pad;
+      const dados = pad.getContext("2d").getImageData(0, 0, w, h).data;
+      let x0 = w, y0 = h, x1 = -1, y1 = -1;
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          if (dados[(y * w + x) * 4 + 3] > 10) {
+            if (x < x0) x0 = x;
+            if (x > x1) x1 = x;
+            if (y < y0) y0 = y;
+            if (y > y1) y1 = y;
+          }
+        }
+      }
+      if (x1 < 0) return null;
+      const m = 4;
+      x0 = Math.max(0, x0 - m); y0 = Math.max(0, y0 - m);
+      x1 = Math.min(w - 1, x1 + m); y1 = Math.min(h - 1, y1 + m);
+      const cw = x1 - x0 + 1, ch = y1 - y0 + 1;
+      const escala = Math.min(1, 240 / ch);
+      const saida = document.createElement("canvas");
+      saida.width = Math.round(cw * escala);
+      saida.height = Math.round(ch * escala);
+      saida.getContext("2d").drawImage(pad, x0, y0, cw, ch, 0, 0, saida.width, saida.height);
+      return { src: saida.toDataURL("image/png"), proporcao: cw / ch };
+    }
+
+    function trocarAba(aba) {
+      $("app").dataset.aba = aba;
+      document.querySelectorAll(".abas button").forEach((b) => {
+        b.setAttribute("aria-selected", String(b.dataset.aba === aba));
+      });
+      if (aba === "previa") { zerarZoom(); atualizarPrevia(); } // o canvas só tem tamanho quando aparece
+    }
+
+    // ---------- Prévia e zoom ----------
+    // Pinça (ou roda do mouse) amplia só a folha; arrastar move quando ampliada; toque duplo
+    // amplia no ponto tocado ou volta. A folha é redesenhada a cada movimento, então não borra
+    const ZOOM_MAX = 8;
+    const FOLGA = 8;                          // respiro nas bordas ao arrastar ampliado
+    const zoom = { s: 1, x: 0, y: 0 };        // x, y: canto da folha dentro do canvas
+    const vista = { W: 0, H: 0, w: 0, h: 0, dpr: 1, papel: null, cmds: null };
+    let quadro = 0, animacao = 0;
+
+    function limitarZoom() {
+      const eixo = (pos, tam, area) => tam <= area - 2 * FOLGA
+        ? (area - tam) / 2
+        : Math.min(FOLGA, Math.max(area - tam - FOLGA, pos));
+      zoom.x = eixo(zoom.x, vista.w * zoom.s, vista.W);
+      zoom.y = eixo(zoom.y, vista.h * zoom.s, vista.H);
+    }
+
+    function pintarPrevia() {
+      cancelAnimationFrame(quadro);
+      quadro = 0;
+      if (!vista.W || !vista.H) return;       // aba escondida
+      limitarZoom();
+      const canvas = $("previa");
+      const ctx = canvas.getContext("2d");
+      const w = vista.w * zoom.s, h = vista.h * zoom.s;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.setTransform(vista.dpr, 0, 0, vista.dpr, zoom.x * vista.dpr, zoom.y * vista.dpr);
+      ctx.save();
+      ctx.shadowColor = "rgba(0, 0, 0, 0.12)";
+      ctx.shadowBlur = 10 * vista.dpr;
+      ctx.shadowOffsetY = 2 * vista.dpr;
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
+      if (vista.cmds) desenharCanvas(ctx, vista.cmds, w / vista.papel.w);
+      canvas.parentElement.classList.toggle("ampliada", zoom.s > 1);
+    }
+
+    function agendarPintura() {
+      if (!quadro) quadro = requestAnimationFrame(pintarPrevia);
+    }
+
+    function zerarZoom() {
+      cancelAnimationFrame(animacao);
+      zoom.s = 1;
+      agendarPintura();
+    }
+
+    // Amplia para "novo" mantendo parado o ponto (cx, cy) da tela
+    function ampliarEm(novo, cx, cy) {
+      const r = $("previa").getBoundingClientRect();
+      const px = cx - r.left, py = cy - r.top;
+      const lx = (px - zoom.x) / zoom.s, ly = (py - zoom.y) / zoom.s;
+      zoom.s = Math.min(ZOOM_MAX, Math.max(1, novo));
+      zoom.x = px - lx * zoom.s;
+      zoom.y = py - ly * zoom.s;
+      limitarZoom();
+      agendarPintura();
+    }
+
+    // Toque duplo: transição curta em vez de salto
+    function animarZoom(alvo, cx, cy) {
+      cancelAnimationFrame(animacao);
+      const de = zoom.s, inicio = performance.now();
+      const passo = (agora) => {
+        const p = Math.min(1, Math.max(0, (agora - inicio) / 220));
+        ampliarEm(de + (alvo - de) * (1 - Math.pow(1 - p, 3)), cx, cy);
+        if (p < 1) animacao = requestAnimationFrame(passo);
+      };
+      animacao = requestAnimationFrame(passo);
+    }
+
+    (function gestosDaPrevia() {
+      const moldura = $("previa").parentElement;
+      const dedos = new Map();
+      let pinca = null, ultimoToque = { t: 0, x: 0, y: 0 }, moveu = false, partida = null;
+
+      const centro = () => {
+        const p = [...dedos.values()];
+        return { x: (p[0].x + p[1].x) / 2, y: (p[0].y + p[1].y) / 2, d: Math.max(1, Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y)) };
+      };
+
+      moldura.addEventListener("pointerdown", (e) => {
+        cancelAnimationFrame(animacao);
+        moldura.setPointerCapture(e.pointerId);
+        dedos.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (dedos.size === 1) { moveu = false; partida = { x: e.clientX, y: e.clientY }; }
+        if (dedos.size === 2) { moveu = true; pinca = centro(); }
+        if (zoom.s > 1) moldura.classList.add("arrastando");
+      });
+
+      moldura.addEventListener("pointermove", (e) => {
+        const antes = dedos.get(e.pointerId);
+        if (!antes) return;
+        const agora = { x: e.clientX, y: e.clientY };
+        dedos.set(e.pointerId, agora);
+        // O dedo sempre treme um pouco: só conta como movimento depois de alguns pixels
+        if (Math.hypot(agora.x - partida.x, agora.y - partida.y) > 8) moveu = true;
+        if (dedos.size === 2 && pinca) {
+          const c = centro();
+          ampliarEm(zoom.s * (c.d / pinca.d), pinca.x, pinca.y);
+          zoom.x += c.x - pinca.x;
+          zoom.y += c.y - pinca.y;
+          limitarZoom();
+          pinca = c;
+        } else if (dedos.size === 1 && zoom.s > 1) {
+          zoom.x += agora.x - antes.x;
+          zoom.y += agora.y - antes.y;
+          limitarZoom();
+          agendarPintura();
+        }
+      });
+
+      const soltar = (e) => {
+        if (!dedos.has(e.pointerId)) return;
+        dedos.delete(e.pointerId);
+        if (dedos.size < 2) pinca = null;
+        if (dedos.size) return;
+        moldura.classList.remove("arrastando");
+        if (e.type !== "pointerup" || moveu) return;
+        const agora = Date.now();
+        if (agora - ultimoToque.t < 320 && Math.hypot(e.clientX - ultimoToque.x, e.clientY - ultimoToque.y) < 40) {
+          animarZoom(zoom.s > 1 ? 1 : 3, e.clientX, e.clientY);
+          ultimoToque.t = 0;
+        } else {
+          ultimoToque = { t: agora, x: e.clientX, y: e.clientY };
+        }
+      };
+      moldura.addEventListener("pointerup", soltar);
+      moldura.addEventListener("pointercancel", soltar);
+
+      // Computador: roda do mouse (ou pinça no touchpad) amplia no ponto do cursor
+      moldura.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        ampliarEm(zoom.s * Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0015)), e.clientX, e.clientY);
+      }, { passive: false });
+
+      // iPhone/iPad: o Safari ignora o bloqueio de zoom do viewport; os gestos nativos são barrados aqui
+      ["gesturestart", "gesturechange"].forEach((ev) => document.addEventListener(ev, (e) => e.preventDefault()));
+    })();
+
+    // ---------- Puxar para atualizar ----------
+    (function puxarParaAtualizar() {
+      const aviso = $("puxar");
+      const MINIMO = 110;                     // quanto arrastar para valer
+      let inicio = null;
+
+      const esconder = () => {
+        inicio = null;
+        aviso.style.opacity = "";
+        aviso.style.transform = "";
+        aviso.classList.remove("pronto");
+      };
+
+      document.addEventListener("touchstart", (e) => {
+        esconder();
+        const alvo = e.target;
+        if (e.touches.length !== 1 || document.querySelector("dialog[open]")) return;
+        if (!alvo.closest || alvo.closest("input, select, textarea")) return;
+        // Nas configurações, só vale com a lista já no topo; na prévia, só sem zoom
+        const lista = alvo.closest(".config");
+        if (lista && lista.scrollTop > 0) return;
+        if (zoom.s > 1 && alvo.closest(".previa-moldura")) return;
+        inicio = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }, { passive: true });
+
+      document.addEventListener("touchmove", (e) => {
+        if (!inicio) return;
+        if (e.touches.length !== 1) { esconder(); return; }
+        const dx = e.touches[0].clientX - inicio.x;
+        const dy = e.touches[0].clientY - inicio.y;
+        if (dy < 12 || Math.abs(dx) > dy) {
+          aviso.style.opacity = "";
+          aviso.classList.remove("pronto");
+          return;
+        }
+        const p = Math.min(1, dy / MINIMO);
+        aviso.style.opacity = String(p);
+        aviso.style.transform = "translateY(" + (-50 + p * 62) + "px) rotate(" + (p * 270) + "deg)";
+        aviso.classList.toggle("pronto", dy >= MINIMO);
+      }, { passive: true });
+
+      document.addEventListener("touchend", () => {
+        if (!inicio || !aviso.classList.contains("pronto")) { esconder(); return; }
+        inicio = null;
+        aviso.style.transform = "translateY(12px)";
+        aviso.classList.add("girando");
+        try { sessionStorage.setItem("mm-aba", $("app").dataset.aba); } catch (e) { /* ignora */ }
+        location.reload();
+      });
+      document.addEventListener("touchcancel", esconder);
+    })();
+
+    // ---------- Altura do app (celular) ----------
+    function ajustarAltura() {
+      const medidas = [window.innerHeight, document.documentElement.clientHeight];
+      // Com o teclado aberto a área visível encolhe; aí ela não conta
+      const digitando = document.activeElement && document.activeElement.matches("input, textarea, select");
+      if (window.visualViewport && !digitando) medidas.push(Math.round(window.visualViewport.height));
+      const validas = medidas.filter((n) => n > 0);
+      if (validas.length) document.documentElement.style.setProperty("--altura-app", Math.min(...validas) + "px");
+    }
+    ajustarAltura();
+    ["resize", "orientationchange", "pageshow"].forEach((ev) => window.addEventListener(ev, ajustarAltura));
+
+    // ---------- Eventos ----------
+    document.querySelectorAll(".abas button").forEach((b) => {
+      b.addEventListener("click", () => trocarAba(b.dataset.aba));
+    });
+
+    document.querySelectorAll(".config input, .config select").forEach((el) => {
+      const atualiza = () => { salvarConfig(); atualizarPrevia(); };
+      el.addEventListener("input", atualiza);
+      el.addEventListener("change", atualiza);
+    });
+
+    $("idioma").addEventListener("change", (e) => {
+      const anterior = idioma;
+      idioma = e.target.value;
+      traduzirTextosPadrao(anterior, idioma);
+      aplicarTextos();
+      salvarConfig();
+      atualizarPrevia();
+      // O endereço passa a ser o do idioma (/xx/): quem receber o link já abre no mesmo idioma
+      try {
+        history.replaceState(null, "", new URL(idioma + "/", RAIZ));
+      } catch (erro) { /* endereço que não aceita mudança: segue sem */ }
+    });
+
+    // O seletor de idioma fica no cabeçalho do celular ou no topo do painel (tablet e desktop)
+    const telaLarga = window.matchMedia("(min-width: 768px)");
+    function posicionarIdioma() {
+      const destino = $(telaLarga.matches ? "lugar-idioma-painel" : "lugar-idioma-celular");
+      const seletor = $("escolha-idioma");
+      if (seletor.parentElement !== destino) destino.append(seletor);
+    }
+    telaLarga.addEventListener("change", posicionarIdioma);
+
+    $("botao").addEventListener("click", baixarPDF);
+
+    // Novo texto entra no fim da área escolhida, já com o campo pronto para digitar
+    document.querySelectorAll(".btn-add").forEach((bt) => {
+      bt.addEventListener("click", () => {
+        const b = { tipo: "livre", ativo: true, valor: "", pos: `${bt.dataset.zona}-centro`, tam: "m" };
+        textos.push(b);
+        renderTextos(b);
+        mudouTextos();
+        const campo = document.querySelector(`[data-foco="${idDe(b)}-texto"]`);
+        if (campo) campo.focus();
+      });
+    });
+
+    // ---------- Apoio (café e sugestões) ----------
+    function aplicarTextosApoio(t) {
+      const temCafe = Boolean(APOIO.pix || APOIO.kofi);
+      $("btn-cafe").hidden = !temCafe;
+      $("link-sugestoes").hidden = !APOIO.sugestoes;
+      $("apoio").hidden = !temCafe && !APOIO.sugestoes;
+      $("btn-cafe").textContent = t.cafe;
+      $("link-sugestoes").textContent = t.sugestoes;
+      if (APOIO.sugestoes) $("link-sugestoes").href = APOIO.sugestoes;
+      $("cafe-titulo").textContent = t.cafeTitulo;
+      $("cafe-dica").textContent = t.cafeDica;
+      $("cafe-pix").hidden = !APOIO.pix;
+      $("cafe-pix-titulo").textContent = t.pixTitulo;
+      $("cafe-pix-dica").textContent = t.pixDica;
+      $("cafe-chave").textContent = APOIO.pix;
+      $("cafe-copiar").textContent = t.copiar;
+      $("cafe-kofi").hidden = !APOIO.kofi;
+      $("cafe-kofi-titulo").textContent = t.kofiTitulo;
+      $("cafe-kofi-dica").textContent = t.kofiDica;
+      $("cafe-kofi-link").textContent = t.kofiAbrir;
+      if (APOIO.kofi) $("cafe-kofi-link").href = APOIO.kofi;
+      $("cafe-fechar").textContent = t.fechar;
+      // Fora do Brasil o Ko-fi vem primeiro (Pix só funciona com conta brasileira)
+      const dlg = $("dlg-cafe");
+      if (idioma === "pt") dlg.insertBefore($("cafe-pix"), $("cafe-kofi"));
+      else dlg.insertBefore($("cafe-kofi"), $("cafe-pix"));
+    }
+
+    $("btn-cafe").addEventListener("click", () => $("dlg-cafe").showModal());
+    $("cafe-fechar").addEventListener("click", () => $("dlg-cafe").close());
+    $("cafe-copiar").addEventListener("click", async () => {
+      const t = TEXTOS[idioma];
+      const bt = $("cafe-copiar");
+      try {
+        await navigator.clipboard.writeText(APOIO.pix);
+      } catch (e) {
+        // Sem acesso à área de transferência: seleciona a chave para a pessoa copiar
+        const r = document.createRange();
+        r.selectNodeContents($("cafe-chave"));
+        const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+        return;
+      }
+      bt.textContent = t.copiado;
+      setTimeout(() => { bt.textContent = TEXTOS[idioma].copiar; }, 2000);
+    });
+
+    // Volta tudo ao padrão, menos a data de nascimento (o resto é preferência; a data é um dado da pessoa)
+    $("restaurar").addEventListener("click", () => {
+      if (!confirm(TEXTOS[idioma].confirmarRestaurar)) return;
+      // Mantém a data de nascimento e o idioma; todo o resto volta ao padrão
+      const nascimento = $("nascimento").value;
+      try {
+        localStorage.setItem(CHAVE_CONFIG, JSON.stringify(nascimento ? { nascimento, idioma } : { idioma }));
+      } catch (e) { /* ignora */ }
+      location.reload();
+    });
+
+    let redimensionando;
+    window.addEventListener("resize", () => {
+      clearTimeout(redimensionando);
+      redimensionando = setTimeout(() => { ajustarAltura(); zerarZoom(); atualizarPrevia(); }, 120);
+    });
+
+    // ---------- Inicialização ----------
+    // Calendário nativo do sistema, limitado a 1900 até hoje (o seletor já bloqueia o resto)
+    (function limitarData() {
+      const h = new Date();
+      const p = (n) => String(n).padStart(2, "0");
+      $("nascimento").min = ANO_MIN + "-01-01";
+      $("nascimento").max = `${h.getFullYear()}-${p(h.getMonth() + 1)}-${p(h.getDate())}`;
+    })();
+    preencherSelects();
+    $("papel-" + papelPadrao()).checked = true; // A4 ou Carta conforme o país (a configuração salva vale mais)
+    aplicarTextos();   // monta a lista de frases
+    carregarConfig();  // restaura a configuração salva
+    aplicarTextos();   // aplica o idioma e mantém a frase escolhida
+    posicionarIdioma();
+    // Depois de puxar para atualizar, volta para a aba em que a pessoa estava
+    let abaInicial = "config";
+    try {
+      if (sessionStorage.getItem("mm-aba") === "previa") abaInicial = "previa";
+      sessionStorage.removeItem("mm-aba");
+    } catch (e) { /* ignora */ }
+    trocarAba(abaInicial);
+    atualizarPrevia();
+
+    // App instalado (Tela de Início): funciona sem internet depois da primeira visita
+    if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("../sw.js").catch(() => { /* sem modo offline */ });
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,10 +1,16 @@
 // Service worker: guarda o app para ele abrir mesmo sem internet (útil no app da Tela de Início).
 // Estratégia "rede primeiro": com internet, sempre usa a versão mais nova publicada e atualiza a cópia;
 // sem internet, usa a cópia guardada.
-const CACHE = "memento-mori-v3"; // mude o número quando trocar arquivos de lib/
+const CACHE = "memento-mori-v4"; // mude o número quando trocar arquivos de lib/
 const ARQUIVOS = [
   "./",
   "./index.html",
+  "./pt/",
+  "./en/",
+  "./es/",
+  "./fr/",
+  "./de/",
+  "./it/",
   "./manifest.json",
   "./icon.svg",
   "./icon-180.png",
