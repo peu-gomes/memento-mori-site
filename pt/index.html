@@ -2335,14 +2335,18 @@
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     const USA_COMPARTILHAR = EH_IOS && typeof navigator.canShare === "function";
 
-    // Conta no GoatCounter só que um PDF foi baixado (nada do que está nele). Se o contador
-    // estiver bloqueado ou sem internet, o download segue normalmente
-    function contarDownload() {
+    // Eventos anônimos no GoatCounter (sem cookies, sem nada do que a pessoa digita): só o nome da ação.
+    // Se o contador estiver bloqueado ou sem internet, o site segue normalmente
+    function contarEvento(path, title) {
       try {
         if (window.goatcounter && window.goatcounter.count) {
-          window.goatcounter.count({ path: "baixou-pdf", title: "Baixou o PDF", event: true });
+          window.goatcounter.count({ path, title, event: true });
         }
       } catch (e) { /* ignora */ }
+    }
+    // Download: registra só o idioma e o papel (ex.: baixou-pdf/pt/a4)
+    function contarDownload() {
+      contarEvento("baixou-pdf/" + idioma + "/" + valorMarcado("papel", "a4"), "Baixou o PDF");
     }
 
     async function entregarPDF(doc, t) {
@@ -3382,14 +3386,16 @@
       }));
       $("ajuda-fechar").textContent = t.fechar;
     }
-    $("btn-ajuda").addEventListener("click", () => $("dlg-ajuda").showModal());
+    $("btn-ajuda").addEventListener("click", () => { contarEvento("abriu-ajuda", "Abriu Como funciona"); $("dlg-ajuda").showModal(); });
     $("ajuda-fechar").addEventListener("click", () => $("dlg-ajuda").close());
 
-    $("btn-cafe").addEventListener("click", () => $("dlg-cafe").showModal());
+    $("btn-cafe").addEventListener("click", () => { contarEvento("abriu-apoio", "Abriu Apoiar"); $("dlg-cafe").showModal(); });
+    $("cafe-kofi-link").addEventListener("click", () => contarEvento("clicou-kofi", "Clicou no Ko-fi"));
     $("cafe-fechar").addEventListener("click", () => $("dlg-cafe").close());
     $("cafe-copiar").addEventListener("click", async () => {
       const t = TEXTOS[idioma];
       const bt = $("cafe-copiar");
+      contarEvento("copiou-pix", "Copiou a chave Pix");
       try {
         await navigator.clipboard.writeText(APOIO.pix);
       } catch (e) {
@@ -3461,13 +3467,14 @@
       $("nascimento").value = op.nascimento;
       $("expectativa").value = op.anos;
       $("preencher").checked = $("atual").checked = $("guia-pintar").checked;
+      contarEvento("guia-concluido", "Concluiu o primeiro acesso");
       $("dlg-guia").close();
       salvarConfig();
       trocarAba("previa");
       atualizarPrevia();
     });
     $("guia-voltar").addEventListener("click", () => mostrarPasso(1));
-    $("guia-pular").addEventListener("click", () => $("dlg-guia").close());
+    $("guia-pular").addEventListener("click", () => { contarEvento("guia-pulado", "Pulou o primeiro acesso"); $("dlg-guia").close(); });
     $("dlg-guia").addEventListener("close", salvarConfig); // pulou ou concluiu: não aparece de novo
     ["guia-data", "guia-anos"].forEach((id) => $(id).addEventListener("keydown", (e) => {
       if (e.key === "Enter") { e.preventDefault(); $("guia-avancar").click(); }
