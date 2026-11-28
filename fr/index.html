@@ -351,6 +351,15 @@
     .dlg-botoes { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
     .dlg-botoes .btn-principal { width: auto; min-height: 44px; padding: 0 20px; font-size: 0.95rem; }
 
+    /* Como funciona e perguntas frequentes */
+    .dlg-ajuda { max-height: min(640px, calc(100vh - 32px)); overflow-y: auto; line-height: 1.5; }
+    h2.dlg-titulo { font-size: 1.05rem; }
+    .dlg-ajuda ol { margin: 0 0 12px; padding-left: 20px; }
+    .dlg-ajuda details { border-top: 1px solid var(--linha); }
+    .dlg-ajuda summary { cursor: pointer; padding: 11px 0; font-weight: 600; font-size: 0.92rem; }
+    .dlg-ajuda details p { margin: 0 0 12px; font-size: 0.9rem; color: var(--cinza); }
+    .dlg-ajuda .dlg-botoes { margin-top: 12px; }
+
     /* Webcam do computador para fotografar a assinatura */
     .camera-quadro { position: relative; border-radius: 10px; overflow: hidden; background: #111; }
     #camera-video { display: block; width: 100%; height: auto; }
@@ -695,7 +704,8 @@
       </div>
       <p class="resumo" id="resumo"></p>
       <p class="info" id="info"></p>
-      <p class="apoio" id="apoio" hidden>
+      <p class="apoio" id="apoio">
+        <button type="button" class="btn-link" id="btn-ajuda"></button>
         <button type="button" class="btn-link" id="btn-cafe" hidden></button>
         <a class="btn-link" id="link-sugestoes" target="_blank" rel="noopener noreferrer" hidden></a>
       </p>
@@ -706,6 +716,13 @@
       <p class="msg" id="msg" role="alert"></p>
     </div>
 </main>
+
+  <dialog class="dlg dlg-ajuda" id="dlg-ajuda" aria-labelledby="ajuda-titulo">
+    <h2 class="dlg-titulo" id="ajuda-titulo"></h2>
+    <ol id="ajuda-passos"></ol>
+    <div id="ajuda-perguntas"></div>
+    <div class="dlg-botoes"><button type="button" class="btn-sec" id="ajuda-fechar"></button></div>
+  </dialog>
 
   <dialog class="dlg" id="dlg-cafe" aria-labelledby="cafe-titulo">
     <p class="dlg-titulo" id="cafe-titulo"></p>
@@ -770,6 +787,16 @@
       pix: "",        // chave Pix
       kofi: "",       // link da página no Ko-fi (https://ko-fi.com/...)
       sugestoes: ""   // link do Formulário Google
+    };
+
+    // ---------- Como funciona e perguntas frequentes: [botão, passos, perguntas] ----------
+    const AJUDA = {
+      pt: ["Como funciona", ["Informe sua data de nascimento.", "Ajuste o calendário e os textos como quiser.", "Baixe o PDF, imprima e pinte um quadrinho a cada semana."], [["O que é memento mori?", "É uma expressão em latim que significa “lembre-se de que você vai morrer”. É um convite a usar bem o tempo."], ["Por que semanas?", "Uma vida inteira em semanas cabe em uma única folha, e cada semana é um passo que dá para perceber."], ["Meus dados são enviados para algum lugar?", "Não. O PDF é criado no seu aparelho e o que você digita fica só nele. O site apenas conta as visitas, sem cookies."], ["Em que papel posso imprimir?", "A4 ou Carta, em casa ou em uma gráfica. Para manter as proporções, imprima em tamanho real (100%)."], ["Funciona sem internet?", "Depois da primeira visita, o site costuma abrir mesmo sem conexão."], ["É grátis?", "Sim, e não precisa de cadastro."]]],
+      en: ["How it works", ["Enter your date of birth.", "Adjust the calendar and texts as you like.", "Download the PDF, print it and fill in one box each week."], [["What is memento mori?", "A Latin phrase meaning “remember that you will die”. It is an invitation to use your time well."], ["Why weeks?", "A whole life in weeks fits on a single page, and each week is a step you can actually feel."], ["Is my data sent anywhere?", "No. The PDF is made on your device and what you type stays there. The site only counts visits, without cookies."], ["What paper can I print on?", "A4 or Letter, at home or at a print shop. To keep the proportions, print at actual size (100%)."], ["Does it work offline?", "After your first visit, the site usually opens even without a connection."], ["Is it free?", "Yes, and there is no sign-up."]]],
+      es: ["Cómo funciona", ["Introduce tu fecha de nacimiento.", "Ajusta el calendario y los textos a tu gusto.", "Descarga el PDF, imprímelo y rellena un cuadro cada semana."], [["¿Qué es memento mori?", "Es una expresión latina que significa «recuerda que vas a morir». Es una invitación a aprovechar bien el tiempo."], ["¿Por qué semanas?", "Una vida entera en semanas cabe en una sola hoja, y cada semana es un paso que se puede sentir."], ["¿Mis datos se envían a algún sitio?", "No. El PDF se crea en tu dispositivo y lo que escribes se queda en él. El sitio solo cuenta las visitas, sin cookies."], ["¿En qué papel puedo imprimir?", "A4 o Carta, en casa o en una imprenta. Para mantener las proporciones, imprime a tamaño real (100 %)."], ["¿Funciona sin internet?", "Después de la primera visita, el sitio suele abrirse incluso sin conexión."], ["¿Es gratis?", "Sí, y no hace falta registrarse."]]],
+      fr: ["Comment ça marche", ["Indiquez votre date de naissance.", "Ajustez le calendrier et les textes à votre goût.", "Téléchargez le PDF, imprimez-le et coloriez une case chaque semaine."], [["Que signifie memento mori ?", "C’est une expression latine qui veut dire « souviens-toi que tu vas mourir ». Une invitation à bien employer son temps."], ["Pourquoi des semaines ?", "Toute une vie en semaines tient sur une seule page, et chaque semaine est un pas que l’on peut ressentir."], ["Mes données sont-elles envoyées quelque part ?", "Non. Le PDF est créé sur votre appareil et ce que vous saisissez y reste. Le site compte seulement les visites, sans cookies."], ["Sur quel papier imprimer ?", "A4 ou Lettre, chez vous ou chez un imprimeur. Pour garder les proportions, imprimez en taille réelle (100 %)."], ["Est-ce que cela marche hors ligne ?", "Après la première visite, le site s’ouvre en général même sans connexion."], ["Est-ce gratuit ?", "Oui, et sans inscription."]]],
+      de: ["So funktioniert’s", ["Gib dein Geburtsdatum ein.", "Passe Kalender und Texte nach Wunsch an.", "Lade das PDF herunter, drucke es aus und male jede Woche ein Kästchen aus."], [["Was bedeutet Memento mori?", "Ein lateinischer Ausdruck für „Bedenke, dass du sterben wirst“. Eine Einladung, die eigene Zeit gut zu nutzen."], ["Warum Wochen?", "Ein ganzes Leben in Wochen passt auf eine einzige Seite, und jede Woche ist ein spürbarer Schritt."], ["Werden meine Daten irgendwohin gesendet?", "Nein. Das PDF entsteht auf deinem Gerät, und deine Eingaben bleiben dort. Die Seite zählt nur Besuche, ohne Cookies."], ["Auf welchem Papier kann ich drucken?", "A4 oder Letter, zu Hause oder in der Druckerei. Damit die Proportionen stimmen, in Originalgröße (100 %) drucken."], ["Geht das auch offline?", "Nach dem ersten Besuch öffnet sich die Seite in der Regel auch ohne Verbindung."], ["Ist es kostenlos?", "Ja, und ohne Anmeldung."]]],
+      it: ["Come funziona", ["Inserisci la tua data di nascita.", "Regola il calendario e i testi come preferisci.", "Scarica il PDF, stampalo e colora una casella ogni settimana."], [["Che cosa significa memento mori?", "È un’espressione latina che vuol dire «ricordati che devi morire». Un invito a usare bene il proprio tempo."], ["Perché le settimane?", "Un’intera vita in settimane sta in un solo foglio, e ogni settimana è un passo che si può sentire."], ["I miei dati vengono inviati da qualche parte?", "No. Il PDF viene creato sul tuo dispositivo e ciò che scrivi resta lì. Il sito conta solo le visite, senza cookie."], ["Su che carta posso stampare?", "A4 o Letter, a casa o in copisteria. Per mantenere le proporzioni, stampa a grandezza reale (100%)."], ["Funziona senza internet?", "Dopo la prima visita, il sito di solito si apre anche senza connessione."], ["È gratis?", "Sì, e senza registrazione."]]]
     };
 
     const TEXTOS = {
@@ -2443,6 +2470,7 @@
       });
       $("restaurar").textContent = t.restaurar;
       aplicarTextosApoio(t);
+      aplicarTextosAjuda(t);
       $("dlg-titulo").textContent = t.dlgTitulo;
       $("dlg-dica").textContent = t.dlgDica;
       $("pad-limpar").textContent = t.limpar;
@@ -3261,7 +3289,6 @@
       const temCafe = Boolean(APOIO.pix || APOIO.kofi);
       $("btn-cafe").hidden = !temCafe;
       $("link-sugestoes").hidden = !APOIO.sugestoes;
-      $("apoio").hidden = !temCafe && !APOIO.sugestoes;
       $("btn-cafe").textContent = t.cafe;
       $("link-sugestoes").textContent = t.sugestoes;
       if (APOIO.sugestoes) $("link-sugestoes").href = APOIO.sugestoes;
@@ -3283,6 +3310,21 @@
       if (idioma === "pt") dlg.insertBefore($("cafe-pix"), $("cafe-kofi"));
       else dlg.insertBefore($("cafe-kofi"), $("cafe-pix"));
     }
+
+    function aplicarTextosAjuda(t) {
+      const [titulo, passos, perguntas] = AJUDA[idioma] || AJUDA.en;
+      const criar = (tag, texto) => Object.assign(document.createElement(tag), { textContent: texto });
+      $("btn-ajuda").textContent = $("ajuda-titulo").textContent = titulo;
+      $("ajuda-passos").replaceChildren(...passos.map((p) => criar("li", p)));
+      $("ajuda-perguntas").replaceChildren(...perguntas.map(([pergunta, resposta]) => {
+        const d = document.createElement("details");
+        d.append(criar("summary", pergunta), criar("p", resposta));
+        return d;
+      }));
+      $("ajuda-fechar").textContent = t.fechar;
+    }
+    $("btn-ajuda").addEventListener("click", () => $("dlg-ajuda").showModal());
+    $("ajuda-fechar").addEventListener("click", () => $("dlg-ajuda").close());
 
     $("btn-cafe").addEventListener("click", () => $("dlg-cafe").showModal());
     $("cafe-fechar").addEventListener("click", () => $("dlg-cafe").close());
