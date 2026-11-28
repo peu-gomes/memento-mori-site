@@ -3261,6 +3261,35 @@
     // A barra do Safari muda a área visível sem disparar o "resize" da janela
     if (window.visualViewport) window.visualViewport.addEventListener("resize", ajustarAltura);
 
+    // ---------- Diagnóstico temporário de altura (só com ?medidas no endereço) ----------
+    if (new URLSearchParams(location.search).has("medidas")) {
+      const caixa = document.body.appendChild(document.createElement("pre"));
+      caixa.style.cssText = "position:fixed;left:8px;right:8px;top:30%;z-index:99;margin:0;padding:10px;background:#000;color:#fff;font:13px/1.5 monospace;white-space:pre-wrap;border-radius:8px";
+      const medirCss = (valor) => {
+        const d = document.body.appendChild(document.createElement("div"));
+        d.style.cssText = "position:fixed;top:0;width:0;visibility:hidden;height:" + valor;
+        const alt = Math.round(d.getBoundingClientRect().height);
+        d.remove();
+        return alt;
+      };
+      const mostrar = () => {
+        const v = window.visualViewport || {}, r = (el) => el.getBoundingClientRect();
+        caixa.textContent = [
+          "versao: diag1",
+          "tela: " + screen.width + "x" + screen.height + "  dpr " + devicePixelRatio,
+          "inner: " + innerWidth + "x" + innerHeight + "  client: " + document.documentElement.clientHeight,
+          "visual: " + Math.round(v.height) + "  topo " + Math.round(v.offsetTop) + "  rolagem " + Math.round(scrollY),
+          "svh " + medirCss("100svh") + "  dvh " + medirCss("100dvh") + "  lvh " + medirCss("100lvh") + "  100% " + medirCss("100%"),
+          "safe cima " + medirCss("env(safe-area-inset-top)") + "  baixo " + medirCss("env(safe-area-inset-bottom)"),
+          "altura-app: " + document.documentElement.style.getPropertyValue("--altura-app"),
+          "body: " + Math.round(r(document.body).top) + " ate " + Math.round(r(document.body).bottom),
+          "botao: " + Math.round(r($("botao")).top) + " ate " + Math.round(r($("botao")).bottom),
+          "instalado: " + (navigator.standalone === true)
+        ].join("\n");
+      };
+      setInterval(mostrar, 500);
+    }
+
     // ---------- Eventos ----------
     document.querySelectorAll(".abas button").forEach((b) => {
       b.addEventListener("click", () => trocarAba(b.dataset.aba));
